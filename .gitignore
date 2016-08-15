@@ -98,7 +98,7 @@ publish/
 
 # NuGet Packages Directory
 ## TODO: If you have NuGet Package Restore enabled, uncomment the next line
-#packages/
+packages/
 
 # Windows Azure Build Output
 csx
@@ -155,5 +155,7 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-/packages
+.vs
 /RecKprs.SignalR.EventPublisher/Scripts
+nuget.exe
+_distribution/

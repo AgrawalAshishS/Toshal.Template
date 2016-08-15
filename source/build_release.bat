@@ -1,0 +1,1 @@
+C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\msbuild Toshal.Template.sln /t:Rebuild /p:Configuration="Release" /p:Platform="Any CPU"

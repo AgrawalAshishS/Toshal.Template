@@ -1,1 +1,0 @@
-C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\msbuild Template.sln /t:Rebuild /p:Configuration="Debug" /p:Platform="Any CPU"
