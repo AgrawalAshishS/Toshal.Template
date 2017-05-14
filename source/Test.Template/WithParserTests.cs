@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Test.Template
 {
@@ -9,10 +8,10 @@ namespace Test.Template
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestClass]
+    [TestFixture]
     public class WithParserTests
     {
-        [TestMethod]
+        [Test]
         public void ItShouldHandleBasicWithStatement()
         {
             const string templateText = "<%WITH Name %>Some content <%=SomeToken%><%ENDWITH%>";
@@ -31,22 +30,27 @@ namespace Test.Template
             Assert.AreEqual("sometoken", namedContent.Name);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenMissingNameException))]
+        [Test]
         public void ItShouldThrowExceptionForMissingNameInWith()
         {
             const string templateText = "<%WITH %>Some content<%ENDWITH%>";
             var parser = new Parser();
-            parser.Parse(templateText);
+
+            Assert.Throws<TokenMissingNameException>(() =>
+            {
+                parser.Parse(templateText);
+            });
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void ItShouldThrowExceptionForMissingEndForWith()
         {
             const string templateText = "<%WITH Name %>Some content";
             var parser = new Parser();
-            parser.Parse(templateText);
+            Assert.Throws<TokenNotClosedException>(() =>
+            {
+                parser.Parse(templateText);
+            });
         }
     }
 }

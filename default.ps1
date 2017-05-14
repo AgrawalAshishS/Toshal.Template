@@ -45,6 +45,16 @@ task UpdateVersion {
 	"" >> $versionAssemblyInfoFile
 	"[assembly: AssemblyVersion(""$assemblyVersion"")]" >> $versionAssemblyInfoFile
 	"[assembly: AssemblyFileVersion(""$assemblyFileVersion"")]" >> $versionAssemblyInfoFile
+    
+    $regex = New-Object Text.RegularExpressions.Regex '"version": ".*"'
+    $regex2 = New-Object Text.RegularExpressions.Regex '"Coordinator": ".*"'
+
+    gci .\source -Recurse "project.json" |% {
+        #"version": "1.0.0-*",
+        $text = (Get-Content $_.FullName) -join [Environment]::NewLine
+        $text = $regex.Replace($text, """version"": ""$assemblyFileVersion""")
+        $regex2.Replace($text, """Coordinator"": ""$assemblyFileVersion""") | set-content $_.FullName
+    }
 }
 
 task CreateNuGetPackage -depends Compile {
@@ -77,7 +87,7 @@ task CreateNuGetPackage -depends Compile {
 		copy-item $projectSrcPath\bin\$project.dll $projectDistPath\lib\net45
         
         if(Test-Path $projectSrcPath\support_package_build.ps1){
-            Invoke-Psake $projectSrcPath\support_package_build.ps1 -framework "4.5.1x64" -properties @{ base_directory=$projectSrcPath; dist_directory=$projectDistPath; }
+            Invoke-Psake $projectSrcPath\support_package_build.ps1 -framework "4.5.1x64" -properties @{ base_directory=$base_directory; projectSrcPath=$projectSrcPath; projectDistPath=$projectDistPath; }
         }
         
 		exec { . $nuget_path pack $projectDistPath\$project.nuspec -BasePath $projectDistPath -o $dist_directory -version $packageVersion }

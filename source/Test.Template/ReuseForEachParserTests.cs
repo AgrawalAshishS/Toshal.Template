@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Test.Template
 {
@@ -9,10 +9,10 @@ namespace Test.Template
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestClass]
+    [TestFixture]
     public class ReuseForEachParserTests
     {
-        [TestMethod]
+        [Test]
         public void ItShouldHandleBasicReuseForEachToken()
         {
             const string templateText =
@@ -26,7 +26,7 @@ namespace Test.Template
             Assert.AreEqual("existingforeachname", token.ExistingForEachName);
         }
 
-        [TestMethod]
+        [Test]
         public void ItShouldHandleBasicReuseWithInForEachToken()
         {
             const string templateText =
@@ -41,40 +41,49 @@ namespace Test.Template
             Assert.AreEqual("existingforeachname", token.ExistingForEachName);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenMissingNameException))]
+        [Test]
         public void ItShouldThrowExceptionForMissingNameForReuseForEach()
         {
             const string templateText = "<%REUSEFOREACH ExistingForEachName %>";
             var parser = new Parser();
-            parser.Parse(templateText);
+            Assert.Throws<TokenMissingNameException>(() =>
+            {
+                parser.Parse(templateText);
+            });
+            
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenMissingNameException))]
+        [Test]
         public void ItShouldThrowExceptionForMissingLoopNameForReuseForEach()
         {
             const string templateText = "<%REUSEFOREACH %>";
             var parser = new Parser();
-            parser.Parse(templateText);
+            Assert.Throws<TokenMissingNameException>(() =>
+            {
+                parser.Parse(templateText);
+            });
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ForEachMissingForReuseException))]
+        [Test]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse()
         {
             const string templateText = "<%REUSEFOREACH ExistingForEachName NewLoopName %>";
             var parser = new Parser();
-            parser.Parse(templateText);
+            Assert.Throws<ForEachMissingForReuseException>(() =>
+            {
+                parser.Parse(templateText);
+            });
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ForEachMissingForReuseException))]
+        [Test]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse2()
         {
             const string templateText = "<%FOREACH SomeName%><%ENDFOR%><%REUSEFOREACH ExistingForEachName NewLoopName %>";
             var parser = new Parser();
-            parser.Parse(templateText);
+            Assert.Throws<ForEachMissingForReuseException>(() =>
+            {
+                parser.Parse(templateText);
+            });
         }
     }
 }

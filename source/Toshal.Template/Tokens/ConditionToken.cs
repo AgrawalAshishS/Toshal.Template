@@ -31,7 +31,7 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class ConditionToken : ContainerTokenBase
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ConditionToken" /> class.
@@ -44,6 +44,7 @@ namespace Toshal.Template.Tokens
         public ConditionToken(string split)
         {
             this.Name = string.Empty;
+            this.IsPositive = true;
 
             if (split.StartsWith("<%IF"))
             {
@@ -70,6 +71,12 @@ namespace Toshal.Template.Tokens
             {
                 throw new TokenMissingNameException(split);
             }
+
+            if (Name.StartsWith("not "))
+            {
+                this.IsPositive = false;
+                Name = Name.Substring(4);
+            }
         }
 
         #endregion
@@ -80,6 +87,8 @@ namespace Toshal.Template.Tokens
         ///     Gets or sets the false part.
         /// </summary>
         public IContainerToken FalsePart { get; set; }
+
+        public bool IsPositive { get; set; }
 
         /// <summary>
         ///     Gets the name.

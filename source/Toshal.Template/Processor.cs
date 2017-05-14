@@ -353,7 +353,7 @@ namespace Toshal.Template
                                     ? forEachToken.AltRowTokens
                                     : forEachToken.RowTokens;
 
-                if (i == 0)
+                if (i == 0 && val.Count > 1)
                 {
                     beforeTokens = (forEachToken.BeforeFirstRowTokens.Count > 0)
                                        ? forEachToken.BeforeFirstRowTokens

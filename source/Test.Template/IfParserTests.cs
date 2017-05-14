@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Test.Template
 {
@@ -9,10 +8,10 @@ namespace Test.Template
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestClass]
+    [TestFixture]
     public class IfParserTests
     {
-        [TestMethod]
+        [Test]
         public void ItShouldHandleConditionToken()
         {
             string part1 = "<%IF ";
@@ -29,7 +28,7 @@ namespace Test.Template
             Assert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
         }
 
-        [TestMethod]
+        [Test]
         public void IfConditionWithoutThenIsAlsoOk()
         {
             string part1 = "<%IF ";
@@ -46,8 +45,7 @@ namespace Test.Template
             Assert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenMissingNameException))]
+        [Test]
         public void IfWithoutConditionNameShouldThrowException()
         {
             string part1 = "<%IF ";
@@ -59,19 +57,21 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4 + part5;
 
             var parser = new Parser();
-
-            try
+            Assert.Throws<TokenMissingNameException>(() =>
             {
-                parser.Parse(templateText);
-            }
-            catch (TokenMissingNameException ex)
-            {
-                Assert.AreEqual("<%IF  %>", ex.Split);
-                throw;
-            }
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenMissingNameException ex)
+                {
+                    Assert.AreEqual("<%IF  %>", ex.Split);
+                    throw;
+                }
+            });
         }
 
-        [TestMethod]
+        [Test]
         public void AllContentBetweenIfToEndIfShouldNotBeInTopResultItShouldBeChildOfIfToken()
         {
             string part1 = "<%IF ";
@@ -95,8 +95,7 @@ namespace Test.Template
             Assert.AreEqual(part4, content.Content);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void IfWithoutEndIfShouldThrowException()
         {
             string part1 = "<%IF ";
@@ -107,19 +106,23 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4;
 
             var parser = new Parser();
-            try
+            Assert.Throws<TokenNotClosedException>(() =>
             {
-                parser.Parse(templateText);
-            }
-            catch (TokenNotClosedException ex)
-            {
-                Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
-                throw;
-            }
+
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenNotClosedException ex)
+                {
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    throw;
+                }
+            });
+
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void IfWithoutEndIfShouldThrowException2()
         {
             string part1 = "<%IF ";
@@ -130,18 +133,22 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4;
 
             var parser = new Parser();
-            try
+            Assert.Throws<TokenNotClosedException>(() =>
             {
-                parser.Parse(templateText);
-            }
-            catch (TokenNotClosedException ex)
-            {
-                Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
-                throw;
-            }
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenNotClosedException ex)
+                {
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    throw;
+                }
+            });
+
         }
 
-        [TestMethod]
+        [Test]
         public void VerifyNestedIfConditionWorksCorrectly()
         {
             string part1 = "<%IF ";
@@ -174,8 +181,7 @@ namespace Test.Template
             Assert.AreEqual(part7, content.Content);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void VerifyNestedIfConditionWithNotClosingBreaketThrowErrorForParentIf()
         {
             string part1 = "<%IF ";
@@ -190,19 +196,22 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4 + part5 + part6 + part7 + part8;
 
             var parser = new Parser();
+            Assert.Throws<TokenNotClosedException>(() =>
+            {
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenNotClosedException ex)
+                {
+                    Assert.AreEqual(part2.ToLower(), ex.TokenName);
+                    throw;
+                }
+            });
 
-            try
-            {
-                parser.Parse(templateText);
-            }
-            catch (TokenNotClosedException ex)
-            {
-                Assert.AreEqual(part2.ToLower(), ex.TokenName);
-                throw;
-            }
         }
 
-        [TestMethod]
+        [Test]
         public void ItShouldHandleIfElseConditionToken()
         {
             string part1 = "<%IF ";
@@ -232,7 +241,7 @@ namespace Test.Template
             Assert.AreEqual(part6, content.Content);
         }
 
-        [TestMethod]
+        [Test]
         public void ItShouldHandleIfElseIfConditionToken()
         {
             string part1 = "<%IF ";
@@ -262,7 +271,7 @@ namespace Test.Template
             Assert.AreEqual(part6, content.Content);
         }
 
-        [TestMethod]
+        [Test]
         public void ItShouldHandleIfElseIfElseConditionToken()
         {
             string templateText = "<%IF ConditionName THEN%>";
@@ -319,8 +328,7 @@ namespace Test.Template
             Assert.AreEqual("something", ((NamedToken)elseToken.InnerTokens[1]).Name);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void ItShouldThrowErrorElseIfWithoutEndIf()
         {
             string part1 = "<%IF ";
@@ -333,20 +341,23 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4 + part5 + part6;
 
             var parser = new Parser();
-            try
+            Assert.Throws<TokenNotClosedException>(() =>
             {
-                parser.Parse(templateText);
-            }
-            catch (TokenNotClosedException ex)
-            {
-                Assert.AreEqual("othercondition", ex.TokenName);
-                Assert.AreEqual("<%ELSEIF OtherCondition THEN%>", ex.Split);
-                throw;
-            }
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenNotClosedException ex)
+                {
+                    Assert.AreEqual("othercondition", ex.TokenName);
+                    Assert.AreEqual("<%ELSEIF OtherCondition THEN%>", ex.Split);
+                    throw;
+                }
+            });
+
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(TokenNotClosedException))]
+        [Test]
         public void ItShouldThrowErrorElseWithoutEndIf()
         {
             string part1 = "<%IF ";
@@ -359,17 +370,38 @@ namespace Test.Template
             string templateText = part1 + part2 + part3 + part4 + part5 + part6;
 
             var parser = new Parser();
-            try
+            Assert.Throws<TokenNotClosedException>(() =>
             {
-                parser.Parse(templateText);
-            }
-            catch (TokenNotClosedException ex)
-            {
-                Assert.AreEqual("conditionname", ex.TokenName);
-                Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
-                throw;
-            }
+                try
+                {
+                    parser.Parse(templateText);
+                }
+                catch (TokenNotClosedException ex)
+                {
+                    Assert.AreEqual("conditionname", ex.TokenName);
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    throw;
+                }
+            });
+
         }
 
+        [Test]
+        public void ItShouldHandleNegativeConditionToken()
+        {
+            string part1 = "<%IF NOT ";
+            string part2 = "ConditionName";
+            string part3 = " THEN%>";
+            string part4 = "Content within IF";
+            string part5 = "<%ENDIF%>";
+
+            string templateText = part1 + part2 + part3 + part4 + part5;
+
+            var parser = new Parser();
+
+            List<IToken> result = parser.Parse(templateText);
+            Assert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
+            Assert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
+        }
     }
 }
