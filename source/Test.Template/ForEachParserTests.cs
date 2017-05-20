@@ -351,7 +351,6 @@ namespace Test.Template
             });
         }
 
-
         [Test]
         public void ItShouldProcessLastRowTokenWhenThereIsOnlyOneRowForLoop()
         {
@@ -394,7 +393,6 @@ namespace Test.Template
             var token = (ForEachToken)result[0];
             Assert.AreEqual("name", token.Name);
 
-            assertMethod(token.NoRecordTokens, "Content within NORECORD");
             assertMethod(token.HeaderTokens, "Content within HEADER");
 
             assertMethod(token.BeforeFirstRowTokens, "Content within BEFOREFIRSTROW");

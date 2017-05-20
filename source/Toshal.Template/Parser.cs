@@ -414,6 +414,29 @@ namespace Toshal.Template
         }
 
         /// <summary>
+        ///     The handled as SET tokens.
+        /// </summary>
+        /// <param name="split">
+        ///     The split.
+        /// </param>
+        /// <param name="tokenList">
+        ///     The token list.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        private bool HandledAsSet(string split, List<IToken> tokenList)
+        {
+            if (split.StartsWith("<%SET ") == false)
+            {
+                return false;
+            }
+
+            tokenList.Add(new SetToken(split));
+            return true;
+        }
+
+        /// <summary>
         ///     The process splits till end.
         /// </summary>
         /// <param name="tokenList">
@@ -454,6 +477,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandledAsReuseForEach(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandledAsSet(split, tokenList))
                 {
                     continue;
                 }

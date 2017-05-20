@@ -116,6 +116,9 @@
     <Compile Include="..\Toshal.Template\Tokens\ReuseForEachToken.cs">
       <Link>Tokens\ReuseForEachToken.cs</Link>
     </Compile>
+    <Compile Include="..\Toshal.Template\Tokens\SetToken.cs">
+      <Link>Tokens\SetToken.cs</Link>
+    </Compile>
     <Compile Include="..\Toshal.Template\Tokens\TokenAttributeDictionary.cs">
       <Link>Tokens\TokenAttributeDictionary.cs</Link>
     </Compile>

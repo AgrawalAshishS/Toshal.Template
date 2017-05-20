@@ -31,7 +31,7 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class WithToken : ContainerTokenBase
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="WithToken" /> class.

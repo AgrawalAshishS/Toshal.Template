@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="NamedToken.cs" company="Toshal Infotech">
+// <copyright file="SetToken.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -29,7 +29,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// The named token.
     /// </summary>
-    public class NamedToken : IToken
+    public class SetToken : IToken
     {
         #region Constructors and Destructor
 
@@ -41,17 +41,20 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public NamedToken(string split)
+        public SetToken(string split)
         {
-            this.Attributes = new TokenAttributeDictionary();
+            const string tokenExpression = "<%SET\\s(?<Name>.+?)\\s(?<Value>.*?)%>";
+            var m = Regex.Match(split, tokenExpression);
 
-            const string tokenExpression = "<%=(?<Name>.*?)%>";
-            string tempString = Regex.Match(split, tokenExpression).Groups["Name"].Value.Trim();
-            this.Name = GetNameAndAttributes(split, tempString, this.Attributes);
+            this.Name = m.Groups["Name"].Value.Trim().ToLower();
+            this.Value = m.Groups["Value"].Value;
+
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);
             }
+
+            if (string.IsNullOrEmpty(this.Value) == false) this.Value = this.Value.Trim();
         }
 
         #endregion
@@ -59,65 +62,16 @@ namespace Toshal.Template.Tokens
         #region Public Properties
 
         /// <summary>
-        /// Gets the attributes.
-        /// </summary>
-        public TokenAttributeDictionary Attributes { get; private set; }
-
-        /// <summary>
         /// Gets the name.
         /// </summary>
         public string Name { get; private set; }
 
-        #endregion
-
-        #region Methods
-
         /// <summary>
-        /// The get name and attributes.
+        /// Gets the value for token.
         /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <param name="nameString">
-        /// The name string.
-        /// </param>
-        /// <param name="attributes">
-        /// The attributes.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="InvalidTokenAttributeException">
-        /// </exception>
-        internal static string GetNameAndAttributes(
-            string split, 
-            string nameString, 
-            TokenAttributeDictionary attributes)
-        {
-            string retVal = nameString;
-
-            if (nameString.IndexOf('=') > -1)
-            {
-                string[] nameSplit = nameString.Split(' ');
-                retVal = nameSplit[0];
-
-                const string tokenAttributeExpression = "(?<Name>\\w+)=\"(?<Value>[^\"]*)\"";
-
-                for (int i = 1; i < nameSplit.Length; i++)
-                {
-                    Match m = Regex.Match(nameSplit[i], tokenAttributeExpression);
-                    if (m.Success == false)
-                    {
-                        throw new InvalidTokenAttributeException(split);
-                    }
-
-                    attributes.Add(m.Groups["Name"].Value.ToLower(), m.Groups["Value"].Value);
-                }
-            }
-
-            return retVal.Trim().ToLower();
-        }
+        public string Value { get; private set; }
 
         #endregion
+
     }
 }

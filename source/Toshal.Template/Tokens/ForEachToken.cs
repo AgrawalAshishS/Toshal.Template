@@ -32,7 +32,7 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class ForEachToken : IToken
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ForEachToken" /> class.

@@ -49,7 +49,7 @@ namespace Toshal.Template
         {
             var retVal = new StringBuilder();
 
-            this.Process(retVal, args.TokenList, args.Context);
+            this.Process(retVal, args.TokenList, args.Context, new Dictionary<string, string>());
 
             return retVal;
         }
@@ -97,7 +97,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleConditionToken(StringBuilder output, IToken token, object context)
+        private bool HandleConditionToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var conditionToken = token as ConditionToken;
             if (conditionToken == null)
@@ -107,20 +107,21 @@ namespace Toshal.Template
 
             var args = new ConditionArgs(conditionToken, context);
             var val = this.ConditionValueProvider(args);
-            if (val)
+
+            if (conditionToken.IsPositive == val)
             {
-                this.Process(output, conditionToken.InnerTokens, context);
+                this.Process(output, conditionToken.InnerTokens, context, customTokens);
             }
             else if (conditionToken.FalsePart != null && conditionToken.FalsePart.InnerTokens.Count > 0)
             {
                 var elseToken = conditionToken.FalsePart as ElseToken;
                 if (elseToken != null)
                 {
-                    this.Process(output, elseToken.InnerTokens, context);
+                    this.Process(output, elseToken.InnerTokens, context, customTokens);
                 }
                 else
                 {
-                    this.HandleConditionToken(output, conditionToken.FalsePart, context);
+                    this.HandleConditionToken(output, conditionToken.FalsePart, context, customTokens);
                 }
             }
 
@@ -142,7 +143,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleForEachToken(StringBuilder output, IToken token, object context)
+        private bool HandleForEachToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var forEachToken = token as ForEachToken;
             if (forEachToken == null)
@@ -151,7 +152,7 @@ namespace Toshal.Template
             }
 
             var args = new LoopArgs(forEachToken, context);
-            return this.ProcessForEach(output, context, args, forEachToken);
+            return this.ProcessForEach(output, context, args, forEachToken, customTokens);
         }
 
         /// <summary>
@@ -169,7 +170,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleNamedToken(StringBuilder output, IToken token, object context)
+        private bool HandleNamedToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var namedToken = token as NamedToken;
             if (namedToken == null)
@@ -177,9 +178,18 @@ namespace Toshal.Template
                 return false;
             }
 
-            var args = new TokenArgs(namedToken, context);
+            var value = "";
+            if (customTokens.TryGetValue(namedToken.Name, out value))
+            {
+                output.Append(value);
+                return true;
+            }
 
+            if (this.TokenValueProvider != null) return true;
+
+            var args = new TokenArgs(namedToken, context);
             var val = this.TokenValueProvider(args);
+
             if (!string.IsNullOrEmpty(val))
             {
                 output.Append(val);
@@ -203,7 +213,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleReuseForEachToken(StringBuilder output, IToken token, object context)
+        private bool HandleReuseForEachToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var reuseForEachToken = token as ReuseForEachToken;
             if (reuseForEachToken == null)
@@ -212,7 +222,7 @@ namespace Toshal.Template
             }
 
             var args = new LoopArgs(reuseForEachToken.Name, context);
-            return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken);
+            return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken, customTokens);
         }
 
         /// <summary>
@@ -227,7 +237,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        private void HandleWithToken(StringBuilder output, IToken token, object context)
+        private void HandleWithToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var withToken = token as WithToken;
 
@@ -237,8 +247,44 @@ namespace Toshal.Template
             var val = this.WithValueProvider(args);
             if (val != null)
             {
-                this.Process(output, withToken.InnerTokens, val);
+                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                this.Process(output, withToken.InnerTokens, val, newCustomTokens);
             }
+        }
+
+        /// <summary>
+        ///     The handle SET token.
+        /// </summary>
+        /// <param name="output">
+        ///     The output.
+        /// </param>
+        /// <param name="token">
+        ///     The token.
+        /// </param>
+        /// <param name="context">
+        ///     The context.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        private bool HandleSetToken(IToken token, ref Dictionary<string, string> customTokens)
+        {
+            var setToken = token as SetToken;
+            if (setToken == null)
+            {
+                return false;
+            }
+
+            if (customTokens.ContainsKey(setToken.Name) == false)
+            {
+                customTokens.Add(setToken.Name, setToken.Value);
+            }
+            else
+            {
+                customTokens[setToken.Name] = setToken.Value;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -253,7 +299,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        private void Process(StringBuilder output, List<IToken> tokenList, object context)
+        private void Process(StringBuilder output, List<IToken> tokenList, object context, Dictionary<string, string> customTokens)
         {
             foreach (var token in tokenList)
             {
@@ -264,17 +310,14 @@ namespace Toshal.Template
                     continue;
                 }
 
-                if (this.TokenValueProvider != null)
+                if (this.HandleNamedToken(output, token, context, customTokens))
                 {
-                    if (this.HandleNamedToken(output, token, context))
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 if (this.ConditionValueProvider != null)
                 {
-                    if (this.HandleConditionToken(output, token, context))
+                    if (this.HandleConditionToken(output, token, context, customTokens))
                     {
                         continue;
                     }
@@ -282,12 +325,12 @@ namespace Toshal.Template
 
                 if (this.LoopValueProvider != null)
                 {
-                    if (this.HandleForEachToken(output, token, context))
+                    if (this.HandleForEachToken(output, token, context, customTokens))
                     {
                         continue;
                     }
 
-                    if (this.HandleReuseForEachToken(output, token, context))
+                    if (this.HandleReuseForEachToken(output, token, context, customTokens))
                     {
                         continue;
                     }
@@ -295,8 +338,10 @@ namespace Toshal.Template
 
                 if (this.WithValueProvider != null)
                 {
-                    this.HandleWithToken(output, token, context);
+                    this.HandleWithToken(output, token, context, customTokens);
                 }
+
+                HandleSetToken(token, ref customTokens);
             }
         }
 
@@ -318,14 +363,17 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool ProcessForEach(StringBuilder output, object context, LoopArgs args, ForEachToken forEachToken)
+        private bool ProcessForEach(StringBuilder output, object context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
         {
+            var rowLevelShared = new Dictionary<string, string>(customTokens);
+
             var val = this.LoopValueProvider(args);
             if (val == null || val.Count == 0)
             {
                 if (forEachToken.NoRecordTokens.Count > 0)
                 {
-                    this.Process(output, forEachToken.NoRecordTokens, context);
+                    var newCustomTokens = new Dictionary<string, string>(customTokens);
+                    this.Process(output, forEachToken.NoRecordTokens, context, newCustomTokens);
                 }
 
                 return true;
@@ -333,7 +381,8 @@ namespace Toshal.Template
 
             if (forEachToken.HeaderTokens.Count > 0)
             {
-                this.Process(output, forEachToken.HeaderTokens, context);
+                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                this.Process(output, forEachToken.HeaderTokens, context, newCustomTokens);
             }
 
             for (var i = 0; i < val.Count; i++)
@@ -380,23 +429,26 @@ namespace Toshal.Template
 
                 if (beforeTokens.Count > 0)
                 {
-                    this.Process(output, beforeTokens, item);
+                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
+                    this.Process(output, beforeTokens, item, newCustomTokens);
                 }
 
                 if (rowTokens.Count > 0)
                 {
-                    this.Process(output, rowTokens, item);
+                    this.Process(output, rowTokens, item, rowLevelShared);
                 }
 
                 if (afterTokens.Count > 0)
                 {
-                    this.Process(output, afterTokens, item);
+                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
+                    this.Process(output, afterTokens, item, customTokens);
                 }
             }
 
             if (forEachToken.FooterTokens.Count > 0)
             {
-                this.Process(output, forEachToken.FooterTokens, context);
+                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                this.Process(output, forEachToken.FooterTokens, context, newCustomTokens);
             }
 
             return true;
