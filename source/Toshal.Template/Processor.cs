@@ -100,10 +100,8 @@ namespace Toshal.Template
         private bool HandleConditionToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var conditionToken = token as ConditionToken;
-            if (conditionToken == null)
-            {
-                return false;
-            }
+            if (conditionToken == null) return false;
+            if (this.ConditionValueProvider == null) return true; //skip as there is no value provider
 
             var args = new ConditionArgs(conditionToken, context);
             var val = this.ConditionValueProvider(args);
@@ -146,10 +144,8 @@ namespace Toshal.Template
         private bool HandleForEachToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var forEachToken = token as ForEachToken;
-            if (forEachToken == null)
-            {
-                return false;
-            }
+            if (forEachToken == null) return false;
+            if (this.LoopValueProvider == null) return true; //skip as there is no value provider
 
             var args = new LoopArgs(forEachToken, context);
             return this.ProcessForEach(output, context, args, forEachToken, customTokens);
@@ -173,10 +169,7 @@ namespace Toshal.Template
         private bool HandleNamedToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var namedToken = token as NamedToken;
-            if (namedToken == null)
-            {
-                return false;
-            }
+            if (namedToken == null) return false;
 
             var value = "";
             if (customTokens.TryGetValue(namedToken.Name, out value))
@@ -185,7 +178,7 @@ namespace Toshal.Template
                 return true;
             }
 
-            if (this.TokenValueProvider != null) return true;
+            if (this.TokenValueProvider == null) return true; //skip as there is no value provider
 
             var args = new TokenArgs(namedToken, context);
             var val = this.TokenValueProvider(args);
@@ -216,10 +209,8 @@ namespace Toshal.Template
         private bool HandleReuseForEachToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var reuseForEachToken = token as ReuseForEachToken;
-            if (reuseForEachToken == null)
-            {
-                return false;
-            }
+            if (reuseForEachToken == null) return false;
+            if (this.LoopValueProvider != null) return true;
 
             var args = new LoopArgs(reuseForEachToken.Name, context);
             return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken, customTokens);
@@ -237,11 +228,12 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        private void HandleWithToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
+        private bool HandleWithToken(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
             var withToken = token as WithToken;
+            if (withToken == null) return false;
+            if (this.WithValueProvider == null) return true;//skip as there is no value provider;
 
-            // if (withToken == null) return ; //because with is last element check in loop - we are sure its WITH token.
             var args = new TokenArgs(withToken, context);
 
             var val = this.WithValueProvider(args);
@@ -250,6 +242,8 @@ namespace Toshal.Template
                 var newCustomTokens = new Dictionary<string, string>(customTokens);
                 this.Process(output, withToken.InnerTokens, val, newCustomTokens);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -270,11 +264,8 @@ namespace Toshal.Template
         private bool HandleSetToken(IToken token, ref Dictionary<string, string> customTokens)
         {
             var setToken = token as SetToken;
-            if (setToken == null)
-            {
-                return false;
-            }
-
+            if (setToken == null) return false;
+            
             if (customTokens.ContainsKey(setToken.Name) == false)
             {
                 customTokens.Add(setToken.Name, setToken.Value);
@@ -315,30 +306,24 @@ namespace Toshal.Template
                     continue;
                 }
 
-                if (this.ConditionValueProvider != null)
+                if (this.HandleConditionToken(output, token, context, customTokens))
                 {
-                    if (this.HandleConditionToken(output, token, context, customTokens))
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
-                if (this.LoopValueProvider != null)
+                if (this.HandleForEachToken(output, token, context, customTokens))
                 {
-                    if (this.HandleForEachToken(output, token, context, customTokens))
-                    {
-                        continue;
-                    }
-
-                    if (this.HandleReuseForEachToken(output, token, context, customTokens))
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
-                if (this.WithValueProvider != null)
+                if (this.HandleReuseForEachToken(output, token, context, customTokens))
                 {
-                    this.HandleWithToken(output, token, context, customTokens);
+                    continue;
+                }
+
+                if (this.HandleWithToken(output, token, context, customTokens))
+                {
+                    continue;
                 }
 
                 HandleSetToken(token, ref customTokens);

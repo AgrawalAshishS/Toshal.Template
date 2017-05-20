@@ -1,5 +1,5 @@
 Param(
-    [string]$version = "1.0.7.0",
+    [string]$version = "1.0.8.0",
 	[string]$buildNumber = "0",
 	[string]$preRelease = $null
 )
