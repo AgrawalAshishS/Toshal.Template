@@ -14,14 +14,14 @@ namespace Test.Template
         [Test]
         public void ItShouldRecognizeSet()
         {
-            const string templateText = "<%SET MyTokenName MyValue %><%=MyTokenName%>";
+            const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%=MyTokenName%>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
             Assert.AreEqual(2, result.Count);
             var token = (SetToken)result[0];
             Assert.AreEqual("MyTokenName".ToLower(), token.Name);
-            Assert.AreEqual("MyValue", token.Value);
+            Assert.AreEqual(1, token.InnerTokens.Count);
 
             var namedToken = (NamedToken)result[1];
             Assert.AreEqual("MyTokenName".ToLower(), namedToken.Name);
@@ -30,14 +30,14 @@ namespace Test.Template
         [Test]
         public void EmptyValueShouldNotThrowError()
         {
-            const string templateText = "<%SET MyTokenName %>";
+            const string templateText = "<%SET MyTokenName %><%ENDSET%>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
             Assert.AreEqual(1, result.Count);
             var token = (SetToken)result[0];
             Assert.AreEqual("MyTokenName".ToLower(), token.Name);
-            Assert.AreEqual("", token.Value);
+            Assert.AreEqual(0, token.InnerTokens.Count);
         }
     }
 }

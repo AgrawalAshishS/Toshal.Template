@@ -261,18 +261,21 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleSetToken(IToken token, ref Dictionary<string, string> customTokens)
+        private bool HandleSetToken(IToken token, object context, ref Dictionary<string, string> customTokens)
         {
             var setToken = token as SetToken;
             if (setToken == null) return false;
-            
+
+            var valueOutput = new StringBuilder();
+            this.Process(valueOutput, setToken.InnerTokens, context, customTokens);
+
             if (customTokens.ContainsKey(setToken.Name) == false)
             {
-                customTokens.Add(setToken.Name, setToken.Value);
+                customTokens.Add(setToken.Name, valueOutput.ToString());
             }
             else
             {
-                customTokens[setToken.Name] = setToken.Value;
+                customTokens[setToken.Name] = valueOutput.ToString();
             }
 
             return true;
@@ -326,7 +329,7 @@ namespace Toshal.Template
                     continue;
                 }
 
-                HandleSetToken(token, ref customTokens);
+                HandleSetToken(token, context, ref customTokens);
             }
         }
 

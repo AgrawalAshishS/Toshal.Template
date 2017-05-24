@@ -409,6 +409,12 @@ namespace Toshal.Template
                 throw new TokenNotClosedException(split, token.Name);
             }
 
+            var lastSplit = this._splits[this._splitIndex];
+            if (lastSplit != "<%ENDWITH%>")
+            {
+                throw new TokenNotClosedException(split, token.Name);
+            }
+
             tokenList.Add(token);
             return true;
         }
@@ -432,7 +438,21 @@ namespace Toshal.Template
                 return false;
             }
 
-            tokenList.Add(new SetToken(split));
+            var token = new SetToken(split);
+
+            this._splitIndex++;
+            if (this.ProcessSplitsTillEnd(token.InnerTokens))
+            {
+                throw new TokenNotClosedException(split, token.Name);
+            }
+
+            var lastSplit = this._splits[this._splitIndex];
+            if (lastSplit != "<%ENDSET%>")
+            {
+                throw new TokenNotClosedException(split, token.Name);
+            }
+
+            tokenList.Add(token);
             return true;
         }
 

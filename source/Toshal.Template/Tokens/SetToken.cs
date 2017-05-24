@@ -29,7 +29,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// The named token.
     /// </summary>
-    public class SetToken : IToken
+    public class SetToken : ContainerTokenBase
     {
         #region Constructors and Destructor
 
@@ -43,18 +43,19 @@ namespace Toshal.Template.Tokens
         /// </exception>
         public SetToken(string split)
         {
-            const string tokenExpression = "<%SET\\s(?<Name>.+?)\\s(?<Value>.*?)%>";
-            var m = Regex.Match(split, tokenExpression);
+            this.Name = string.Empty;
+            this.Attributes = new TokenAttributeDictionary();
 
-            this.Name = m.Groups["Name"].Value.Trim().ToLower();
-            this.Value = m.Groups["Value"].Value;
+            const string tokenExpression = "<%SET\\s(?<Name>.+?)%>";
+            this.Name = NamedToken.GetNameAndAttributes(
+                split,
+                Regex.Match(split, tokenExpression).Groups["Name"].Value.Trim(),
+                this.Attributes);
 
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);
             }
-
-            if (string.IsNullOrEmpty(this.Value) == false) this.Value = this.Value.Trim();
         }
 
         #endregion
@@ -67,9 +68,9 @@ namespace Toshal.Template.Tokens
         public string Name { get; private set; }
 
         /// <summary>
-        /// Gets the value for token.
+        ///     Gets the attributes.
         /// </summary>
-        public string Value { get; private set; }
+        public TokenAttributeDictionary Attributes { get; }
 
         #endregion
 

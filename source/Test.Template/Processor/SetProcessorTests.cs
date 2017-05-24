@@ -15,7 +15,7 @@ namespace Test.Template
         [Test]
         public void ItShouldRecognizeSet()
         {
-            const string templateText = "<%SET MyTokenName MyValue %><%=MyTokenName%>";
+            const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%=MyTokenName%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
@@ -28,7 +28,7 @@ namespace Test.Template
         [Test]
         public void EmptyValueShouldNotThrowError()
         {
-            const string templateText = "<%SET MyTokenName %>";
+            const string templateText = "<%SET MyTokenName %><%ENDSET%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
@@ -41,7 +41,7 @@ namespace Test.Template
         [Test]
         public void SetValueAppearInForEach()
         {
-            const string templateText = "<%SET MyTokenName MyValue %><%FOREACH A%><%=MyTokenName%><%ENDFOR%>";
+            const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%FOREACH A%><%=MyTokenName%><%ENDFOR%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
@@ -56,7 +56,7 @@ namespace Test.Template
         [Test]
         public void SetValueChangeForContextOnlyInForEach()
         {
-            const string templateText = "<%SET MyTokenName Out %><%=MyTokenName%> <%FOREACH A%><%=MyTokenName%> <%SET MyTokenName In %> <%=MyTokenName%><%ENDFOR%> <%=MyTokenName%>";
+            const string templateText = "<%SET MyTokenName %>Out<%ENDSET%><%=MyTokenName%> <%FOREACH A%><%=MyTokenName%> <%SET MyTokenName %>In<%ENDSET%> <%=MyTokenName%><%ENDFOR%> <%=MyTokenName%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
@@ -66,6 +66,20 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
             Assert.AreEqual("Out Out  In Out", result.ToString());
+        }
+
+        [Test]
+        public void SetProcessTokens()
+        {
+            const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%SET OtherToken %><%=MyTokenName%>Abc<%ENDSET%><%=OtherToken%>";
+            var parser = new Parser();
+            List<IToken> tokens = parser.Parse(templateText);
+
+            var processor = new Processor();
+            var process = new ProcessorArgs(tokens);
+
+            StringBuilder result = processor.Process(process);
+            Assert.AreEqual("MyValueAbc", result.ToString());
         }
     }
 }
