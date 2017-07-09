@@ -27,7 +27,7 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class ContentToken : IToken
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ContentToken" /> class.

@@ -105,5 +105,6 @@ namespace Test.Template
             Assert.AreEqual(part5, ((ContentToken)result[2]).Content);
             Assert.AreEqual(part7.ToLower(), ((NamedToken)result[3]).Name);
         }
+
     }
 }

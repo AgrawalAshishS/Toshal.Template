@@ -24,6 +24,6 @@ namespace Toshal.Template.Signatures
 {
     public interface IWithValueProvider
     {
-        string WithValueProvider(TokenArgs args);
+        object WithValueProvider(TokenArgs args);
     }
 }

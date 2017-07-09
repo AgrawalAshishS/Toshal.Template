@@ -20,10 +20,12 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections;
+
 namespace Toshal.Template.Signatures
 {
     public interface ILoopValueProvider
     {
-        string LoopValueProvider(LoopArgs args);
+        IList LoopValueProvider(LoopArgs args);
     }
 }

@@ -71,5 +71,10 @@ namespace Toshal.Template
         public TokenAttributeDictionary Attributes { get; private set; }
 
         #endregion
+
+        public string GetAttribute(string key, string defaultValue)
+        {
+            return Attributes.GetValue(key, defaultValue);
+        }
     }
 }

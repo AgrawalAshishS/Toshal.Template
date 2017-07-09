@@ -22,6 +22,7 @@
 
 namespace Toshal.Template
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -456,6 +457,18 @@ namespace Toshal.Template
             return true;
         }
 
+        private bool HandleRemovePreviousNewLine(string split, List<IToken> tokenList)
+        {
+            if (split != "<%REMOVE_PREVIOUS_NEW_LINE%>")
+            {
+                return false;
+            }
+
+            tokenList.Add(new RemovePreviousNewLine());
+
+            return true;
+        }
+
         /// <summary>
         ///     The process splits till end.
         /// </summary>
@@ -502,6 +515,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandledAsSet(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandleRemovePreviousNewLine(split, tokenList))
                 {
                     continue;
                 }

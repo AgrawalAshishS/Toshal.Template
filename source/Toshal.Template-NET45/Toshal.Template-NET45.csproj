@@ -113,6 +113,9 @@
     <Compile Include="..\Toshal.Template\Tokens\NamedToken.cs">
       <Link>Tokens\NamedToken.cs</Link>
     </Compile>
+    <Compile Include="..\Toshal.Template\Tokens\RemovePreviousNewLine.cs">
+      <Link>Tokens\RemovePreviousNewLine.cs</Link>
+    </Compile>
     <Compile Include="..\Toshal.Template\Tokens\ReuseForEachToken.cs">
       <Link>Tokens\ReuseForEachToken.cs</Link>
     </Compile>

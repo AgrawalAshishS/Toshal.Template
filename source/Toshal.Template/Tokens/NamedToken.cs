@@ -119,5 +119,10 @@ namespace Toshal.Template.Tokens
         }
 
         #endregion
+
+        public string GetAttribute(string attributeName, string defaultValue)
+        {
+            return Attributes.GetValue(attributeName, defaultValue);
+        }
     }
 }

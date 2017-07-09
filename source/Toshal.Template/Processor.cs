@@ -210,7 +210,7 @@ namespace Toshal.Template
         {
             var reuseForEachToken = token as ReuseForEachToken;
             if (reuseForEachToken == null) return false;
-            if (this.LoopValueProvider != null) return true;
+            if (this.LoopValueProvider == null) return true;
 
             var args = new LoopArgs(reuseForEachToken.Name, context);
             return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken, customTokens);
@@ -281,6 +281,22 @@ namespace Toshal.Template
             return true;
         }
 
+        private bool HandleRemovePreviousNewLine(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
+        {
+            var removeToken = token as RemovePreviousNewLine;
+            if (removeToken == null) return false;
+
+            if (output.Length == 0) return true;
+
+            if (output[output.Length - 1] == '\n')
+                output = output.Remove(output.Length - 1, 1);
+
+            if (output[output.Length - 1] == '\r')
+                output = output.Remove(output.Length - 1, 1);
+
+            return true;
+        }
+
         /// <summary>
         ///     The process.
         /// </summary>
@@ -325,6 +341,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleWithToken(output, token, context, customTokens))
+                {
+                    continue;
+                }
+
+                if (this.HandleRemovePreviousNewLine(output, token, context, customTokens))
                 {
                     continue;
                 }

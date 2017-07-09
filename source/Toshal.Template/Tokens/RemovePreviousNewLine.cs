@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ArgsBase.cs" company="Toshal Infotech">
+// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -20,10 +20,9 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Toshal.Template.Signatures
+namespace Toshal.Template.Tokens
 {
-    public interface IConditionValueProvider
+    public class RemovePreviousNewLine : IToken
     {
-        bool ConditionValueProvider(ConditionArgs args);
     }
 }

@@ -29,5 +29,12 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class TokenAttributeDictionary : Dictionary<string, string>
     {
+        public string GetValue(string attributeName, string defaultValue)
+        {
+            attributeName = attributeName.ToLower();
+            var retVal = defaultValue;
+            if (this.TryGetValue(attributeName, out retVal)) return retVal;
+            return defaultValue;
+        }
     }
 }
