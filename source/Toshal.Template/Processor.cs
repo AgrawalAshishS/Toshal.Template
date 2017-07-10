@@ -297,6 +297,19 @@ namespace Toshal.Template
             return true;
         }
 
+        private bool HandleRemovePreviousChars(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
+        {
+            var removeToken = token as RemovePreviousChars;
+            if (removeToken == null) return false;
+
+            var count = removeToken.CharCount;
+            if (output.Length < removeToken.CharCount) count = output.Length;
+
+            output = output.Remove(output.Length - count, count);
+
+            return true;
+        }
+
         /// <summary>
         ///     The process.
         /// </summary>
@@ -346,6 +359,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleRemovePreviousNewLine(output, token, context, customTokens))
+                {
+                    continue;
+                }
+
+                if (this.HandleRemovePreviousChars(output, token, context, customTokens))
                 {
                     continue;
                 }

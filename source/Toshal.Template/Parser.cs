@@ -469,6 +469,18 @@ namespace Toshal.Template
             return true;
         }
 
+        private bool HandleRemovePreviousChars(string split, List<IToken> tokenList)
+        {
+            if (split.StartsWith("<%REMOVE_PREVIOUS ") == false)
+            {
+                return false;
+            }
+
+            tokenList.Add(new RemovePreviousChars(split));
+
+            return true;
+        }
+
         /// <summary>
         ///     The process splits till end.
         /// </summary>
@@ -520,6 +532,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleRemovePreviousNewLine(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandleRemovePreviousChars(split, tokenList))
                 {
                     continue;
                 }

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TokenMissingNameException.cs" company="Toshal Infotech">
+// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -20,26 +20,28 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Toshal.Template.Exceptions
-{
-    /// <summary>
-    /// The token missing name exception.
-    /// </summary>
-    public class TokenMissingNameException : ParserException
-    {
-        #region Constructors and Destructor
+using System.Text.RegularExpressions;
+using Toshal.Template.Exceptions;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenMissingNameException"/> class.
-        /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        public TokenMissingNameException(string split)
-            : base(split)
+
+namespace Toshal.Template.Tokens
+{
+    public class RemovePreviousChars : IToken
+    {
+        public RemovePreviousChars(string split)
         {
+            const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
+            string tempString = Regex.Match(split, tokenExpression).Groups["charcount"].Value.Trim();
+
+            int charCount = 0;
+            if(int.TryParse(tempString, out charCount) == false)
+            {
+                throw new ParserException(split, "Char count is missing or not integer");
+            }
+
+            this.CharCount = charCount;
         }
 
-        #endregion
+        public int CharCount { get; private set; }
     }
 }
