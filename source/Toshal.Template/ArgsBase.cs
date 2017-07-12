@@ -20,6 +20,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Toshal.Template
 {
     /// <summary>
@@ -38,10 +40,11 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        protected ArgsBase(string name, object context)
+        protected ArgsBase(string name, object context, List<object> parentContext)
         {
             this.Name = name;
             this.Context = context;
+            ParentContext = parentContext;
         }
 
         #endregion
@@ -57,6 +60,8 @@ namespace Toshal.Template
         ///     Gets the name.
         /// </summary>
         public string Name { get; private set; }
+
+        public List<object> ParentContext { get; private set; }
 
         #endregion
     }

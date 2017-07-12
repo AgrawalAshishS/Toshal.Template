@@ -22,6 +22,7 @@
 
 namespace Toshal.Template
 {
+    using System.Collections.Generic;
     using Toshal.Template.Tokens;
 
     /// <summary>
@@ -40,8 +41,8 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        public ConditionArgs(ConditionToken token, object context)
-            : base(token.Name, context)
+        public ConditionArgs(ConditionToken token, object context, List<object> parentContext)
+            : base(token.Name, context, parentContext)
         {
         }
 

@@ -22,6 +22,7 @@
 
 namespace Toshal.Template
 {
+    using System.Collections.Generic;
     using Template.Tokens;
 
     /// <summary>
@@ -40,8 +41,8 @@ namespace Toshal.Template
         /// <param name="context">
         /// The context.
         /// </param>
-        public TokenArgs(NamedToken token, object context)
-            : base(token.Name, context)
+        public TokenArgs(NamedToken token, object context, List<object> parentContext)
+            : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
@@ -55,8 +56,8 @@ namespace Toshal.Template
         /// <param name="context">
         /// The context.
         /// </param>
-        public TokenArgs(WithToken token, object context)
-            : base(token.Name, context)
+        public TokenArgs(WithToken token, object context, List<object> parentContext)
+            : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
