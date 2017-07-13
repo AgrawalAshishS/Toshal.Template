@@ -41,29 +41,31 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public ConditionToken(string split)
+        public ConditionToken(Split split)
         {
             this.Name = string.Empty;
             this.IsPositive = true;
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
 
-            if (split.StartsWith("<%IF"))
+            if (split.Content.StartsWith("<%IF"))
             {
                 const string ifWithThenTokenExpression = "<%IF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
                 if (string.IsNullOrEmpty(this.Name))
                 {
                     const string ifWithoutThenTokenExpression = "<%IF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
                 }
             }
             else
             {
                 const string ifWithThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
                 if (string.IsNullOrEmpty(this.Name))
                 {
                     const string ifWithoutThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
                 }
             }
 

@@ -22,6 +22,7 @@
 
 namespace Toshal.Template.Tokens
 {
+    using System;
     using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
@@ -29,7 +30,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// The named token.
     /// </summary>
-    public class NamedToken : IToken
+    public class NamedToken : Token
     {
         #region Constructors and Destructor
 
@@ -41,13 +42,16 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public NamedToken(string split)
+        public NamedToken(Split split)
         {
             this.Attributes = new TokenAttributeDictionary();
 
             const string tokenExpression = "<%=(?<Name>.*?)%>";
-            string tempString = Regex.Match(split, tokenExpression).Groups["Name"].Value.Trim();
+            string tempString = Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim();
             this.Name = GetNameAndAttributes(split, tempString, this.Attributes);
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
+
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);
@@ -90,8 +94,8 @@ namespace Toshal.Template.Tokens
         /// <exception cref="InvalidTokenAttributeException">
         /// </exception>
         internal static string GetNameAndAttributes(
-            string split, 
-            string nameString, 
+            Split split,
+            string nameString,
             TokenAttributeDictionary attributes)
         {
             string retVal = nameString;

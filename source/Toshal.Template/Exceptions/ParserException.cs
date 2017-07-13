@@ -31,53 +31,35 @@ namespace Toshal.Template.Exceptions
     {
         #region Constructors and Destructor
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserException"/> class.
-        /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        public ParserException(string split, int tokenIndex)
-            :this(split, tokenIndex, "Issue with token " + split + " @index " + tokenIndex.ToString())
-        {
-        }
-
-        public ParserException(string split)
-            : this(split, -1, "Issue with token " + split)
-        {
-        }
-
-        public ParserException(string split, string message)
-            : this(split, -1, message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParserException"/> class.
-        /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <param name="message">
-        /// The message.
-        /// </param>
-        public ParserException(string split, int tokenIndex, string message)
+        public ParserException(Split split, string message)
             : base(message)
         {
-            this.Split = split;
-            this.TokenIndex = tokenIndex;
+            Split = split;
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
         }
 
+        public ParserException(Split split)
+            : this(split, "Token - " + split.Content + " is wrong @" + split.StartingIndex + " on line number " + split.LineNumber)
+        {
+        }
+
+        public ParserException(int lineNumber, int startingIndex, string message)
+            : base(message)
+        {
+            this.LineNumber = lineNumber;
+            this.StartingIndex = startingIndex;
+        }
+        
         #endregion
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets or sets the split.
-        /// </summary>
-        public string Split { get; set; }
+        public Split Split { get; set; }
 
-        public int TokenIndex { get; set; }
+        public int LineNumber { get; private set; }
+
+        public int StartingIndex { get; private set; }
 
         #endregion
     }

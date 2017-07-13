@@ -20,12 +20,14 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+
 namespace Toshal.Template.Tokens
 {
     /// <summary>
     ///     The content token.
     /// </summary>
-    public class ContentToken : IToken
+    public class ContentToken : Token
     {
         #region Constructors and Destructor
 
@@ -35,9 +37,11 @@ namespace Toshal.Template.Tokens
         /// <param name="content">
         ///     The content.
         /// </param>
-        public ContentToken(string content)
+        public ContentToken(Split split)
         {
-            this.Content = content;
+            this.Content = split.Content;
+            this.StartingIndex = split.StartingIndex;
+            this.LineNumber = split.LineNumber;
         }
 
         #endregion

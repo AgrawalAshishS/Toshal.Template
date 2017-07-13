@@ -48,7 +48,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split);
+                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -68,7 +68,7 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.AreEqual("<%FOREACH %>", ex.Split);
+                    Assert.AreEqual("<%FOREACH %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -110,7 +110,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split);
+                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -133,7 +133,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split);
+                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -157,7 +157,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split);
+                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -248,7 +248,7 @@ namespace Test.Template
                     catch (TokenNotClosedException ex)
                     {
                         Assert.AreEqual("name", ex.TokenName);
-                        Assert.AreEqual("<%FOREACH Name %>", ex.Split);
+                        Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                         Assert.AreEqual("<%" + token + "%> not closed for <%FOREACH Name %>", ex.Message);
                         return;
                     }

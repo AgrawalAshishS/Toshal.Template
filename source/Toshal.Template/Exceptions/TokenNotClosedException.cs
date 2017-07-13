@@ -29,35 +29,14 @@ namespace Toshal.Template.Exceptions
     {
         #region Constructors and Destructor
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenNotClosedException"/> class.
-        /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <param name="name">
-        /// The name.
-        /// </param>
-        public TokenNotClosedException(string split, int tokenIndex, string name)
-            : base(split, tokenIndex)
+        public TokenNotClosedException(Split split, string name)
+            : base(split, "Token named " + name + " is not closed")
         {
             this.TokenName = name;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TokenNotClosedException"/> class.
-        /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <param name="name">
-        /// The name.
-        /// </param>
-        /// <param name="message">
-        /// The message.
-        /// </param>
-        public TokenNotClosedException(string split, int tokenIndex, string name, string message)
-            : base(split, tokenIndex, message)
+        public TokenNotClosedException(Split split, string name, string additionalMessage)
+            : base(split, additionalMessage)
         {
             this.TokenName = name;
         }

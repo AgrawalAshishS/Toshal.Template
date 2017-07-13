@@ -86,6 +86,9 @@
     <Compile Include="..\Toshal.Template\Signatures\IWithValueProvider.cs">
       <Link>Signatures\IWithValueProvider.cs</Link>
     </Compile>
+    <Compile Include="..\Toshal.Template\Split.cs">
+      <Link>Split.cs</Link>
+    </Compile>
     <Compile Include="..\Toshal.Template\TokenArgs.cs">
       <Link>TokenArgs.cs</Link>
     </Compile>
@@ -124,6 +127,9 @@
     </Compile>
     <Compile Include="..\Toshal.Template\Tokens\SetToken.cs">
       <Link>Tokens\SetToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Toshal.Template\Tokens\Token.cs">
+      <Link>Tokens\Token.cs</Link>
     </Compile>
     <Compile Include="..\Toshal.Template\Tokens\TokenAttributeDictionary.cs">
       <Link>Tokens\TokenAttributeDictionary.cs</Link>

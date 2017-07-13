@@ -35,7 +35,7 @@ namespace Toshal.Template.Exceptions
         /// <param name="split">
         /// The split.
         /// </param>
-        public TokenMissingNameException(string split)
+        public TokenMissingNameException(Split split)
             : base(split)
         {
         }

@@ -38,7 +38,7 @@ namespace Test.Template
                 }
                 catch (ParserException ex)
                 {
-                    Assert.AreEqual("<%%>", ex.Split);
+                    Assert.AreEqual("<%%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -76,7 +76,7 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.AreEqual("<%=%>", ex.Split);
+                    Assert.AreEqual("<%=%>", ex.Split.Content);
                     throw;
                 }
             });

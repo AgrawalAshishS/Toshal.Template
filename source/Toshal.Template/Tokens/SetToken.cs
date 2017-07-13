@@ -41,7 +41,7 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public SetToken(string split)
+        public SetToken(Split split)
         {
             this.Name = string.Empty;
             this.Attributes = new TokenAttributeDictionary();
@@ -49,8 +49,11 @@ namespace Toshal.Template.Tokens
             const string tokenExpression = "<%SET\\s(?<Name>.+?)%>";
             this.Name = NamedToken.GetNameAndAttributes(
                 split,
-                Regex.Match(split, tokenExpression).Groups["Name"].Value.Trim(),
+                Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim(),
                 this.Attributes);
+
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
 
             if (string.IsNullOrEmpty(this.Name))
             {

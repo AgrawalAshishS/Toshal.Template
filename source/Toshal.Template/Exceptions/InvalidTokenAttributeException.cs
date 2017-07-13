@@ -35,7 +35,7 @@ namespace Toshal.Template.Exceptions
         /// <param name="split">
         /// The split.
         /// </param>
-        public InvalidTokenAttributeException(string split)
+        public InvalidTokenAttributeException(Split split)
             : base(split)
         {
         }

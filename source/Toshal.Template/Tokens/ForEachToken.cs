@@ -30,7 +30,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     ///     The for each token.
     /// </summary>
-    public class ForEachToken : IToken
+    public class ForEachToken : Token
     {
         #region Constructors and Destructor
 
@@ -42,7 +42,7 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public ForEachToken(string split)
+        public ForEachToken(Split split)
         {
             this.NoRecordTokens = new List<IToken>();
 
@@ -68,11 +68,14 @@ namespace Toshal.Template.Tokens
 
             const string forEachTokenExpression = "<%FOREACH\\s(?<Name>.*?)%>";
 
-            this.Name = Regex.Match(split, forEachTokenExpression).Groups["Name"].Value.Trim().ToLower();
+            this.Name = Regex.Match(split.Content, forEachTokenExpression).Groups["Name"].Value.Trim().ToLower();
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);
             }
+
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
         }
 
         #endregion

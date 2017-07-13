@@ -29,7 +29,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     ///     The reuse for each token.
     /// </summary>
-    public class ReuseForEachToken : IToken
+    public class ReuseForEachToken : Token
     {
         #region Constructors and Destructor
 
@@ -41,15 +41,18 @@ namespace Toshal.Template.Tokens
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public ReuseForEachToken(string split)
+        public ReuseForEachToken(Split split)
         {
             this.Name = string.Empty;
 
             const string reuseForEachTokenExpression = "<%REUSEFOREACH\\s(?<ExistingForEachName>.+?)\\s(?<Name>.+?)%>";
-            var m = Regex.Match(split, reuseForEachTokenExpression);
+            var m = Regex.Match(split.Content, reuseForEachTokenExpression);
 
             this.ExistingForEachName = m.Groups["ExistingForEachName"].Value.Trim().ToLower();
             this.Name = m.Groups["Name"].Value.Trim().ToLower();
+
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
 
             if (string.IsNullOrEmpty(this.Name))
             {

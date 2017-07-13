@@ -27,7 +27,7 @@ namespace Toshal.Template.Tokens
     /// <summary>
     ///     The container token base.
     /// </summary>
-    public abstract class ContainerTokenBase : IContainerToken
+    public abstract class ContainerTokenBase : Token, IContainerToken
     {
         #region Constructors and Destructor
 

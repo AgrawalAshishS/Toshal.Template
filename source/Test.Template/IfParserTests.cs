@@ -65,7 +65,7 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.AreEqual("<%IF  %>", ex.Split);
+                    Assert.AreEqual("<%IF  %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -115,7 +115,7 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -141,7 +141,7 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -350,7 +350,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("othercondition", ex.TokenName);
-                    Assert.AreEqual("<%ELSEIF OtherCondition THEN%>", ex.Split);
+                    Assert.AreEqual("<%ELSEIF OtherCondition THEN%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -379,7 +379,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("conditionname", ex.TokenName);
-                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split);
+                    Assert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });

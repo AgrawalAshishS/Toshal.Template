@@ -27,5 +27,10 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public class ElseToken : ContainerTokenBase
     {
+        public ElseToken(Split split)
+        {
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
+        }
     }
 }

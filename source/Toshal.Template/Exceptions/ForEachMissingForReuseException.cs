@@ -32,13 +32,18 @@ namespace Toshal.Template.Exceptions
         /// <summary>
         /// Initializes a new instance of the <see cref="ForEachMissingForReuseException"/> class.
         /// </summary>
-        /// <param name="split">
+        /// <param name="name">
         /// The split.
         /// </param>
-        public ForEachMissingForReuseException(string split)
-            : base(split)
+        public ForEachMissingForReuseException(string reuseName, string forEachName, int lineNumber, int startingIndex)
+            : base(lineNumber, startingIndex, "FOREACH is missing with name " + forEachName + ", it is referenced in Reuse token named : " + reuseName)
         {
+            this.ReuseName = reuseName;
+            ForEachName = forEachName;
         }
+
+        public string ReuseName { get; set; }
+        public string ForEachName { get; set; }
 
         #endregion
     }

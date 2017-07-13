@@ -26,12 +26,12 @@ using Toshal.Template.Exceptions;
 
 namespace Toshal.Template.Tokens
 {
-    public class RemovePreviousChars : IToken
+    public class RemovePreviousChars : Token
     {
-        public RemovePreviousChars(string split)
+        public RemovePreviousChars(Split split)
         {
             const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
-            string tempString = Regex.Match(split, tokenExpression).Groups["charcount"].Value.Trim();
+            string tempString = Regex.Match(split.Content, tokenExpression).Groups["charcount"].Value.Trim();
 
             int charCount = 0;
             if(int.TryParse(tempString, out charCount) == false)
@@ -40,6 +40,8 @@ namespace Toshal.Template.Tokens
             }
 
             this.CharCount = charCount;
+            this.LineNumber = split.LineNumber;
+            this.StartingIndex = split.StartingIndex;
         }
 
         public int CharCount { get; private set; }
