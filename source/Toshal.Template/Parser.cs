@@ -199,15 +199,17 @@ namespace Toshal.Template
         {
             if (this._splits[this._splitIndex].Content == "<%" + containerTag + "%>")
             {
+                var tempSplit = this._splits[this._splitIndex];
+
                 this._splitIndex++;
                 if (this.ProcessSplitsTillEnd(tokenList))
                 {
-                    throw new TokenNotClosedException(split, name, "<%" + containerTag + "%> not closed for " + split.Content);
+                    throw new TokenNotClosedException(tempSplit, name, "<%" + containerTag + "%> not closed for " + split.Content);
                 }
 
                 if (this._splits[this._splitIndex].Content != "<%END" + containerTag + "%>")
                 {
-                    throw new TokenNotClosedException(split, name, "<%" + containerTag + "%> not closed for " + split.Content);
+                    throw new TokenNotClosedException(tempSplit, name, "<%" + containerTag + "%> not closed for " + split.Content);
                 }
 
                 this._splitIndex++;

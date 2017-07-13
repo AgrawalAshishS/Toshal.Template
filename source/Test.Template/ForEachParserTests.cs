@@ -110,7 +110,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
+                    Assert.AreEqual("<%ROW%>", ex.Split.Content);
                     Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -133,7 +133,7 @@ namespace Test.Template
                 catch (TokenNotClosedException ex)
                 {
                     Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
+                    Assert.AreEqual("<%ROW%>", ex.Split.Content);
                     Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -248,7 +248,7 @@ namespace Test.Template
                     catch (TokenNotClosedException ex)
                     {
                         Assert.AreEqual("name", ex.TokenName);
-                        Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
+                        Assert.AreEqual("<%" + token + "%>", ex.Split.Content);
                         Assert.AreEqual("<%" + token + "%> not closed for <%FOREACH Name %>", ex.Message);
                         return;
                     }
@@ -355,7 +355,7 @@ namespace Test.Template
         public void ItShouldProcessLastRowTokenWhenThereIsOnlyOneRowForLoop()
         {
             string templateText = "<%FOREACH Name %>";
-            
+
             templateText += "<%HEADER%>Content within HEADER<%ENDHEADER%>";
 
             templateText += "<%BEFOREFIRSTROW%>Content within BEFOREFIRSTROW<%ENDBEFOREFIRSTROW%>";
