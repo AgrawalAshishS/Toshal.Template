@@ -27,7 +27,7 @@ namespace Toshal.Template.Exceptions
     /// </summary>
     public class TokenNotClosedException : ParserException
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenNotClosedException"/> class.
@@ -38,8 +38,8 @@ namespace Toshal.Template.Exceptions
         /// <param name="name">
         /// The name.
         /// </param>
-        public TokenNotClosedException(string split, string name)
-            : base(split)
+        public TokenNotClosedException(string split, int tokenIndex, string name)
+            : base(split, tokenIndex)
         {
             this.TokenName = name;
         }
@@ -56,8 +56,8 @@ namespace Toshal.Template.Exceptions
         /// <param name="message">
         /// The message.
         /// </param>
-        public TokenNotClosedException(string split, string name, string message)
-            : base(split, message)
+        public TokenNotClosedException(string split, int tokenIndex, string name, string message)
+            : base(split, tokenIndex, message)
         {
             this.TokenName = name;
         }

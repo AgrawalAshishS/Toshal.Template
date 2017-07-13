@@ -37,9 +37,19 @@ namespace Toshal.Template.Exceptions
         /// <param name="split">
         /// The split.
         /// </param>
-        public ParserException(string split)
+        public ParserException(string split, int tokenIndex)
+            :this(split, tokenIndex, "Issue with token " + split + " @index " + tokenIndex.ToString())
         {
-            this.Split = split;
+        }
+
+        public ParserException(string split)
+            : this(split, -1, "Issue with token " + split)
+        {
+        }
+
+        public ParserException(string split, string message)
+            : this(split, -1, message)
+        {
         }
 
         /// <summary>
@@ -51,10 +61,11 @@ namespace Toshal.Template.Exceptions
         /// <param name="message">
         /// The message.
         /// </param>
-        public ParserException(string split, string message)
+        public ParserException(string split, int tokenIndex, string message)
             : base(message)
         {
             this.Split = split;
+            this.TokenIndex = tokenIndex;
         }
 
         #endregion
@@ -65,6 +76,8 @@ namespace Toshal.Template.Exceptions
         /// Gets or sets the split.
         /// </summary>
         public string Split { get; set; }
+
+        public int TokenIndex { get; set; }
 
         #endregion
     }

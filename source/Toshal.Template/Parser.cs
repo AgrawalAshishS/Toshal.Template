@@ -68,7 +68,7 @@ namespace Toshal.Template
 
             if (this.ProcessSplitsTillEnd(retList) == false)
             {
-                throw new ParserException(this._splits[this._splitIndex]);
+                throw new ParserException(this._splits[this._splitIndex], this._splitIndex);
             }
 
             this.VerifyAllReuseForEachReferences();
@@ -131,12 +131,12 @@ namespace Toshal.Template
                 this._splitIndex++;
                 if (this.ProcessSplitsTillEnd(tokenList))
                 {
-                    throw new TokenNotClosedException(split, name, "<%" + containerTag + "%> not closed for " + split);
+                    throw new TokenNotClosedException(split, this._splitIndex, name, "<%" + containerTag + "%> not closed for " + split);
                 }
 
                 if (this._splits[this._splitIndex] != "<%END" + containerTag + "%>")
                 {
-                    throw new TokenNotClosedException(split, name, "<%" + containerTag + "%> not closed for " + split);
+                    throw new TokenNotClosedException(split, this._splitIndex, name, "<%" + containerTag + "%> not closed for " + split);
                 }
 
                 this._splitIndex++;
@@ -165,7 +165,7 @@ namespace Toshal.Template
             this._splitIndex++;
             if (this.ProcessSplitsTillEnd(token.InnerTokens))
             {
-                throw new TokenNotClosedException(split, token.Name);
+                throw new TokenNotClosedException(split, this._splitIndex, token.Name);
             }
 
             if (this._splits[this._splitIndex].StartsWith("<%ELSEIF "))
@@ -180,13 +180,13 @@ namespace Toshal.Template
                     token.FalsePart = new ElseToken();
                     if (this.ProcessSplitsTillEnd(((ElseToken)token.FalsePart).InnerTokens))
                     {
-                        throw new TokenNotClosedException(split, token.Name);
+                        throw new TokenNotClosedException(split, this._splitIndex, token.Name);
                     }
                 }
 
                 if (this._splits[this._splitIndex] != "<%ENDIF%>")
                 {
-                    throw new TokenNotClosedException(split, token.Name);
+                    throw new TokenNotClosedException(split, this._splitIndex, token.Name);
                 }
             }
 
@@ -291,7 +291,7 @@ namespace Toshal.Template
                 this.ProcessSplitsTillEnd(token.RowTokens);
                 if (this._splitIndex == this._splits.Length)
                 {
-                    throw new TokenNotClosedException(split, token.Name);
+                    throw new TokenNotClosedException(split, this._splitIndex, token.Name);
                 }
 
                 if (tokenTypes.Keys.Count == 0)
@@ -313,7 +313,7 @@ namespace Toshal.Template
 
                 if (this._splitIndex == this._splits.Length)
                 {
-                    throw new TokenNotClosedException(split, token.Name);
+                    throw new TokenNotClosedException(split, this._splitIndex, token.Name);
                 }
 
                 if (this._splits[this._splitIndex] == "<%ENDFOR%>")
@@ -407,13 +407,13 @@ namespace Toshal.Template
             this._splitIndex++;
             if (this.ProcessSplitsTillEnd(token.InnerTokens))
             {
-                throw new TokenNotClosedException(split, token.Name);
+                throw new TokenNotClosedException(split, this._splitIndex, token.Name);
             }
 
             var lastSplit = this._splits[this._splitIndex];
             if (lastSplit != "<%ENDWITH%>")
             {
-                throw new TokenNotClosedException(split, token.Name);
+                throw new TokenNotClosedException(split, this._splitIndex, token.Name);
             }
 
             tokenList.Add(token);
@@ -444,13 +444,13 @@ namespace Toshal.Template
             this._splitIndex++;
             if (this.ProcessSplitsTillEnd(token.InnerTokens))
             {
-                throw new TokenNotClosedException(split, token.Name);
+                throw new TokenNotClosedException(split, this._splitIndex, token.Name);
             }
 
             var lastSplit = this._splits[this._splitIndex];
             if (lastSplit != "<%ENDSET%>")
             {
-                throw new TokenNotClosedException(split, token.Name);
+                throw new TokenNotClosedException(split, this._splitIndex, token.Name);
             }
 
             tokenList.Add(token);

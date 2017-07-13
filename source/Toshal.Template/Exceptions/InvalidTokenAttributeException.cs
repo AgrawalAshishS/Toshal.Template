@@ -27,7 +27,7 @@ namespace Toshal.Template.Exceptions
     /// </summary>
     public class InvalidTokenAttributeException : ParserException
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidTokenAttributeException"/> class.

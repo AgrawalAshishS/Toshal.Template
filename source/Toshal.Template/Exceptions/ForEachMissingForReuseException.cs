@@ -27,7 +27,7 @@ namespace Toshal.Template.Exceptions
     /// </summary>
     public class ForEachMissingForReuseException : ParserException
     {
-        #region Constructors and Destructors
+        #region Constructors and Destructor
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ForEachMissingForReuseException"/> class.
