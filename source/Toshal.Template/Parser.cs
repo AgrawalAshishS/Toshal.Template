@@ -297,7 +297,7 @@ namespace Toshal.Template
                 if (tokenTypes.Keys.Count == 0)
                 {
                     // all known tokens are parsed - this is unknown token
-                    throw new ParserException(this._splits[this._splitIndex], "Unknown token.");
+                    throw new ParserException(this._splits[this._splitIndex], this._splitIndex);
                 }
 
                 var beforeCount = tokenTypes.Keys.Count;
@@ -324,7 +324,7 @@ namespace Toshal.Template
                 if (beforeCount == tokenTypes.Keys.Count)
                 {
                     // none of inner token is matching - this is unknown token
-                    throw new ParserException(this._splits[this._splitIndex], "Unknown token.");
+                    throw new ParserException(this._splits[this._splitIndex], this._splitIndex);
                 }
             }
 
