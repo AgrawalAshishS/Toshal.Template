@@ -41,7 +41,7 @@ namespace Toshal.Template.Tokens
 
             this.CharCount = charCount;
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
         }
 
         public int CharCount { get; private set; }

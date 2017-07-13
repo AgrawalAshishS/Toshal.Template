@@ -30,7 +30,7 @@ namespace Toshal.Template.Tokens
         public ElseToken(Split split)
         {
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Toshal.Template.Tokens
             this.Name = m.Groups["Name"].Value.Trim().ToLower();
 
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
 
             if (string.IsNullOrEmpty(this.Name))
             {

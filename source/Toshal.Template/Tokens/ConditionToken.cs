@@ -46,7 +46,7 @@ namespace Toshal.Template.Tokens
             this.Name = string.Empty;
             this.IsPositive = true;
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
 
             if (split.Content.StartsWith("<%IF"))
             {

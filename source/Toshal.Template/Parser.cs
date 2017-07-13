@@ -83,8 +83,8 @@ namespace Toshal.Template
         {
             var retList = new List<Split>();
             var split = new Split();
-            int lineNumber = 0;
-            int charIndex = 0;
+            int lineNumber = 1;
+            int charIndex = 1;
 
             for (int i = 0, len = templateText.Length; i < len; i++)
             {
@@ -100,10 +100,11 @@ namespace Toshal.Template
                             }
 
                             split = new Split();
-                            split.StartingIndex = charIndex;
+                            split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
                             split.Content = "<%";
                             i++;
+                            charIndex++;
                             charIndex++;
                         }
                     }
@@ -120,9 +121,10 @@ namespace Toshal.Template
                             }
                             split.Content += "%>";
                             split = new Split();
-                            split.StartingIndex = charIndex;
+                            split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
                             i++;
+                            charIndex++;
                             charIndex++;
                         }
                     }
@@ -645,7 +647,7 @@ namespace Toshal.Template
 
                 if (reuseForEachToken.ExistingForEachToken == null)
                 {
-                    throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingIndex);
+                    throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition);
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace Toshal.Template.Tokens
         public RemovePreviousNewLine(Split split)
         {
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Toshal.Template.Tokens
             string tempString = Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim();
             this.Name = GetNameAndAttributes(split, tempString, this.Attributes);
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
 
             if (string.IsNullOrEmpty(this.Name))
             {

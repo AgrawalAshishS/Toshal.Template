@@ -40,7 +40,7 @@ namespace Toshal.Template.Tokens
         public ContentToken(Split split)
         {
             this.Content = split.Content;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
             this.LineNumber = split.LineNumber;
         }
 

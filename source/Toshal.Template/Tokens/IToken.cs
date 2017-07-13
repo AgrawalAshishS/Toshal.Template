@@ -27,7 +27,7 @@ namespace Toshal.Template.Tokens
     /// </summary>
     public interface IToken
     {
-        int StartingIndex { get; set; }
+        int StartingPosition { get; set; }
         int LineNumber { get; set; }
     }
 }

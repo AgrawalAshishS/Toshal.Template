@@ -9,7 +9,7 @@ namespace Toshal.Template.Tokens
     {
         public int LineNumber { get; set; }
 
-        public int StartingIndex { get; set; }
+        public int StartingPosition { get; set; }
 
     }
 }

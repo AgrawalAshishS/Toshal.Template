@@ -8,7 +8,7 @@ namespace Toshal.Template
     public class Split
     {
         public string Content = string.Empty;
-        public int StartingIndex = 0;
+        public int StartingPosition = 0;
         public int LineNumber = 0;
     }
 }

@@ -75,7 +75,7 @@ namespace Toshal.Template.Tokens
             }
 
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
         }
 
         #endregion

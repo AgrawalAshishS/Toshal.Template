@@ -36,19 +36,19 @@ namespace Toshal.Template.Exceptions
         {
             Split = split;
             this.LineNumber = split.LineNumber;
-            this.StartingIndex = split.StartingIndex;
+            this.StartingPosition = split.StartingPosition;
         }
 
         public ParserException(Split split)
-            : this(split, "Token - " + split.Content + " is wrong @" + split.StartingIndex + " on line number " + split.LineNumber)
+            : this(split, "Token - " + split.Content + " is wrong @" + split.StartingPosition + " on line number " + split.LineNumber)
         {
         }
 
-        public ParserException(int lineNumber, int startingIndex, string message)
+        public ParserException(int lineNumber, int startingPosition, string message)
             : base(message)
         {
             this.LineNumber = lineNumber;
-            this.StartingIndex = startingIndex;
+            this.StartingPosition = startingPosition;
         }
         
         #endregion
@@ -59,7 +59,7 @@ namespace Toshal.Template.Exceptions
 
         public int LineNumber { get; private set; }
 
-        public int StartingIndex { get; private set; }
+        public int StartingPosition { get; private set; }
 
         #endregion
     }

@@ -35,8 +35,8 @@ namespace Toshal.Template.Exceptions
         /// <param name="name">
         /// The split.
         /// </param>
-        public ForEachMissingForReuseException(string reuseName, string forEachName, int lineNumber, int startingIndex)
-            : base(lineNumber, startingIndex, "FOREACH is missing with name " + forEachName + ", it is referenced in Reuse token named : " + reuseName)
+        public ForEachMissingForReuseException(string reuseName, string forEachName, int lineNumber, int startingPosition)
+            : base(lineNumber, startingPosition, "FOREACH is missing with name " + forEachName + ", it is referenced in Reuse token named : " + reuseName)
         {
             this.ReuseName = reuseName;
             ForEachName = forEachName;
