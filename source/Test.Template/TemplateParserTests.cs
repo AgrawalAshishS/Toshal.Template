@@ -106,5 +106,40 @@ namespace Test.Template
             Assert.AreEqual(part7.ToLower(), ((NamedToken)result[3]).Name);
         }
 
+        [Test]
+        public void ItSouldRespectRegularAngularBreackts()
+        {
+            const string templateText = "Simple text< %";
+            var parser = new Parser();
+
+            List<IToken> result = parser.Parse(templateText);
+            Assert.AreEqual(1, result.Count);
+            Assert.IsInstanceOf<ContentToken>(result[0]);
+            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+        }
+
+        [Test]
+        public void ItSouldRespectRegularAngularBreackts2()
+        {
+            const string templateText = "Simple text<T>";
+            var parser = new Parser();
+
+            List<IToken> result = parser.Parse(templateText);
+            Assert.AreEqual(1, result.Count);
+            Assert.IsInstanceOf<ContentToken>(result[0]);
+            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+        }
+
+        [Test]
+        public void ItSouldRespectRegularAngularBreackts3()
+        {
+            const string templateText = "Simple text%%%%%";
+            var parser = new Parser();
+
+            List<IToken> result = parser.Parse(templateText);
+            Assert.AreEqual(1, result.Count);
+            Assert.IsInstanceOf<ContentToken>(result[0]);
+            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+        }
     }
 }

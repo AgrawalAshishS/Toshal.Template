@@ -106,6 +106,7 @@ namespace Toshal.Template
                             i++;
                             charIndex++;
                             charIndex++;
+                            continue;
                         }
                     }
                 }
@@ -126,18 +127,17 @@ namespace Toshal.Template
                             i++;
                             charIndex++;
                             charIndex++;
+                            continue;
                         }
                     }
                 }
-                else
+
+                split.Content += templateText[i];
+                charIndex++;
+                if (templateText[i] == '\n')
                 {
-                    split.Content += templateText[i];
-                    charIndex++;
-                    if (templateText[i] == '\n')
-                    {
-                        lineNumber++;
-                        charIndex = 0;
-                    }
+                    lineNumber++;
+                    charIndex = 0;
                 }
             }
 

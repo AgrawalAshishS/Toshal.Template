@@ -1,5 +1,5 @@
 {
-    "version": "1.0.18.0",
+    "version": "1.0.19.0",
     "runtimes": {
         "win": {},
         "win10-x64": {}
@@ -9,7 +9,7 @@
         "netcoreapp1.0": {
             "imports": "dnxcore50",
             "Microsoft.NETCore.App": {
-                "version": "1.0.18.0",
+                "version": "1.0.19.0",
                 "type": "platform"
             }
         }
