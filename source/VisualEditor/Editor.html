@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
     <script src="https://unpkg.com/vue"></script>
     <script src="TemplateParser.js"></script>
     <title>Template View</title>
@@ -15,63 +16,185 @@
             box-sizing: border-box;
         }
 
-        #jsonPreview {
-            height: 500px;
+        html, body{
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            line-height: 18px;
+            font-family: 'Lato', sans-serif;
+        }
+
+        ::-webkit-input-placeholder { 
+            color:#d7d7d7;
+            font-style: italic;
+        }
+
+        ::-moz-placeholder { 
+            color: #d7d7d7;
+            font-style: italic;
+        }
+
+        :-ms-input-placeholder {
+            color: #d7d7d7;
+            font-style: italic;
+        }
+
+        :-moz-placeholder { 
+            color: #d7d7d7;
+            font-style: italic;
+        }
+
+        input, select{
+            border: none;
+            background: transparent;
         }
 
         textarea {
             display: block;
             width: 100%;
-            min-height: 40px;
+            overflow: hidden;
             border: none;
-            background: whitesmoke;
-            color: green;
+            background: transparent;
+            resize: none;
+        }
+
+        input:focus,
+        input:hover,
+        input:active,
+        textarea:focus,
+        textarea:hover,
+        textarea:active,
+        select:focus,
+        select:hover,
+        select:active,
+        button:focus,
+        button:hover,
+        button:active{
+            border: none;
+            box-shadow: none;
+            outline: none;
+        }
+
+        input{
+            color: #555;
+        }
+
+        select,
+        input.tag{
+            color: #000080;
+            font-weight: bold;
+        }
+
+        button{
+            display: inline-block;
+            margin: 0;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 18px;
+            background: #444;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.5s;
+        }
+
+        button:hover{
+            background: #888;
+        }
+
+        .box button{
+            background: #cecece;
+            color: #222;
+        }
+
+       .box button:hover{
+            background: #b5b5b5;
+        }
+
+        .nav{
+            display: table;
+            width: 100%;
+            background: #222;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .left,
+        .right{
+            display: table-cell;
+            padding: 12px;
+        }
+
+        .right{
+            text-align: right;
         }
 
         .block {
-            padding: 0 0 0 10px;
+            padding: 0 0 0 20px;
+        }
+
+        .box{
+            padding: 64px 10px 10px 10px;
             background: #fafafa;
-            border:none;
         }
 
-        #root>.block {
-            margin: 0 0 10px 0;
+        .item{
+            margin: 2px 0;
         }
 
-        .item {
-            padding: 0px;
-            margin: 0px;
+        .popup{
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
         }
 
-        .child>.block {
-            border: none;
+        .popup textarea#jsonPreview{
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            right: 5%;
+            bottom: 5%;
+            background: #fff;
+            padding: 20px;
+            margin: 0;
+            width: 90%;
+            overflow: auto;
         }
-        
-        input {
-            border: none;
-        }
-        input.tag {
-            background: #d7f3d7;
-        }
-        input.name{
-            background: #bad0e4;
+
+        .popup .actions{
+            position: absolute;
+            bottom: 5%;
+            right: 5%;
         }
     </style>
 </head>
 
 <body>
     <div id="preview">
-        <button @click="addRootBlock">Add Block</button>
-        <button @click="addRootContent">Add Content</button>
-        <button @click="addRootToken">Add Content</button>
-        <hr/>
-        <div>
+        <div class="nav">
+            <div class="left">
+                <button @click="addRootBlock">Add Block</button>
+                <button @click="addRootContent">Add Content</button>
+                <button @click="addRootToken">Add Token</button>
+            </div>
+            <div class="right">
+                <button @click="openPopup">Open Code</button>  
+            </div>
+        </div>
+        <div class="box">
             <preview-item :preview-data="outputData" :tokens="tokenList"></preview-item>
         </div>
-        <div>
+        <div class="popup" v-show="showCode">
             <textarea id="jsonPreview"></textarea>
-            <button @click="jsonPreview">Json</button>
-            <button @click="uiPreview">UI</button>
+            <div class="actions">
+                <button @click="jsonPreview">Json</button>
+                <button @click="uiPreview">UI</button>     
+                <button @click="closePopup">Close</button>  
+            </div>
         </div>
     </div>
     <script type="text/javascript">
@@ -85,7 +208,7 @@
                                 <select type="text" v-model="item.tag" placeholder="Tag">\
                                     <option v-for="token in tokens" :value="token">{{token}}</option>\
                                 </select>\
-                                <input type="text" v-model="item.name" placeholder="Name" class="name">\
+                                <input class="name" type="text" v-model="item.name" placeholder="Name">\
                                 <button @click="addBlock(item)">Add Block</button>\
                                 <button @click="addContent(item)">Add Content</button>\
                                 <button @click="addToken(item)">Add Token</button>\
@@ -93,13 +216,13 @@
                         </template>\
                         <template v-if="item.type === \'token\'">\
                             <div class="item">\
-                                <input type="text" v-model="item.tag" placeholder="tag" class="tag">\
-                                <input type="text" v-model="item.name" placeholder="name or info" class="name">\
+                                <input class="tag" type="text" v-model="item.tag" placeholder="Tag">\
+                                <input class="name" type="text" v-model="item.name" placeholder="Name">\
                             </div>\
                         </template>\
                         <template v-if="item.type === \'content\'">\
                             <div class="item">\
-                                <textarea v-model="item.name"></textarea>\
+                                <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)"></textarea>\
                             </div>\
                         </template>\
                         <preview-item class="child" :preview-data="item.subItems" :tokens="tokens"></preview-item>\
@@ -114,6 +237,22 @@
                 },
                 addToken: function (item) {
                     item.subItems.push({ type: "token", tag: "", name: "" });
+                },
+                autosize: function(event){
+                    setTimeout( function(){
+                        event.target.style.height = "0px";
+                        event.target.style.height = event.target.scrollHeight + "px";
+                    },0);
+                }
+            },
+            created: function(){
+                var ele = document.getElementsByClassName("content");
+                for (var i=0; i<ele.length; i++){
+                    var $curEle = ele[i];
+                    setTimeout( function(){
+                        $curEle.style.height = "0px";
+                        $curEle.style.height = $curEle.scrollHeight + "px";
+                    },0);
                 }
             }
         })
@@ -121,6 +260,7 @@
             el: '#preview',
             data: {
                 outputData: [],
+                showCode: false,
                 tokenList: [
                     "if", 
                     "else", 
@@ -160,6 +300,13 @@
                 },
                 uiPreview: function(){
                     this.outputData = fromTemplateToTokens(document.getElementById("jsonPreview").value);
+                    this.showCode = false;
+                },
+                openPopup: function(){
+                    this.showCode = true;
+                },
+                closePopup: function(){
+                    this.showCode = false;
                 }
             }
         })
