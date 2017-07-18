@@ -27,21 +27,25 @@
         ::-webkit-input-placeholder { 
             color:#d7d7d7;
             font-style: italic;
+            font-weight: normal;
         }
 
         ::-moz-placeholder { 
             color: #d7d7d7;
             font-style: italic;
+            font-weight: normal;
         }
 
         :-ms-input-placeholder {
             color: #d7d7d7;
             font-style: italic;
+            font-weight: normal;
         }
 
         :-moz-placeholder { 
             color: #d7d7d7;
             font-style: italic;
+            font-weight: normal;
         }
 
         input, select{
@@ -103,6 +107,8 @@
         }
 
         .box button{
+            padding: 2px 6px;
+            font-size: 12px;
             background: #cecece;
             color: #222;
         }
@@ -135,8 +141,14 @@
         }
 
         .box{
-            padding: 64px 10px 10px 10px;
+            padding: 10px;
             background: #fafafa;
+            position: fixed;
+            overflow: auto;
+            top: 54px;
+            bottom: 0;
+            width: 50%;
+            left: 0;
         }
 
         .item{
@@ -145,23 +157,22 @@
 
         .popup{
             position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            top: 54px;
+            right: 0;
+            bottom: 0;
+            width: 50%;
         }
 
         .popup textarea#jsonPreview{
             position: absolute;
-            top: 5%;
-            left: 5%;
-            right: 5%;
-            bottom: 5%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: #fff;
             padding: 20px;
             margin: 0;
-            width: 90%;
+            width: 100%;
             overflow: auto;
         }
 
@@ -182,19 +193,15 @@
                 <button @click="addRootToken">Add Token</button>
             </div>
             <div class="right">
-                <button @click="openPopup">Open Code</button>  
+                <button @click="uiPreview">Parse</button>
+                <button @click="jsonPreview">Generate</button>
             </div>
         </div>
         <div class="box">
             <preview-item :preview-data="outputData" :tokens="tokenList"></preview-item>
         </div>
-        <div class="popup" v-show="showCode">
+        <div class="popup">
             <textarea id="jsonPreview"></textarea>
-            <div class="actions">
-                <button @click="jsonPreview">Json</button>
-                <button @click="uiPreview">UI</button>     
-                <button @click="closePopup">Close</button>  
-            </div>
         </div>
     </div>
     <script type="text/javascript">
@@ -205,24 +212,24 @@
                     <div v-for="item in previewData" class="block">\
                         <template v-if="item.type === \'block\'">\
                             <div class="item">\
-                                <select type="text" v-model="item.tag" placeholder="Tag">\
+                                <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode">\
                                     <option v-for="token in tokens" :value="token">{{token}}</option>\
                                 </select>\
-                                <input class="name" type="text" v-model="item.name" placeholder="Name">\
-                                <button @click="addBlock(item)">Add Block</button>\
-                                <button @click="addContent(item)">Add Content</button>\
-                                <button @click="addToken(item)">Add Token</button>\
+                                <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode">\
+                                <button @click="addBlock(item)">Block</button>\
+                                <button @click="addContent(item)">Content</button>\
+                                <button @click="addToken(item)">Token</button>\
                             </div>\
                         </template>\
                         <template v-if="item.type === \'token\'">\
                             <div class="item">\
-                                <input class="tag" type="text" v-model="item.tag" placeholder="Tag">\
-                                <input class="name" type="text" v-model="item.name" placeholder="Name">\
+                                <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
+                                <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode">\
                             </div>\
                         </template>\
                         <template v-if="item.type === \'content\'">\
                             <div class="item">\
-                                <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)"></textarea>\
+                                <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)" @change="updateCode"></textarea>\
                             </div>\
                         </template>\
                         <preview-item class="child" :preview-data="item.subItems" :tokens="tokens"></preview-item>\
@@ -243,6 +250,25 @@
                         event.target.style.height = "0px";
                         event.target.style.height = event.target.scrollHeight + "px";
                     },0);
+                },
+                updateCode: function(){
+                    //console.log(this.$root.outputData);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
+                },
+                alignTemplate: function(item){
+                    return;
+                    var input = document.getElementById("jsonPreview");
+                    if (input.setSelectionRange) {
+                        input.focus();
+                        input.setSelectionRange(item.startCharPosition, item.startCharPosition+1);
+                    }
+                    else if (input.createTextRange) {
+                        var range = input.createTextRange();
+                        range.collapse(true);
+                        range.moveEnd('character', item.startCharPosition+1);
+                        range.moveStart('character', item.startCharPosition);
+                        range.select();
+                    }
                 }
             },
             created: function(){
@@ -260,7 +286,6 @@
             el: '#preview',
             data: {
                 outputData: [],
-                showCode: false,
                 tokenList: [
                     "if", 
                     "else", 
@@ -300,13 +325,6 @@
                 },
                 uiPreview: function(){
                     this.outputData = fromTemplateToTokens(document.getElementById("jsonPreview").value);
-                    this.showCode = false;
-                },
-                openPopup: function(){
-                    this.showCode = true;
-                },
-                closePopup: function(){
-                    this.showCode = false;
                 }
             }
         })
