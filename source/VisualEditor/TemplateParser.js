@@ -1,81 +1,114 @@
+function newSplit(ln, lnCharPos, charPos ){
+    return {
+        startLineNumber : ln,
+        startLineCharPosition : lnCharPos,
+        startCharPosition : charPos,
+        content : ""
+    }
+}
 
-function fromTemplateToTokens(srcString){
-	var currentStr ="";
-	var finalArray = new Array();
-	var stringLength = srcString.length;
+function newToken(split, type){
+    return {
+        startLineNumber : split.startLineNumber,
+        startLineCharPosition : split.startLineCharPosition,
+        startCharPosition : split.startCharPosition,
+        type : type,
+        name: "",
+        tag : ""
+    }
+}
 
-	for(var i=0; i < stringLength; i++){
-		var currentChar = srcString.charAt(i);
-		//if its last char no need to check;
-		if(i+1 == stringLength){
-			currentStr += currentChar;
-			finalArray.push(currentStr);
-			break;
-		}
+function fromTemplateToTokens(templateText){
+    var len = templateText.length;
 
-		//Token started;
-		if(currentChar == "<" && srcString.charAt(i+1) == "%"){
-            if(currentStr != "") finalArray.push(currentStr);
-			currentStr = "";
-			for(;i < stringLength; i++){
-				currentChar = srcString.charAt(i);
-				//String is ending;
-				if(i+1 == stringLength){
-					currentStr += currentChar;
-					i++;
-					currentStr += srcString.charAt(i);
-					finalArray.push(currentStr);
-					continue;
-				}
-				//tag ends;
-				if(currentChar == "%" && srcString.charAt(i+1) == ">"){
-					i++;
-					currentStr += "%>";
-					finalArray.push(currentStr);
-					currentStr = "";
-					break;
-				}else{
-					currentStr += currentChar;
-				}
-			}
-		}else{
-			currentStr += currentChar;
-		}
-	}
+    var retList = new Array();
+    var lineNumber = 1;
+    var charIndex = 1;
+    var split = newSplit(1, 1, 1);
+
+	for(var i=0; i < len; i++){
+        if (templateText.charAt(i) == '<')
+        {
+            if (i + 1 < len)
+            {
+                if (templateText[i + 1] == '%')
+                {
+                    if (split.content.length > 0)
+                    {
+                        retList.push(split);
+                    }
+
+                    split = newSplit(lineNumber, charIndex, i);
+                    split.content = "<%";
+                    i++;
+                    charIndex++;
+                    charIndex++;
+                    continue;
+                }
+            }
+        }
+        else if (templateText.charAt(i) == '%')
+        {
+            if (i + 1 < len)
+            {
+                if (templateText[i + 1] == '>')
+                {
+                    if (split.content.length > 0)
+                    {
+                        retList.push(split);
+                    }
+                    split.content += "%>";
+                    split = newSplit(lineNumber, charIndex, i);
+                    i++;
+                    charIndex++;
+                    charIndex++;
+                    continue;
+                }
+            }
+        }
+
+        split.content += templateText.charAt(i);
+        charIndex++;
+        if (templateText.charAt(i) == '\n')
+        {
+            lineNumber++;
+            charIndex = 0;
+        }
+    }
+    
+    if (split.content.length > 0)
+    {
+        retList.push(split);
+    }
 
     var returnArray = new Array();
-    processArray(0, returnArray, finalArray, 0);
-    //console.log(finalArray);
+    processArray(0, returnArray, retList, 0);
     return returnArray;
 }
 
 function processArray(i, currentArray, finalArray, level){
 
     for(; i < finalArray.length; i++){
-        var regularVal = finalArray[i];
+        var split = finalArray[i];
+        var regularVal = split.content;
         var lowerVal = regularVal.toLowerCase();
         if(regularVal == "") continue;
 
         if(lowerVal.indexOf("<%=") == 0){
             var tempStr = regularVal.replace("<%=", "").replace("%>", "");
-            var token = {};
-            token.type = "token";
-            token.name = "";
+            
+            var token = newToken(split, "token");
             setTagAndName(tempStr, token);
             currentArray.push(token);
         }
         else if(lowerVal.indexOf("<%remove_previous_new_line") == 0){
-            var token = {};
+            var token = newToken(split, "token");
             token.tag = "remove_previous_new_line";
-            token.type = "token";
-            token.name = "";
             currentArray.push(token);
         }
         else if(lowerVal.indexOf("<%remove_previous ") == 0){
             var tempStr = regularVal.replace("<%", "").replace("%>", "");
-            var token = {};
-            token.type = "token";
-            token.name = "";
+            var token = newToken(split, "token");
             setTagAndName(tempStr, token);
             currentArray.push(token);
         }
@@ -84,22 +117,19 @@ function processArray(i, currentArray, finalArray, level){
         }
         else if(lowerVal.indexOf("<%if") == 0){
             var tempStr = regularVal.replace("<%", "").replace(" THEN%>", "");
-            var token = {};
-            token.type = "block";
-            token.name = "";
+            var token = newToken(split, "block");
             token.subItems = new Array();
             setTagAndName(tempStr, token);
             currentArray.push(token);
             i = processArray(i+1, token.subItems, finalArray, level+1);
             
-            while(i < finalArray.length && finalArray[i].toLowerCase().indexOf("<%else") == 0){
-                regularVal = finalArray[i];
+            while(i < finalArray.length && finalArray[i].content.toLowerCase().indexOf("<%else") == 0){
+                split = finalArray[i];
+                regularVal = split.content;
                 lowerVal = regularVal.toLowerCase();
                 tempStr = regularVal.replace("<%", "").replace(" THEN%>", "");
                 
-                var token = {};
-                token.type = "block";
-                token.name = "";
+                var token = newToken(split, "block");
                 token.subItems = new Array();
                 setTagAndName(tempStr, token);
                 currentArray.push(token);
@@ -108,19 +138,15 @@ function processArray(i, currentArray, finalArray, level){
         }
         else if(lowerVal.indexOf("<%") == 0 ){
             var tempStr = regularVal.replace("<%", "").replace("%>", "");
-            var token = {};
-            token.type = "block";
-            token.name = "";
+            var token = newToken(split, "block");
             token.subItems = new Array();
             setTagAndName(tempStr, token);
             currentArray.push(token);
             i = processArray(i+1, token.subItems, finalArray, level+1);
         }
         else{
-            var token = {};
+            var token = newToken(split, "content");
             token.name = regularVal;
-            token.type = "content";
-            token.tag = "";
             currentArray.push(token);
         }
     }
