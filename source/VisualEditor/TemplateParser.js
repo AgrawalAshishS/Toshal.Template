@@ -127,7 +127,7 @@ function processArray(i, currentArray, finalArray, level){
                 split = finalArray[i];
                 regularVal = split.content;
                 lowerVal = regularVal.toLowerCase();
-                tempStr = regularVal.replace("<%", "").replace(" THEN%>", "");
+                tempStr = regularVal.replace("<%", "").replace(" THEN%>", "").replace("%>", "");
                 
                 var token = newToken(split, "block");
                 token.subItems = new Array();

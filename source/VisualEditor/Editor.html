@@ -213,10 +213,12 @@
                     <div v-for="item in previewData" class="block">\
                         <template v-if="item.type === \'block\'">\
                             <div class="item">\
+                                <%\
                                 <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode">\
                                     <option v-for="token in tokens" :value="token">{{token}}</option>\
                                 </select>\
                                 <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode">\
+                                %>\
                                 <button @click="addBlock(item)">Block</button>\
                                 <button @click="addContent(item)">Content</button>\
                                 <button @click="addToken(item)">Token</button>\
@@ -224,8 +226,10 @@
                         </template>\
                         <template v-if="item.type === \'token\'">\
                             <div class="item">\
+                                <%\
                                 <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
                                 <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode">\
+                                %>\
                             </div>\
                         </template>\
                         <template v-if="item.type === \'content\'">\
