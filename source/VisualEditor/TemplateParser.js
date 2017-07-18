@@ -18,6 +18,21 @@ function newToken(split, type){
     }
 }
 
+function newEmptyToken(type, includeSubItem){
+    var retVal = {
+        startLineNumber : 0,
+        startLineCharPosition : 0,
+        startCharPosition : 0,
+        type : type,
+        name: "",
+        tag : ""
+    };
+    if(includeSubItem){
+        retVal.subItems = [];
+    }
+    return retVal;
+}
+
 function fromTemplateToTokens(templateText){
     var len = templateText.length;
 
@@ -75,7 +90,7 @@ function fromTemplateToTokens(templateText){
             charIndex = 0;
         }
     }
-    
+
     if (split.content.length > 0)
     {
         retList.push(split);
@@ -96,7 +111,7 @@ function processArray(i, currentArray, finalArray, level){
 
         if(lowerVal.indexOf("<%=") == 0){
             var tempStr = regularVal.replace("<%=", "").replace("%>", "");
-            
+
             var token = newToken(split, "token");
             setTagAndName(tempStr, token);
             currentArray.push(token);
@@ -122,13 +137,13 @@ function processArray(i, currentArray, finalArray, level){
             setTagAndName(tempStr, token);
             currentArray.push(token);
             i = processArray(i+1, token.subItems, finalArray, level+1);
-            
+
             while(i < finalArray.length && finalArray[i].content.toLowerCase().indexOf("<%else") == 0){
                 split = finalArray[i];
                 regularVal = split.content;
                 lowerVal = regularVal.toLowerCase();
                 tempStr = regularVal.replace("<%", "").replace(" THEN%>", "").replace("%>", "");
-                
+
                 var token = newToken(split, "block");
                 token.subItems = new Array();
                 setTagAndName(tempStr, token);
@@ -167,66 +182,86 @@ function setTagAndName(tokenString, token){
 
 
 //REUSEFOREACH
-
+var overallPosition = 1;
 function fromTokenToTemplate(tokenArray){
     var retVal = "";
     for(var i =0; i < tokenArray.length; i++){
         var token = tokenArray[i];
         if(token.type == "content" && token.name != "") {
+            token.startCharPosition = overallPosition;
             retVal += token.name;
+            overallPosition += token.name.length;
             continue;
         }else if (token.type == "token"){
+            token.startCharPosition = overallPosition;
+            var contentToSet = "";
             if(token.tag == "remove_previous_new_line"){
-                retVal += "<%REMOVE_PREVIOUS_NEW_LINE%>"
+                contentToSet = "<%REMOVE_PREVIOUS_NEW_LINE%>"
             }else if(token.tag == "remove_previous"){
-                retVal += "<%REMOVE_PREVIOUS " + token.name + " %>";
+                contentToSet = "<%REMOVE_PREVIOUS " + token.name + " %>";
             }else{
                 var tempStr = token.tag + " " + token.name + " ";
-                retVal += "<%="+ tempStr.trim() + "%>";
+                contentToSet= "<%="+ tempStr.trim() + "%>";
             }
+            retVal += contentToSet;
+            overallPosition += contentToSet.length;
             continue;
         }
-        
+
         if(token.tag == "if"){
-            retVal += "<%IF " + token.name + " THEN%>";
-            retVal += fromTokenToTemplate(token.subItems);
+            token.startCharPosition = overallPosition;
+            var contentToSet = "<%IF " + token.name + " THEN%>";
+            contentToSet += fromTokenToTemplate(token.subItems);
             if(i+1 < tokenArray.length){
                 //end of elseif block
                 if(tokenArray[i+1].tag.indexOf("else") != 0){
-                    retVal += "<%ENDIF%>";
+                    contentToSet += "<%ENDIF%>";
                 }
             }else{
-                retVal += "<%ENDIF%>";
+                contentToSet += "<%ENDIF%>";
             }
+            retVal += contentToSet;
+            overallPosition += contentToSet.length;
             continue;
         }else if(token.tag.indexOf("elseif") == 0){
-            retVal += "<%ELSEIF " + token.name + " THEN%>";
-            retVal += fromTokenToTemplate(token.subItems);
+            token.startCharPosition = overallPosition;
+            var contentToSet = "<%ELSEIF " + token.name + " THEN%>";
+            contentToSet += fromTokenToTemplate(token.subItems);
             if(i+1 < tokenArray.length){
                 //end of elseif block
                 if(tokenArray[i+1].tag.indexOf("else") != 0){
-                    retVal += "<%ENDIF%>";
+                    contentToSet += "<%ENDIF%>";
                 }
             }else{
-                retVal += "<%ENDIF%>";
+                contentToSet += "<%ENDIF%>";
             }
+            retVal += contentToSet;
+            overallPosition += contentToSet.length;
             continue;
         }else if(token.tag.indexOf("else") == 0){
-            retVal += "<%ELSE%>";
-            retVal += fromTokenToTemplate(token.subItems);
-            retVal += "<%ENDIF%>";
+            token.startCharPosition = overallPosition;
+            var contentToSet = "<%ELSE%>";
+            contentToSet += fromTokenToTemplate(token.subItems);
+            contentToSet += "<%ENDIF%>";
+            retVal += contentToSet;
+            overallPosition += contentToSet.length;
             continue;
         }
-        
+
         var tokenNameString = token.tag.toUpperCase() + " " + token.name;
-        retVal += "<%" + tokenNameString.trim() + "%>";
-        retVal += fromTokenToTemplate(token.subItems);
+        token.startCharPosition = overallPosition;
+        var contentToSet = "<%" + tokenNameString.trim() + "%>";
+        contentToSet += fromTokenToTemplate(token.subItems);
         if(token.tag == 'foreach'){
-            retVal += "<%ENDFOR%>";
+            contentToSet += "<%ENDFOR%>";
+            retVal += contentToSet;
+            overallPosition += contentToSet.length;
             continue;
         }
-        retVal += "<%END" + token.tag.toUpperCase() + "%>";
+        contentToSet += "<%END" + token.tag.toUpperCase() + "%>";
+        retVal += contentToSet;
+        overallPosition += contentToSet.length;
     }
-    
+
     return retVal;
 }

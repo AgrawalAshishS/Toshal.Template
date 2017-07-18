@@ -257,13 +257,13 @@
                 </div>',
             methods: {
                 addBlock: function (item) {
-                    item.subItems.push({ type: "block", tag: "", name: "", subItems: [] })
+                    item.subItems.push(newEmptyToken("block", true));
                 },
                 addContent: function (item) {
-                    item.subItems.push({ type: "content", name: "" });
+                    item.subItems.push(newEmptyToken("content", false));
                 },
                 addToken: function (item) {
-                    item.subItems.push({ type: "token", tag: "", name: "" });
+                    item.subItems.push(newEmptyToken("token", false));
                 },
                 autosize: function(event){
                     setTimeout( function(){
@@ -336,15 +336,16 @@
             },
             methods: {
                 addRootBlock: function () {
-                    this.outputData.push({ type: "block", tag: "", name: "", subItems: [] });
+                    this.outputData.push(newEmptyToken("block", true));
                 },
                 addRootContent: function () {
-                    this.outputData.push({ type: "content", name: "" });
+                    this.outputData.push(newEmptyToken("content", false));
                 },
                 addRootToken: function () {
-                    this.outputData.push({ type: "token", tag: "", name: "" });
+                    this.outputData.push(newEmptyToken("token", false));
                 },
                 jsonPreview: function(){
+                    overallPosition = 1;
                     document.getElementById("jsonPreview").value = fromTokenToTemplate(this.outputData);
                 },
                 uiPreview: function(){
