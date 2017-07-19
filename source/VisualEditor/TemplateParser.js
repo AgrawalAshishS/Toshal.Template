@@ -24,11 +24,12 @@ function newEmptyToken(type, includeSubItem){
         startLineCharPosition : 0,
         startCharPosition : 0,
         type : type,
-        name: "",
-        tag : ""
+        name: "sample",
+        tag : "sample"
     };
     if(includeSubItem){
-        retVal.subItems = [];
+        retVal.tag = "if";
+        retVal.subItems = new Array();
     }
     return retVal;
 }
@@ -185,6 +186,7 @@ function setTagAndName(tokenString, token){
 var overallPosition = 1;
 function fromTokenToTemplate(tokenArray){
     var retVal = "";
+    if(tokenArray == undefined) return retVal;
     for(var i =0; i < tokenArray.length; i++){
         var token = tokenArray[i];
         if(token.type == "content" && token.name != "") {

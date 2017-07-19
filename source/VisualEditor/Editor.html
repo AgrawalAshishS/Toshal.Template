@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
     <link href="jquery.highlight-within-textarea.css" rel="stylesheet">
-    <script src="https://unpkg.com/vue"></script>
+    <script src="vue.js"></script>
     <script src="jquery.js"></script>
     <script src="jquery.highlight-within-textarea.js"></script>
     <script src="TemplateParser.js"></script>
@@ -132,11 +132,12 @@
             background: #ededed; 
         }
 
-        .item button{
+        .item .action{
             opacity: 0;
+            transition: all 0.5s;
         }
 
-        .item:hover button{
+        .item:hover .action{
             opacity: 1;
         }
 
@@ -296,12 +297,18 @@
                                         <span class="light">%></span>\
                                     </td>\
                                     <td valign="middle" align="right">\
-                                        <button @click="addBlock(item)">Block</button>\
-                                        <button @click="addContent(item)">Content</button>\
-                                        <button @click="addToken(item)">Token</button>\
-                                        <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <select class="action" v-model="item.type" placeholder="type" @change="updateCode">\
+                                            <option value="block">Block</option>\
+                                            <option value="content">Content</option>\
+                                            <option value="token">Token</option>\
+                                        </select>\
+                                        <button class="action" @click="addNewItem(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="addBlock(item)">Block</button>\
+                                        <button class="action" @click="addContent(item)">Content</button>\
+                                        <button class="action" @click="addToken(item)">Token</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -318,9 +325,15 @@
                                         <span class="light">%></span>\
                                     </td>\
                                     <td valign="middle" align="right">\
-                                        <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <select class="action" v-model="item.type" placeholder="type" @change="updateCode">\
+                                            <option value="block">Block</option>\
+                                            <option value="content">Content</option>\
+                                            <option value="token">Token</option>\
+                                        </select>\
+                                        <button class="action" @click="addNewItem(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -337,9 +350,15 @@
                                         </div>\
                                     </td>\
                                     <td valign="middle" align="right">\
-                                        <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <select class="action" v-model="item.type" placeholder="type" @change="updateCode">\
+                                            <option value="block">Block</option>\
+                                            <option value="content">Content</option>\
+                                            <option value="token">Token</option>\
+                                        </select>\
+                                        <button class="action" @click="addNewItem(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -370,14 +389,14 @@
                     var indexes = [index, newIndex].sort();
                     array.splice(indexes[0], 2, array[indexes[1]], array[indexes[0]]);
                 },
-                moveUp: function(item,parent){
+                moveUp: function(item, parent){
                     var array = this.$root.outputData;
                     if(typeof parent.item != "undefined"){
                         array = parent.item.subItems;
                     }
                     this.move(array,item,-1);
                 },
-                moveDown: function(item,parent){
+                moveDown: function(item, parent){
                     var array = this.$root.outputData;
                     if(typeof parent.item != "undefined"){
                         array = parent.item.subItems;
@@ -394,12 +413,19 @@
                         highlight: [startCharPos, endCharPos]
                     });
                 },
-                removeItem: function(index,parent){
+                removeItem: function(index, parent){
                     var array = this.$root.outputData;
                     if(typeof parent.item != "undefined"){
                         array = parent.item.subItems;
                     }
                     array.splice(index, 1);
+                },
+                addNewItem: function(index, parent){
+                    var array = this.$root.outputData;
+                    if(typeof parent.item != "undefined"){
+                        array = parent.item.subItems;
+                    }
+                    array.splice(index, 0, newEmptyToken("block", true));
                 }
             }
         })
