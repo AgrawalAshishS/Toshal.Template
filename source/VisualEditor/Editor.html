@@ -228,6 +228,19 @@
             width: 100%;
             overflow: hidden;
         }
+
+        .expandBtn,
+        a.expandBtn,
+        a.expandBtn:link,
+        a.expandBtn:visited{
+            text-decoration: none;
+            color: #888;
+            font-weight: bold;
+            display: inline-block;
+            height: 18px;
+            width: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -245,7 +258,7 @@
             </div>
         </div>
         <div class="box">
-            <preview-item :preview-data="outputData" :tokens="tokenList"></preview-item>
+            <preview-item v-for="(item,i) in outputData" v-bind:item="item"  v-bind:index="i" v-bind:key="i" :tokens="tokenList"></preview-item>
         </div>
         <div class="popup">
             <textarea id="jsonPreview"></textarea>
@@ -253,68 +266,77 @@
     </div>
     <script type="text/javascript">
         Vue.component('preview-item', {
-            props: ["previewData", "tokens"],
+            data: function () {
+                return {
+                    isExpanded: false
+                }
+            },
+            props: ["item", "tokens"],
             template: '\
-                <div>\
-                    <div v-for="(item,i) in previewData" class="block">\
-                        <template v-if="item.type === \'block\'">\
-                            <div class="item">\
-                                <table cellspacing="0" cellpadding="0" border="0" width="100%">\
-                                    <tr>\
-                                        <td valign="middle" align="left">\
-                                            <span class="light"><%</span>\
-                                            <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
-                                                <option v-for="token in tokens" :value="token">{{token}}</option>\
-                                            </select>\
-                                            <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
-                                            <span class="light">%></span>\
-                                        </td>\
-                                        <td valign="middle" align="right">\
-                                            <button @click="addBlock(item)">Block</button>\
-                                            <button @click="addContent(item)">Content</button>\
-                                            <button @click="addToken(item)">Token</button>\
-                                            <button @click="removeItem(i)">Delete</button>\
-                                        </td>\
-                                    </tr>\
-                                </table>\
-                            </div>\
-                        </template>\
-                        <template v-if="item.type === \'token\'">\
-                            <div class="item">\
-                              <table cellspacing="0" cellpadding="0" border="0" width="100%">\
-                                    <tr>\
-                                        <td valign="middle" align="left">\
-                                            <span class="light"><%</span>\
-                                            <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
-                                            <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
-                                            <span class="light">%></span>\
-                                        </td>\
-                                        <td valign="middle" align="right">\
-                                            <button @click="removeItem(i)">Delete</button>\
-                                        </td>\
-                                    </tr>\
-                                </table>\
-                            </div>\
-                        </template>\
-                        <template v-if="item.type === \'content\'">\
-                            <div class="item">\
-                                <table cellspacing="0" cellpadding="0" border="0" width="100%">\
-                                    <tr>\
-                                        <td valign="middle" align="left">\
-                                            <div class="wrapper">\
-                                                <div class="hidden" v-html="htmlConvertor(item.name)"></div>\
-                                                <textarea class="content" v-model="item.name" rows="1" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
-                                            </div>\
-                                        </td>\
-                                        <td valign="middle" align="right">\
-                                            <button @click="removeItem(i)">Delete</button>\
-                                        </td>\
-                                    </tr>\
-                                </table>\
-                            </div>\
-                        </template>\
-                        <preview-item class="child" :preview-data="item.subItems" :tokens="tokens"></preview-item>\
-                    </div>\
+                <div class="block" >\
+                    <template v-if="item.type === \'block\'">\
+                        <div class="item">\
+                            <table cellspacing="0" cellpadding="0" border="0" width="100%">\
+                                <tr>\
+                                    <td valign="middle" align="left" v-if="item.subItems.length > 0">\
+                                        <a class="expandBtn" href="javascript:void(0)" @click="isExpanded = !isExpanded">\
+                                            <span v-if="isExpanded">-</span><span v-else>+</span>\
+                                        </a>\
+                                    </td>\
+                                    <td valign="middle" align="left" v-else><span class="expandBtn">&nbsp;</span></td>\
+                                    <td valign="middle" align="left">\
+                                        <span class="light"><%</span>\
+                                        <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
+                                            <option v-for="token in tokens" :value="token">{{token}}</option>\
+                                        </select>\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <span class="light">%></span>\
+                                    </td>\
+                                    <td valign="middle" align="right">\
+                                        <button @click="addBlock(item)">Block</button>\
+                                        <button @click="addContent(item)">Content</button>\
+                                        <button @click="addToken(item)">Token</button>\
+                                        <button @click="removeItem(i)">Delete</button>\
+                                    </td>\
+                                </tr>\
+                            </table>\
+                        </div>\
+                    </template>\
+                    <template v-if="item.type === \'token\'">\
+                        <div class="item">\
+                            <table cellspacing="0" cellpadding="0" border="0" width="100%">\
+                                <tr>\
+                                    <td valign="middle" align="left">\
+                                        <span class="light"><%</span>\
+                                        <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <span class="light">%></span>\
+                                    </td>\
+                                    <td valign="middle" align="right">\
+                                        <button @click="removeItem(i)">Delete</button>\
+                                    </td>\
+                                </tr>\
+                            </table>\
+                        </div>\
+                    </template>\
+                    <template v-if="item.type === \'content\'">\
+                        <div class="item">\
+                            <table cellspacing="0" cellpadding="0" border="0" width="100%">\
+                                <tr>\
+                                    <td valign="middle" align="left">\
+                                        <div class="wrapper">\
+                                            <div class="hidden" v-html="htmlConvertor(item.name)"></div>\
+                                            <textarea class="content" v-model="item.name" rows="1" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                        </div>\
+                                    </td>\
+                                    <td valign="middle" align="right">\
+                                        <button @click="removeItem(i)">Delete</button>\
+                                    </td>\
+                                </tr>\
+                            </table>\
+                        </div>\
+                    </template>\
+                    <preview-item class="child" v-show="isExpanded" v-for="(item,i) in item.subItems" v-bind:item="item" v-bind:index="i" v-bind:key="i" :tokens="tokens"></preview-item>\
                 </div>',
             methods: {
                 addBlock: function (item) {
@@ -328,9 +350,6 @@
                 },
                 updateCode: function(){
                     document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
-                },
-                moveUp: function(i){
-                    //this.previewData.splice(i, 1);
                 },
                 htmlConvertor: function(content){
                     return content.replace(/\n/g, "<br />");
