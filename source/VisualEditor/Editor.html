@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900" rel="stylesheet">
     <link href="jquery.highlight-within-textarea.css" rel="stylesheet">
     <script src="https://unpkg.com/vue"></script>
-    <script src="https://unpkg.com/jquery"></script>
+    <script src="jquery.js"></script>
     <script src="jquery.highlight-within-textarea.js"></script>
     <script src="TemplateParser.js"></script>
     <title>Template View</title>
@@ -120,7 +120,23 @@
             color: #222;
         }
 
-       .box button:hover{
+        .item{
+            padding: 2px;
+        }
+
+        .item:hover{
+            background: #ededed; 
+        }
+
+        .item button{
+            opacity: 0;
+        }
+
+        .item:hover button{
+            opacity: 1;
+        }
+
+        .box button:hover{
             background: #b5b5b5;
         }
 
@@ -182,6 +198,7 @@
             width: 100%;
             height: 100%;
             overflow: auto;
+            white-space: pre;
         }
 
         .popup .actions{
@@ -217,7 +234,7 @@
             props: ["previewData", "tokens"],
             template: '\
                 <div>\
-                    <div v-for="item in previewData" class="block">\
+                    <div v-for="(item,i) in previewData" class="block">\
                         <template v-if="item.type === \'block\'">\
                             <div class="item">\
                                 <table cellspacing="0" cellpadding="0" border="0" width="100%">\
@@ -234,6 +251,7 @@
                                             <button @click="addBlock(item)">Block</button>\
                                             <button @click="addContent(item)">Content</button>\
                                             <button @click="addToken(item)">Token</button>\
+                                            <button @click="removeItem(i)">Delete</button>\
                                         </td>\
                                     </tr>\
                                 </table>\
@@ -241,15 +259,33 @@
                         </template>\
                         <template v-if="item.type === \'token\'">\
                             <div class="item">\
-                                <span class="light"><%</span>\
-                                <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
-                                <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
-                               <span class="light">%></span>\
+                              <table cellspacing="0" cellpadding="0" border="0" width="100%">\
+                                    <tr>\
+                                        <td valign="middle" align="left">\
+                                            <span class="light"><%</span>\
+                                            <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
+                                            <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
+                                            <span class="light">%></span>\
+                                        </td>\
+                                        <td valign="middle" align="right">\
+                                            <button @click="removeItem(i)">Delete</button>\
+                                        </td>\
+                                    </tr>\
+                                </table>\
                             </div>\
                         </template>\
                         <template v-if="item.type === \'content\'">\
                             <div class="item">\
-                                <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                <table cellspacing="0" cellpadding="0" border="0" width="100%">\
+                                    <tr>\
+                                        <td valign="middle" align="left">\
+                                            <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                        </td>\
+                                        <td valign="middle" align="right">\
+                                            <button @click="removeItem(i)">Delete</button>\
+                                        </td>\
+                                    </tr>\
+                                </table>\
                             </div>\
                         </template>\
                         <preview-item class="child" :preview-data="item.subItems" :tokens="tokens"></preview-item>\
@@ -275,34 +311,18 @@
                     document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
                 },
                 alignTemplate: function(item){
+                    var startCharPos = item.startCharPosition + 9,
+                        endCharPos = startCharPos + item.tag.length;
+                    if( item.tag.length < 1 ){
+                        endCharPos = startCharPos + item.name.length;
+                    }
                     $('#jsonPreview').highlightWithinTextarea({
-                        highlight: [item.startCharPosition + 9, item.startCharPosition + 9 + item.tag.length+1]
+                        highlight: [startCharPos, endCharPos]
                     });
-                    /*
-                    return;
-                    var input = document.getElementById("jsonPreview");
-                    if (input.setSelectionRange) {
-                        input.focus();
-                        input.setSelectionRange(item.startCharPosition, item.startCharPosition+1);
-                    }
-                    else if (input.createTextRange) {
-                        var range = input.createTextRange();
-                        range.collapse(true);
-                        range.moveEnd('character', item.startCharPosition+1);
-                        range.moveStart('character', item.startCharPosition);
-                        range.select();
-                    }
-                    */
-                }
-            },
-            created: function(){
-                var ele = document.getElementsByClassName("content");
-                for (var i=0; i<ele.length; i++){
-                    var $curEle = ele[i];
-                    setTimeout( function(){
-                        $curEle.style.height = "0px";
-                        $curEle.style.height = $curEle.scrollHeight + "px";
-                    },0);
+                },
+                removeItem: function(i){
+                    this.previewData.splice(i, 1);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
                 }
             }
         })
@@ -350,6 +370,17 @@
                 },
                 uiPreview: function(){
                     this.outputData = fromTemplateToTokens(document.getElementById("jsonPreview").value);
+                }
+            },
+            watch: {
+                outputData: function(newData){
+                    setTimeout( function(){
+                        var $el = jQuery("textarea.content");
+                        for (var i=0; i<$el.length; i++){
+                            jQuery($el[i]).height("0px");
+                            jQuery($el[i]).height($el[i].scrollHeight + "px");
+                        }
+                    },0);
                 }
             }
         })
