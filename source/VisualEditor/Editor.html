@@ -62,6 +62,9 @@
             border: none;
             background: transparent;
             resize: none;
+            font-size: 14px;
+            line-height: 18px;
+            font-family: 'Lato', sans-serif;
         }
 
         input:focus,
@@ -206,6 +209,25 @@
             bottom: 5%;
             right: 5%;
         }
+
+        .wrapper{
+            position: relative;
+            display: block;
+        }
+
+        .wrapper .hidden{
+            visibility: hidden;
+            padding: 2px;
+        }
+
+        .wrapper .content{
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
     </style>
 </head>
 
@@ -248,6 +270,7 @@
                                             <span class="light">%></span>\
                                         </td>\
                                         <td valign="middle" align="right">\
+                                            <button @click="moveUp(item)">Up</button>\
                                             <button @click="addBlock(item)">Block</button>\
                                             <button @click="addContent(item)">Content</button>\
                                             <button @click="addToken(item)">Token</button>\
@@ -279,7 +302,10 @@
                                 <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                     <tr>\
                                         <td valign="middle" align="left">\
-                                            <textarea class="content" v-model="item.name" rows="1" @keydown="autosize($event)" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                            <div class="wrapper">\
+                                                <div class="hidden" v-html="htmlConvertor(item.name)"></div>\
+                                                <textarea class="content" v-model="item.name" rows="1" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                            </div>\
                                         </td>\
                                         <td valign="middle" align="right">\
                                             <button @click="removeItem(i)">Delete</button>\
@@ -301,14 +327,11 @@
                 addToken: function (item) {
                     item.subItems.push(newEmptyToken("token", false));
                 },
-                autosize: function(event){
-                    setTimeout( function(){
-                        event.target.style.height = "0px";
-                        event.target.style.height = event.target.scrollHeight + "px";
-                    },0);
-                },
                 updateCode: function(){
                     document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
+                },
+                htmlConvertor: function(content){
+                    return content.replace(/\n/g, "<br />");
                 },
                 alignTemplate: function(item){
                     var startCharPos = item.startCharPosition + 9,
@@ -370,17 +393,6 @@
                 },
                 uiPreview: function(){
                     this.outputData = fromTemplateToTokens(document.getElementById("jsonPreview").value);
-                }
-            },
-            watch: {
-                outputData: function(newData){
-                    setTimeout( function(){
-                        var $el = jQuery("textarea.content");
-                        for (var i=0; i<$el.length; i++){
-                            jQuery($el[i]).height("0px");
-                            jQuery($el[i]).height($el[i].scrollHeight + "px");
-                        }
-                    },0);
                 }
             }
         })
