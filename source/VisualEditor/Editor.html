@@ -301,7 +301,7 @@
                                         <button @click="addToken(item)">Token</button>\
                                         <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
                                         <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -320,7 +320,7 @@
                                     <td valign="middle" align="right">\
                                         <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
                                         <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -339,7 +339,7 @@
                                     <td valign="middle" align="right">\
                                         <button @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
                                         <button @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button @click="removeItem(index)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                        <button @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -394,8 +394,12 @@
                         highlight: [startCharPos, endCharPos]
                     });
                 },
-                removeItem: function(index){
-                    this.$root.outputData.splice(index, 1);
+                removeItem: function(index,parent){
+                    var array = this.$root.outputData;
+                    if(typeof parent.item != "undefined"){
+                        array = parent.item.subItems;
+                    }
+                    array.splice(index, 1);
                 }
             }
         })
