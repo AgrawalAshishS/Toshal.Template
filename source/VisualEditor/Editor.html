@@ -57,7 +57,7 @@
                                         </a>\
                                     </td>\
                                     <td valign="middle" align="left" v-else><span class="expandBtn">&nbsp;</span></td>\
-                                    <td valign="middle" align="left">\
+                                    <td valign="middle" align="left" width="100%">\
                                         <select v-model="item.type" placeholder="type" @change="updateCode">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
@@ -70,7 +70,7 @@
                                         <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
                                         <span class="light">%></span>\
                                     </td>\
-                                    <td valign="middle" align="right">\
+                                    <td valign="middle" align="right" nowrap="nowrap">\
                                         <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="addBlock(item)">Block</button>\
@@ -88,7 +88,7 @@
                         <div class="item">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left">\
+                                    <td valign="middle" align="left" width="100%">\
                                         <select v-model="item.type" placeholder="type" @change="updateCode">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
@@ -99,7 +99,7 @@
                                         <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
                                         <span class="light">%></span>\
                                     </td>\
-                                    <td valign="middle" align="right">\
+                                    <td valign="middle" align="right" nowrap="nowrap">\
                                         <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
@@ -114,7 +114,7 @@
                         <div class="item">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left">\
+                                    <td valign="middle" align="left" width="100%">\
                                         <select v-model="item.type" placeholder="type" @change="updateCode">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
@@ -125,7 +125,7 @@
                                             <textarea class="content" v-model="item.name" rows="1" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
                                         </div>\
                                     </td>\
-                                    <td valign="middle" align="right">\
+                                    <td valign="middle" align="right" nowrap="nowrap">\
                                         <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
                                         <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\

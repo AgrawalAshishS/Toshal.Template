@@ -204,6 +204,7 @@ button:hover{
 .wrapper .hidden{
     visibility: hidden;
     padding: 2px;
+    min-height: 22px;
 }
 
 .wrapper .content{
