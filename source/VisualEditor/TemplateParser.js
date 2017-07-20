@@ -183,9 +183,9 @@ function setTagAndName(tokenString, token){
 
 
 //REUSEFOREACH
-var overallPosition = 1;
 function fromTokenToTemplate(tokenArray){
     var retVal = "";
+    var overallPosition = 1;
     if(tokenArray == undefined) return retVal;
     for(var i =0; i < tokenArray.length; i++){
         var token = tokenArray[i];

@@ -50,7 +50,7 @@
                         <div class="item">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left" v-if="item.subItems.length > 0">\
+                                    <td valign="middle" align="left" v-if="checkSubitems(item)">\
                                         <a class="expandBtn" href="javascript:void(0)" @click="isExpanded = !isExpanded">\
                                             <i class="fa fa-minus" aria-hidden="true" v-if="isExpanded"></i>\
                                             <i class="fa fa-plus" aria-hidden="true" v-else></i>\
@@ -139,6 +139,13 @@
                     <preview-item class="child" v-show="isExpanded" v-for="(item,i) in item.subItems" v-bind:item="item" v-bind:index="i" v-bind:key="i" :tokens="tokens"></preview-item>\
                 </div>',
             methods: {
+                checkSubitems: function (item) {
+                    if (typeof item.subItems != "undefined" && item.subItems.length > 0){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
                 addBlock: function (item) {
                     item.subItems.push(newEmptyToken("block", true));
                 },
@@ -176,10 +183,14 @@
                     this.move(array,item,1);
                 },
                 alignTemplate: function(item){
-                    var startCharPos = item.startCharPosition + 9,
-                        endCharPos = startCharPos + item.tag.length;
-                    if( item.tag.length < 1 ){
-                        endCharPos = startCharPos + item.name.length;
+                    var startCharPos = item.startCharPosition,
+                        endCharPos = startCharPos;
+                    if( item.type == "block" ){
+                        endCharPos = endCharPos + (item.tag.length*2) + 12 + item.name.length;
+                    } else if ( item.type == "token" ) {
+                        endCharPos = endCharPos + item.tag.length + 5 + item.name.length;
+                    } else {
+                        endCharPos = endCharPos + item.name.length;
                     }
                     $('#jsonPreview').highlightWithinTextarea({
                         highlight: [startCharPos, endCharPos]
