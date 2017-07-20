@@ -419,6 +419,7 @@
                         array = parent.item.subItems;
                     }
                     array.splice(index, 1);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.outputData);
                 },
                 addNewItem: function(index, parent){
                     var array = this.$root.outputData;
