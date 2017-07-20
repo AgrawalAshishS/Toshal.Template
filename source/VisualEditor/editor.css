@@ -149,7 +149,7 @@ button:hover{
 }
 
 .block {
-    padding: 0 0 0 20px;
+    padding: 0 0 0 10px;
 }
 
 .box{
@@ -227,5 +227,5 @@ a.expandBtn:visited{
     height: 18px;
     width: 10px;
     text-align: center;
-    margin: 0 18px 0 -18px;
+    margin: 0 12px 0 -18px;
 }
