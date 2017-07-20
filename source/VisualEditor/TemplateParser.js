@@ -28,7 +28,7 @@ function newEmptyToken(type, includeSubItem){
         tag : "sample"
     };
     if(includeSubItem){
-        retVal.tag = "if";
+        retVal.tag = "set";
         retVal.subItems = new Array();
     }
     return retVal;

@@ -1,0 +1,230 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html, body{
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 18px;
+    font-family: 'Lato', sans-serif;
+}
+
+::-webkit-input-placeholder { 
+    color:#d7d7d7;
+    font-style: italic;
+    font-weight: normal;
+}
+
+::-moz-placeholder { 
+    color: #d7d7d7;
+    font-style: italic;
+    font-weight: normal;
+}
+
+:-ms-input-placeholder {
+    color: #d7d7d7;
+    font-style: italic;
+    font-weight: normal;
+}
+
+:-moz-placeholder { 
+    color: #d7d7d7;
+    font-style: italic;
+    font-weight: normal;
+}
+
+input, select{
+    border: none;
+    background: transparent;
+}
+
+textarea {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    font-size: 14px;
+    line-height: 18px;
+    font-family: 'Lato', sans-serif;
+}
+
+input:focus,
+input:hover,
+input:active,
+textarea:focus,
+textarea:hover,
+textarea:active,
+select:focus,
+select:hover,
+select:active,
+button:focus,
+button:hover,
+button:active{
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+input{
+    color: #555;
+}
+
+select,
+input.tag{
+    color: #000080;
+    font-weight: bold;
+}
+
+.light{
+    font-size: 12px;
+    color: #b5b5b5;
+}
+
+button{
+    display: inline-block;
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 18px;
+    background: #444;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+
+button:hover{
+    background: #888;
+}
+
+.box button{
+    padding: 2px 6px;
+    font-size: 12px;
+    background: #d7d7d7;
+    color: #222;
+}
+
+.item{
+    padding: 2px;
+}
+
+.item:hover{
+    background: #ededed; 
+}
+
+.item .action{
+    opacity: 0;
+    transition: all 0.5s;
+}
+
+.item:hover .action{
+    opacity: 1;
+}
+
+.box button:hover{
+    background: #b5b5b5;
+}
+
+.nav{
+    display: table;
+    width: 100%;
+    background: #222;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.left,
+.right{
+    display: table-cell;
+    padding: 12px;
+}
+
+.right{
+    text-align: right;
+}
+
+.block {
+    padding: 0 0 0 20px;
+}
+
+.box{
+    padding: 10px;
+    background: #fafafa;
+    position: fixed;
+    overflow: auto;
+    top: 54px;
+    bottom: 0;
+    width: 50%;
+    left: 0;
+}
+
+.item{
+    margin: 2px 0;
+}
+
+.popup{
+    position: fixed;
+    top: 54px;
+    right: 0;
+    bottom: 0;
+    width: 50%;
+}
+
+.popup textarea#jsonPreview{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    white-space: pre;
+}
+
+.popup .actions{
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+}
+
+.wrapper{
+    position: relative;
+    display: block;
+}
+
+.wrapper .hidden{
+    visibility: hidden;
+    padding: 2px;
+}
+
+.wrapper .content{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.expandBtn,
+a.expandBtn,
+a.expandBtn:link,
+a.expandBtn:visited{
+    text-decoration: none;
+    color: #42b983;
+    display: inline-block;
+    font-size: 10px;
+    height: 18px;
+    width: 10px;
+    text-align: center;
+    margin: 0 18px 0 -18px;
+}
