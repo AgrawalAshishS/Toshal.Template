@@ -39,21 +39,21 @@ function newEmptyToken(type, includeSubItem){
 function fromTemplateToTokens(templateText){
     var len = templateText.length;
 
-    var retList = new Array();
+    var splitArray = new Array();
     var lineNumber = 1;
     var charIndex = 1;
     var split = newSplit(1, 1, 1);
 
-	for(var i=0; i < len; i++){
+    for(var i=0; i < len; i++){
         if (templateText.charAt(i) == '<')
         {
             if (i + 1 < len)
             {
-                if (templateText[i + 1] == '%')
+                if (templateText.charAt(i + 1) == '%')
                 {
                     if (split.content.length > 0)
                     {
-                        retList.push(split);
+                        splitArray.push(split);
                     }
 
                     split = newSplit(lineNumber, charIndex, i);
@@ -69,11 +69,11 @@ function fromTemplateToTokens(templateText){
         {
             if (i + 1 < len)
             {
-                if (templateText[i + 1] == '>')
+                if (templateText.charAt(i + 1) == '>')
                 {
                     if (split.content.length > 0)
                     {
-                        retList.push(split);
+                        splitArray.push(split);
                     }
                     split.content += "%>";
                     split = newSplit(lineNumber, charIndex, i);
@@ -87,6 +87,7 @@ function fromTemplateToTokens(templateText){
 
         split.content += templateText.charAt(i);
         charIndex++;
+
         if (templateText.charAt(i) == '\n')
         {
             lineNumber++;
@@ -96,18 +97,18 @@ function fromTemplateToTokens(templateText){
 
     if (split.content.length > 0)
     {
-        retList.push(split);
+        splitArray.push(split);
     }
 
-    var returnArray = new Array();
-    processArray(0, returnArray, retList, 0);
-    return returnArray;
+    var tokenArray = new Array();
+    convertSplitsToToken(0, tokenArray, splitArray, 0);
+    return tokenArray;
 }
 
-function processArray(i, currentArray, finalArray, level){
+function convertSplitsToToken(i, tokenArray, splitArray, level){
 
-    for(; i < finalArray.length; i++){
-        var split = finalArray[i];
+    for(; i < splitArray.length; i++){
+        var split = splitArray[i];
         var regularVal = split.content;
         var lowerVal = regularVal.toLowerCase();
         if(regularVal == "") continue;
@@ -117,18 +118,18 @@ function processArray(i, currentArray, finalArray, level){
 
             var token = newToken(split, "token");
             setTagAndName(tempStr, token);
-            currentArray.push(token);
+            tokenArray.push(token);
         }
         else if(lowerVal.indexOf("<%remove_previous_new_line") == 0){
             var token = newToken(split, "token");
             token.tag = "remove_previous_new_line";
-            currentArray.push(token);
+            tokenArray.push(token);
         }
         else if(lowerVal.indexOf("<%remove_previous ") == 0){
             var tempStr = regularVal.replace("<%", "").replace("%>", "");
             var token = newToken(split, "token");
             setTagAndName(tempStr, token);
-            currentArray.push(token);
+            tokenArray.push(token);
         }
         else if(lowerVal.indexOf("<%end") == 0 || lowerVal.indexOf("<%else") == 0){
             return i;
@@ -138,11 +139,11 @@ function processArray(i, currentArray, finalArray, level){
             var token = newToken(split, "block");
             token.subItems = new Array();
             setTagAndName(tempStr, token);
-            currentArray.push(token);
-            i = processArray(i+1, token.subItems, finalArray, level+1);
+            tokenArray.push(token);
+            i = convertSplitsToToken(i+1, token.subItems, splitArray, level+1);
 
-            while(i < finalArray.length && finalArray[i].content.toLowerCase().indexOf("<%else") == 0){
-                split = finalArray[i];
+            while(i < splitArray.length && splitArray[i].content.toLowerCase().indexOf("<%else") == 0){
+                split = splitArray[i];
                 regularVal = split.content;
                 lowerVal = regularVal.toLowerCase();
                 tempStr = regularVal.replace("<%", "").replace(" THEN%>", "").replace("%>", "");
@@ -150,8 +151,8 @@ function processArray(i, currentArray, finalArray, level){
                 var token = newToken(split, "block");
                 token.subItems = new Array();
                 setTagAndName(tempStr, token);
-                currentArray.push(token);
-                i = processArray(i+1, token.subItems, finalArray, level+1);
+                tokenArray.push(token);
+                i = convertSplitsToToken(i+1, token.subItems, splitArray, level+1);
             }
         }
         else if(lowerVal.indexOf("<%") == 0 ){
@@ -159,13 +160,13 @@ function processArray(i, currentArray, finalArray, level){
             var token = newToken(split, "block");
             token.subItems = new Array();
             setTagAndName(tempStr, token);
-            currentArray.push(token);
-            i = processArray(i+1, token.subItems, finalArray, level+1);
+            tokenArray.push(token);
+            i = convertSplitsToToken(i+1, token.subItems, splitArray, level+1);
         }
         else{
             var token = newToken(split, "content");
             token.name = regularVal;
-            currentArray.push(token);
+            tokenArray.push(token);
         }
     }
 
@@ -183,100 +184,83 @@ function setTagAndName(tokenString, token){
 
 
 //REUSEFOREACH
-var overallPosition = 0;
-
+var templateString;
 function fromTokenToTemplateMain(tokenArray){
-    overallPosition = 0;
-    return fromTokenToTemplate(tokenArray);
+    templateString = "";
+    fromTokenToTemplate(tokenArray);
+    return templateString;
 }
 
 function fromTokenToTemplate(tokenArray){
-    var retVal = "";
-    if(tokenArray == undefined) return retVal;
+    if(tokenArray == undefined) return;
     for(var i =0; i < tokenArray.length; i++){
         var token = tokenArray[i];
         if(token.type == "content" && token.name != "") {
-            token.startCharPosition = overallPosition;
-            retVal += token.name;
-            overallPosition += token.name.length;
-            token.endCharPosition = overallPosition;
+            token.startCharPosition = templateString.length;
+            templateString += token.name;
+            token.endCharPosition = templateString.length;
             continue;
         }else if (token.type == "token"){
-            token.startCharPosition = overallPosition;
-            var contentToSet = "";
+            token.startCharPosition = templateString.length;
             if(token.tag == "remove_previous_new_line"){
-                contentToSet = "<%REMOVE_PREVIOUS_NEW_LINE%>"
+                templateString += "<%REMOVE_PREVIOUS_NEW_LINE%>"
             }else if(token.tag == "remove_previous"){
-                contentToSet = "<%REMOVE_PREVIOUS " + token.name + " %>";
+                templateString += "<%REMOVE_PREVIOUS " + token.name + " %>";
             }else{
                 var tempStr = token.tag + " " + token.name + " ";
-                contentToSet= "<%="+ tempStr.trim() + "%>";
+                templateString += "<%="+ tempStr.trim() + "%>";
             }
-            retVal += contentToSet;
-            overallPosition += contentToSet.length;
-            token.endCharPosition = overallPosition;
+            token.endCharPosition = templateString.length;
             continue;
         }
 
         if(token.tag == "if"){
-            token.startCharPosition = overallPosition;
-            var contentToSet = "<%IF " + token.name + " THEN%>";
-            contentToSet += fromTokenToTemplate(token.subItems);
+            token.startCharPosition = templateString.length;
+            templateString += "<%IF " + token.name + " THEN%>";
+            fromTokenToTemplate(token.subItems);
             if(i+1 < tokenArray.length){
                 //end of elseif block
                 if(tokenArray[i+1].tag.indexOf("else") != 0){
-                    contentToSet += "<%ENDIF%>";
+                    templateString += "<%ENDIF%>";
                 }
             }else{
-                contentToSet += "<%ENDIF%>";
+                templateString += "<%ENDIF%>";
             }
-            retVal += contentToSet;
-            overallPosition += contentToSet.length;
-            token.endCharPosition = overallPosition;
+            token.endCharPosition = templateString.length;
             continue;
         }else if(token.tag.indexOf("elseif") == 0){
-            token.startCharPosition = overallPosition;
-            var contentToSet = "<%ELSEIF " + token.name + " THEN%>";
-            contentToSet += fromTokenToTemplate(token.subItems);
+            token.startCharPosition = templateString.length;
+            templateString += "<%ELSEIF " + token.name + " THEN%>";
+            fromTokenToTemplate(token.subItems);
             if(i+1 < tokenArray.length){
                 //end of elseif block
                 if(tokenArray[i+1].tag.indexOf("else") != 0){
-                    contentToSet += "<%ENDIF%>";
+                    templateString += "<%ENDIF%>";
                 }
             }else{
-                contentToSet += "<%ENDIF%>";
+                templateString += "<%ENDIF%>";
             }
-            retVal += contentToSet;
-            overallPosition += contentToSet.length;
-            token.endCharPosition = overallPosition;
+            token.endCharPosition = templateString.length;
             continue;
         }else if(token.tag.indexOf("else") == 0){
-            token.startCharPosition = overallPosition;
-            var contentToSet = "<%ELSE%>";
-            contentToSet += fromTokenToTemplate(token.subItems);
-            contentToSet += "<%ENDIF%>";
-            retVal += contentToSet;
-            overallPosition += contentToSet.length;
-            token.endCharPosition = overallPosition;
+            token.startCharPosition = templateString.length;
+            templateString += "<%ELSE%>";
+            fromTokenToTemplate(token.subItems);
+            templateString += "<%ENDIF%>";
+            token.endCharPosition = templateString.length;
             continue;
         }
 
         var tokenNameString = token.tag.toUpperCase() + " " + token.name;
-        token.startCharPosition = overallPosition;
-        var contentToSet = "<%" + tokenNameString.trim() + "%>";
-        contentToSet += fromTokenToTemplate(token.subItems);
+        token.startCharPosition = templateString.length;
+        templateString += "<%" + tokenNameString.trim() + "%>";
+        fromTokenToTemplate(token.subItems);
         if(token.tag == 'foreach'){
-            contentToSet += "<%ENDFOR%>";
-            retVal += contentToSet;
-            overallPosition += contentToSet.length;
-            token.endCharPosition = overallPosition;
+            templateString += "<%ENDFOR%>";
+            token.endCharPosition = templateString.length;
             continue;
         }
-        contentToSet += "<%END" + token.tag.toUpperCase() + "%>";
-        retVal += contentToSet;
-        overallPosition += contentToSet.length;
-        token.endCharPosition = overallPosition;
+        templateString += "<%END" + token.tag.toUpperCase() + "%>";
+        token.endCharPosition = templateString.length;
     }
-
-    return retVal;
 }

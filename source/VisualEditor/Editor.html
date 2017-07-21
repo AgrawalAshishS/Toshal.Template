@@ -190,8 +190,8 @@
                 alignTemplate: function(item){
                     $('#jsonPreview').highlightWithinTextarea({
                         highlight: [
-                            [item.startCharPosition,item.startCharPosition+3], 
-                            [item.endCharPosition,item.endCharPosition+3]
+                            [item.startCharPosition, item.startCharPosition+3], 
+                            [item.endCharPosition-3, item.endCharPosition]
                         ]
                     });
                 },

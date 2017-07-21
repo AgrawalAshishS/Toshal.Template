@@ -280,7 +280,8 @@
 		},
 
 		renderMarks: function(boundaries) {
-			let input = this.$el.val().replace("<", "&lt;").replace(">", "&gt;");
+            let originalInput = this.$el.val();
+			let input = originalInput.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 			boundaries.forEach(function(boundary) {
 				let markup;
 				if (boundary.type === 'stop') {
@@ -290,7 +291,10 @@
 				} else {
 					markup = '<mark>';
 				}
-				input = input.slice(0, boundary.index) + markup + input.slice(boundary.index);
+                let tempSlice = originalInput.slice(0, boundary.index);
+                let count = (tempSlice.match(/</g) || []).length;
+                    count += (tempSlice.match(/>/g) || []).length;
+				input = input.slice(0, boundary.index + (count* 3)) + markup + input.slice(boundary.index + (count* 3));
 			});
 
 			// this keeps scrolling aligned when input ends with a newline
