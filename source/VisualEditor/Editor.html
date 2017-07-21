@@ -156,7 +156,7 @@
                     item.subItems.push(newEmptyToken("token", false));
                 },
                 updateCode: function(){
-                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.$root.outputData);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.$root.outputData);
                 },
                 htmlConvertor: function(content){
                     return content.replace(/\n/g, "<br />");
@@ -202,7 +202,7 @@
                         array = parent.item.subItems;
                     }
                     array.splice(index, 1);
-                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.outputData);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.outputData);
                 },
                 addNewItem: function(index, parent){
                     var array = this.$root.outputData;
@@ -258,8 +258,7 @@
                     this.outputData.push(newEmptyToken("token", false));
                 },
                 jsonPreview: function(){
-                    overallPosition = 1;
-                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.outputData);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.outputData);
                 },
                 uiPreview: function(){
                     this.outputData = fromTemplateToTokens(document.getElementById("jsonPreview").value);
@@ -267,7 +266,7 @@
             },
             watch: {
                 outputData: function(newValue){
-                    document.getElementById("jsonPreview").value = fromTokenToTemplate(this.outputData);
+                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.outputData);
                 }
             }
         })

@@ -12,6 +12,7 @@ function newToken(split, type){
         startLineNumber : split.startLineNumber,
         startLineCharPosition : split.startLineCharPosition,
         startCharPosition : split.startCharPosition,
+        endCharPosition : split.startCharPosition,
         type : type,
         name: "",
         tag : ""
@@ -23,6 +24,7 @@ function newEmptyToken(type, includeSubItem){
         startLineNumber : 0,
         startLineCharPosition : 0,
         startCharPosition : 0,
+        endCharPosition : 0,
         type : type,
         name: "sample",
         tag : "sample"
@@ -180,12 +182,16 @@ function setTagAndName(tokenString, token){
 }
 
 
-
-
 //REUSEFOREACH
+var overallPosition = 0;
+
+function fromTokenToTemplateMain(tokenArray){
+    overallPosition = 0;
+    return fromTokenToTemplate(tokenArray);
+}
+
 function fromTokenToTemplate(tokenArray){
     var retVal = "";
-    var overallPosition = 1;
     if(tokenArray == undefined) return retVal;
     for(var i =0; i < tokenArray.length; i++){
         var token = tokenArray[i];
@@ -193,6 +199,7 @@ function fromTokenToTemplate(tokenArray){
             token.startCharPosition = overallPosition;
             retVal += token.name;
             overallPosition += token.name.length;
+            token.endCharPosition = overallPosition;
             continue;
         }else if (token.type == "token"){
             token.startCharPosition = overallPosition;
@@ -207,6 +214,7 @@ function fromTokenToTemplate(tokenArray){
             }
             retVal += contentToSet;
             overallPosition += contentToSet.length;
+            token.endCharPosition = overallPosition;
             continue;
         }
 
@@ -224,6 +232,7 @@ function fromTokenToTemplate(tokenArray){
             }
             retVal += contentToSet;
             overallPosition += contentToSet.length;
+            token.endCharPosition = overallPosition;
             continue;
         }else if(token.tag.indexOf("elseif") == 0){
             token.startCharPosition = overallPosition;
@@ -239,6 +248,7 @@ function fromTokenToTemplate(tokenArray){
             }
             retVal += contentToSet;
             overallPosition += contentToSet.length;
+            token.endCharPosition = overallPosition;
             continue;
         }else if(token.tag.indexOf("else") == 0){
             token.startCharPosition = overallPosition;
@@ -247,6 +257,7 @@ function fromTokenToTemplate(tokenArray){
             contentToSet += "<%ENDIF%>";
             retVal += contentToSet;
             overallPosition += contentToSet.length;
+            token.endCharPosition = overallPosition;
             continue;
         }
 
@@ -258,11 +269,13 @@ function fromTokenToTemplate(tokenArray){
             contentToSet += "<%ENDFOR%>";
             retVal += contentToSet;
             overallPosition += contentToSet.length;
+            token.endCharPosition = overallPosition;
             continue;
         }
         contentToSet += "<%END" + token.tag.toUpperCase() + "%>";
         retVal += contentToSet;
         overallPosition += contentToSet.length;
+        token.endCharPosition = overallPosition;
     }
 
     return retVal;
