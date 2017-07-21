@@ -203,7 +203,7 @@ button:hover{
 
 .wrapper .hidden{
     visibility: hidden;
-    padding: 2px;
+    padding: 2px 6px;
     min-height: 22px;
 }
 
@@ -214,6 +214,7 @@ button:hover{
     height: 100%;
     width: 100%;
     overflow: hidden;
+    padding: 2px 6px;
 }
 
 .expandBtn,
@@ -227,5 +228,5 @@ a.expandBtn:visited{
     height: 18px;
     width: 10px;
     text-align: center;
-    margin: 0 12px 0 -18px;
+    margin: 0 8px 0 -18px;
 }

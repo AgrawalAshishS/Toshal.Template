@@ -58,16 +58,16 @@
                                     </td>\
                                     <td valign="middle" align="left" v-else><span class="expandBtn">&nbsp;</span></td>\
                                     <td valign="middle" align="left" width="100%">\
-                                        <select v-model="item.type" placeholder="type" @change="updateCode">\
+                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <span class="light"><%</span>\
-                                        <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)" @focus="alignTemplate(item)" >\
                                             <option v-for="token in tokens" :value="token">{{token}}</option>\
                                         </select>\
-                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)" @focus="alignTemplate(item)">\
                                         <span class="light">%></span>\
                                     </td>\
                                     <td valign="middle" align="right" nowrap="nowrap">\
@@ -89,14 +89,14 @@
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
                                     <td valign="middle" align="left" width="100%">\
-                                        <select v-model="item.type" placeholder="type" @change="updateCode">\
+                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <span class="light"><%</span>\
-                                        <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode" @focus="alignTemplate(item)">\
-                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode" @focus="alignTemplate(item)">\
+                                        <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)" @focus="alignTemplate(item)">\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)" @focus="alignTemplate(item)">\
                                         <span class="light">%></span>\
                                     </td>\
                                     <td valign="middle" align="right" nowrap="nowrap">\
@@ -115,14 +115,14 @@
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
                                     <td valign="middle" align="left" width="100%">\
-                                        <select v-model="item.type" placeholder="type" @change="updateCode">\
+                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <div class="wrapper">\
                                             <div class="hidden" v-html="htmlConvertor(item.name)"></div>\
-                                            <textarea class="content" v-model="item.name" rows="1" @change="updateCode" @focus="alignTemplate(item)"></textarea>\
+                                            <textarea class="content" v-model="item.name" rows="1" @change="updateCode($event)" @focus="alignTemplate(item)"></textarea>\
                                         </div>\
                                     </td>\
                                     <td valign="middle" align="right" nowrap="nowrap">\
@@ -155,8 +155,13 @@
                 addToken: function (item) {
                     item.subItems.push(newEmptyToken("token", false));
                 },
-                updateCode: function(){
+                updateCode: function(event){
+                    var id = event.target.id;
                     document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.$root.outputData);
+
+                    setTimeout( function(){
+                        document.getElementById(id).focus();
+                    },100);
                 },
                 htmlConvertor: function(content){
                     return content.replace(/\n/g, "<br />");
@@ -183,17 +188,11 @@
                     this.move(array,item,1);
                 },
                 alignTemplate: function(item){
-                    var startCharPos = item.startCharPosition,
-                        endCharPos = startCharPos;
-                    if( item.type == "block" ){
-                        endCharPos = endCharPos + (item.tag.length*2) + 12 + item.name.length;
-                    } else if ( item.type == "token" ) {
-                        endCharPos = endCharPos + item.tag.length + 5 + item.name.length;
-                    } else {
-                        endCharPos = endCharPos + item.name.length;
-                    }
                     $('#jsonPreview').highlightWithinTextarea({
-                        highlight: [startCharPos, endCharPos]
+                        highlight: [
+                            [item.startCharPosition,item.startCharPosition+3], 
+                            [item.endCharPosition,item.endCharPosition+3]
+                        ]
                     });
                 },
                 removeItem: function(index, parent){
@@ -206,10 +205,14 @@
                 },
                 addNewItem: function(index, parent){
                     var array = this.$root.outputData;
+                    var newItem = newEmptyToken("block", true);
                     if(typeof parent.item != "undefined"){
                         array = parent.item.subItems;
                     }
-                    array.splice(index, 0, newEmptyToken("block", true));
+                    array.splice(index, 0, newItem);
+                    setTimeout( function(){
+                        document.getElementById("startChar" + newItem.startCharPosition).focus();
+                    },100);
                 },
                 addNewItemAbove: function(index, parent){
                     this.addNewItem(index, parent);
@@ -248,14 +251,21 @@
                 ]
             },
             methods: {
+                addNewToken: function(type, hasSubItem){
+                    var newItem = newEmptyToken(type, hasSubItem);
+                    this.outputData.push(newItem);
+                    setTimeout( function(){
+                        document.getElementById("startChar" + newItem.startCharPosition).focus();
+                    },100)
+                },
                 addRootBlock: function () {
-                    this.outputData.push(newEmptyToken("block", true));
+                    this.addNewToken("block", true);
                 },
                 addRootContent: function () {
-                    this.outputData.push(newEmptyToken("content", false));
+                    this.addNewToken("content", false);
                 },
                 addRootToken: function () {
-                    this.outputData.push(newEmptyToken("token", false));
+                    this.addNewToken("token", false);
                 },
                 jsonPreview: function(){
                     document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.outputData);
