@@ -23,7 +23,7 @@ function newEmptyToken(type, includeSubItem){
     var retVal = {
         startLineNumber : 0,
         startLineCharPosition : 0,
-        startCharPosition : 0,
+        startCharPosition : -1,
         endCharPosition : 0,
         type : type,
         name: "sample",
