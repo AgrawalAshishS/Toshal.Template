@@ -2,6 +2,7 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    outline: 0;
 }
 
 html, body{
@@ -52,23 +53,6 @@ textarea {
     font-family: 'Lato', sans-serif;
 }
 
-input:focus,
-input:hover,
-input:active,
-textarea:focus,
-textarea:hover,
-textarea:active,
-select:focus,
-select:hover,
-select:active,
-button:focus,
-button:hover,
-button:active{
-    border: none;
-    box-shadow: none;
-    outline: none;
-}
-
 input{
     color: #555;
 }
@@ -97,6 +81,7 @@ button{
     transition: all 0.5s;
 }
 
+button:focus,
 button:hover{
     background: #888;
 }
@@ -106,6 +91,13 @@ button:hover{
     font-size: 12px;
     background: #d7d7d7;
     color: #222;
+}
+
+.box a:focus,
+.box input:focus,
+.box select:focus,
+.box textarea:focus{
+    outline: #b5b5b5 dotted 1px;
 }
 
 .item{
@@ -121,10 +113,12 @@ button:hover{
     transition: all 0.5s;
 }
 
-.item:hover .action{
+.item:hover .action,
+.item.active .action{
     opacity: 1;
 }
 
+.box button:focus,
 .box button:hover{
     background: #b5b5b5;
 }
@@ -152,8 +146,12 @@ button:hover{
     padding: 0 0 0 10px;
 }
 
+.block .block{
+    padding: 0 0 0 30px;
+}
+
 .box{
-    padding: 10px;
+    padding: 10px 10px 10px 0;
     background: #fafafa;
     position: fixed;
     overflow: auto;
@@ -228,5 +226,17 @@ a.expandBtn:visited{
     height: 18px;
     width: 10px;
     text-align: center;
-    margin: 0 8px 0 -18px;
+}
+
+.expandWrapper{
+    position: relative;
+}
+.expandWrapper:after{
+    content: "";
+    position: absolute;
+    height: calc(100% + 8px);
+    width: 1px;
+    left: 50%;
+    top: -4px;
+    background: #dadada;
 }

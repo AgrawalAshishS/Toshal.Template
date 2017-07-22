@@ -40,97 +40,125 @@
         Vue.component('preview-item', {
             data: function () {
                 return {
-                    isExpanded: false
+                    isExpanded: false,
+                    isActive: false
                 }
             },
             props: ["item", "index", "tokens"],
             template: '\
                 <div class="block" >\
                     <template v-if="item.type === \'block\'">\
-                        <div class="item">\
+                        <div class="item" :class="{active:isActive}">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left" v-if="checkSubitems(item)">\
+                                    <td valign="top" align="left" v-if="checkSubitems(item)">\
                                         <a class="expandBtn" href="javascript:void(0)" @click="isExpanded = !isExpanded">\
                                             <i class="fa fa-minus" aria-hidden="true" v-if="isExpanded"></i>\
                                             <i class="fa fa-plus" aria-hidden="true" v-else></i>\
                                         </a>\
                                     </td>\
-                                    <td valign="middle" align="left" v-else><span class="expandBtn">&nbsp;</span></td>\
-                                    <td valign="middle" align="left" width="100%">\
-                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
+                                    <td class="expandWrapper" valign="top" align="left" v-else><span class="expandBtn">&nbsp;</span></td>\
+                                    <td valign="top" align="left" width="100%">\
+                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition"\
+                                            @focus="addActiveState" @focusout="removeActiveState">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <span class="light"><%</span>\
-                                        <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)" @focus="alignTemplate(item)" >\
+                                        <select type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)"\
+                                            @focus="alignTemplate(item)" @focusout="removeActiveState">\
                                             <option v-for="token in tokens" :value="token">{{token}}</option>\
                                         </select>\
-                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)" @focus="alignTemplate(item)">\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)"\
+                                             @focus="alignTemplate(item)" @focusout="removeActiveState">\
                                         <span class="light">%></span>\
                                     </td>\
-                                    <td valign="middle" align="right" nowrap="nowrap">\
-                                        <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="addBlock(item)">Block</button>\
-                                        <button class="action" @click="addContent(item)">Content</button>\
-                                        <button class="action" @click="addToken(item)">Token</button>\
-                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                    <td valign="top" align="right" nowrap="nowrap">\
+                                        <button class="action" @click="addNewItemAbove(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="addNewItemBellow(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="addBlock(item)"\
+                                            @focus="addActiveState" @focusout="removeActiveState">Block</button>\
+                                        <button class="action" @click="addContent(item)"\
+                                            @focus="addActiveState" @focusout="removeActiveState">Content</button>\
+                                        <button class="action" @click="addToken(item)"\
+                                            @focus="addActiveState" @focusout="removeActiveState">Token</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
                         </div>\
                     </template>\
                     <template v-if="item.type === \'token\'">\
-                        <div class="item">\
+                        <div class="item" :class="{active:isActive}">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left" width="100%">\
+                                    <td class="expandWrapper" valign="top" align="left"><span class="expandBtn">&nbsp;</span></td>\
+                                    <td valign="top" align="left" width="100%">\
                                         <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <span class="light"><%</span>\
-                                        <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)" @focus="alignTemplate(item)">\
-                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)" @focus="alignTemplate(item)">\
+                                        <input class="tag" type="text" v-model="item.tag" placeholder="Tag" @change="updateCode($event)"\
+                                            @focus="alignTemplate(item)" @focusout="removeActiveState">\
+                                        <input class="name" type="text" v-model="item.name" placeholder="Name" @change="updateCode($event)"\
+                                            @focus="alignTemplate(item)" @focusout="removeActiveState">\
                                         <span class="light">%></span>\
                                     </td>\
-                                    <td valign="middle" align="right" nowrap="nowrap">\
-                                        <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                    <td valign="top" align="right" nowrap="nowrap">\
+                                        <button class="action" @click="addNewItemAbove(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="addNewItemBellow(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
                         </div>\
                     </template>\
                     <template v-if="item.type === \'content\'">\
-                        <div class="item">\
+                        <div class="item" :class="{active:isActive}">\
                             <table cellspacing="0" cellpadding="0" border="0" width="100%">\
                                 <tr>\
-                                    <td valign="middle" align="left" width="100%">\
-                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition">\
+                                    <td class="expandWrapper" valign="top" align="left"><span class="expandBtn">&nbsp;</span></td>\
+                                    <td valign="top" align="left" width="100%">\
+                                        <select v-model="item.type" placeholder="type" @change="updateCode($event)" :id="\'startChar\' + item.startCharPosition"\
+                                            @focus="addActiveState" @focusout="removeActiveState">\
                                             <option value="block">Block</option>\
                                             <option value="content">Content</option>\
                                             <option value="token">Token</option>\
                                         </select>\
                                         <div class="wrapper">\
                                             <div class="hidden" v-html="htmlConvertor(item.name)"></div>\
-                                            <textarea class="content" v-model="item.name" rows="1" @change="updateCode($event)" @focus="alignTemplate(item)"></textarea>\
+                                            <textarea class="content" v-model="item.name" rows="1" @change="updateCode($event)"\
+                                                @focus="alignTemplate(item)" @focusout="removeActiveState"></textarea>\
                                         </div>\
                                     </td>\
-                                    <td valign="middle" align="right" nowrap="nowrap">\
-                                        <button class="action" @click="addNewItemAbove(index,$parent)"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="addNewItemBellow(index,$parent)"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
-                                        <button class="action" @click="moveUp(item,$parent)"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="moveDown(item,$parent)"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="removeItem(index,$parent)"><i class="fa fa-trash" aria-hidden="true"></i></button>\
+                                    <td valign="top" align="right" nowrap="nowrap">\
+                                        <button class="action" @click="addNewItemAbove(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-up" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="addNewItemBellow(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-down" aria-hidden="true"></i> New</button>\
+                                        <button class="action" @click="moveUp(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="moveDown(item,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-down" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="removeItem(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-trash" aria-hidden="true"></i></button>\
                                     </td>\
                                 </tr>\
                             </table>\
@@ -158,7 +186,6 @@
                 updateCode: function(event){
                     var id = event.target.id;
                     document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.$root.outputData);
-
                     setTimeout( function(){
                         document.getElementById(id).focus();
                     },100);
@@ -188,12 +215,19 @@
                     this.move(array,item,1);
                 },
                 alignTemplate: function(item){
-                    $('#jsonPreview').highlightWithinTextarea({
+                    this.addActiveState();
+                    jQuery('#jsonPreview').highlightWithinTextarea({
                         highlight: [
                             [item.startCharPosition, item.startCharPosition+3], 
                             [item.endCharPosition-3, item.endCharPosition]
                         ]
                     });
+                },
+                addActiveState: function(){
+                    this.isActive = true;
+                },
+                removeActiveState: function(){
+                    this.isActive = false;
                 },
                 removeItem: function(index, parent){
                     var array = this.$root.outputData;
