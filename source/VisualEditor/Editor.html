@@ -121,12 +121,12 @@
                                     <td valign="top" align="right" nowrap="nowrap">\
                                         <button class="action" @click="addNewItemAbove(index,$parent)"\
                                             @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-up" aria-hidden="true"></i></button>\
+                                        <button class="action" @click="addNewItemBellow(index,$parent)"\
+                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>\
                                         <button class="action" @click="moveOut(item,$parent,index)" v-if="canMoveOut(item,$parent)"\
                                             @focus="addActiveState" @focusout="removeActiveState"> <i class="fa fa-mail-reply" aria-hidden="true"></i></button>\
                                         <button class="action" @click="moveIn(item,$parent,index)" v-if="canMoveIn(item,$parent,index)"\
                                             @focus="addActiveState" @focusout="removeActiveState"> <i class="fa fa-mail-forward" aria-hidden="true"></i></button>\
-                                        <button class="action" @click="addNewItemBellow(index,$parent)"\
-                                            @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-arrow-down" aria-hidden="true"></i></button>\
                                         <button class="action" @click="moveUp(item,$parent)"\
                                             @focus="addActiveState" @focusout="removeActiveState"><i class="fa fa-caret-up" aria-hidden="true"></i></button>\
                                         <button class="action" @click="moveDown(item,$parent)"\
@@ -197,7 +197,7 @@
                 },
                 updateCode: function(event){
                     var id = event.target.id;
-                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.$root.outputData);
+                    this.updatePreview();
                     setTimeout( function(){
                         document.getElementById(id).focus();
                     },100);
@@ -211,6 +211,7 @@
                     if (newIndex < 0  || newIndex == array.length) return;
                     var indexes = [index, newIndex].sort();
                     array.splice(indexes[0], 2, array[indexes[1]], array[indexes[0]]);
+                    this.updatePreview();
                 },
                 moveOut: function(item,parent,index){
                     if(typeof parent.$parent == "undefined") return;
@@ -292,7 +293,7 @@
                         array = parent.item.subItems;
                     }
                     array.splice(index, 1);
-                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.outputData);
+                    this.updatePreview();
                 },
                 addNewItem: function(index, parent){
                     var array = this.$root.outputData;
@@ -301,6 +302,7 @@
                         array = parent.item.subItems;
                     }
                     array.splice(index, 0, newItem);
+                    this.updatePreview();
                     setTimeout( function(){
                         document.getElementById("startChar" + newItem.startCharPosition).focus();
                     },100);
@@ -310,6 +312,9 @@
                 },
                 addNewItemBellow: function(index, parent){
                     this.addNewItem(index+1, parent);
+                },
+                updatePreview: function(){
+                    document.getElementById("jsonPreview").value = fromTokenToTemplateMain(this.$root.outputData);
                 }
             }
         })
