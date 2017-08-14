@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="NamedToken.cs" company="Toshal Infotech">
+// <copyright file="ForEachToken.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -22,30 +22,31 @@
 
 namespace Toshal.Template.Tokens
 {
-    using System;
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
     /// <summary>
-    /// The named token.
+    ///     The for each token.
     /// </summary>
-    public class NamedToken : Token
+    public class ProcessTemplateToken : Token
     {
         #region Constructors and Destructor
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NamedToken"/> class.
+        ///     Initializes a new instance of the <see cref="ForEachToken" /> class.
         /// </summary>
         /// <param name="split">
-        /// The split.
+        ///     The split.
         /// </param>
         /// <exception cref="TokenMissingNameException">
         /// </exception>
-        public NamedToken(Split split)
+        public ProcessTemplateToken(Split split)
         {
-            const string tokenExpression = "<%=(?<Name>.*?)%>";
-            string tempString = Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim();
+            const string processTokenExpression = "<%PROCESS_TEMPLATE\\s(?<Name>.*?)%>";
+
+            string tempString = Regex.Match(split.Content, processTokenExpression).Groups["Name"].Value.Trim();
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, tempString, this.Attributes);
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
@@ -66,9 +67,9 @@ namespace Toshal.Template.Tokens
         public TokenAttributeDictionary Attributes { get; private set; } = new TokenAttributeDictionary();
 
         /// <summary>
-        /// Gets the name.
+        ///     Gets the name.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; } = string.Empty;
 
         #endregion
 

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="WithToken.cs" company="Toshal Infotech">
+// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -20,58 +20,30 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Text.RegularExpressions;
+using Toshal.Template.Exceptions;
+
+
 namespace Toshal.Template.Tokens
 {
-    using System.Text.RegularExpressions;
-
-    using Toshal.Template.Exceptions;
-
-    /// <summary>
-    ///     The with token.
-    /// </summary>
-    public class WithToken : ContainerTokenBase
+    public class RemovePreviousCharsToken : Token
     {
-        #region Constructors and Destructor
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="WithToken" /> class.
-        /// </summary>
-        /// <param name="split">
-        ///     The split.
-        /// </param>
-        /// <exception cref="TokenMissingNameException">
-        /// </exception>
-        public WithToken(Split split)
+        public RemovePreviousCharsToken(Split split)
         {
-            const string withTokenExpression = "<%WITH\\s(?<Name>.+?)%>";
-            this.Name = TokenAttributeDictionary.GetNameAndAttributes(
-                split,
-                Regex.Match(split.Content, withTokenExpression).Groups["Name"].Value.Trim(),
-                this.Attributes);
+            const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
+            string tempString = Regex.Match(split.Content, tokenExpression).Groups["charcount"].Value.Trim();
 
+            int charCount = 0;
+            if(int.TryParse(tempString, out charCount) == false)
+            {
+                throw new ParserException(split, "Char count is missing or not integer");
+            }
+
+            this.CharCount = charCount;
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
-
-            if (string.IsNullOrEmpty(this.Name))
-            {
-                throw new TokenMissingNameException(split);
-            }
         }
 
-        #endregion
-
-        #region Public Properties
-
-        /// <summary>
-        ///     Gets the attributes.
-        /// </summary>
-        public TokenAttributeDictionary Attributes { get; } = new TokenAttributeDictionary();
-
-        /// <summary>
-        ///     Gets the name.
-        /// </summary>
-        public string Name { get; } = string.Empty;
-
-        #endregion
+        public int CharCount { get; private set; }
     }
 }

@@ -16,7 +16,7 @@ namespace Test.Template
         public void ItShouldHandleBasicReuseForEachToken()
         {
             const string templateText =
-                "<%FOREACH ExistingForEachName %><%ENDFOR%><%REUSEFOREACH ExistingForEachName NewLoopName %>";
+                "<%FOREACH ExistingForEachName %><%ENDFOR%><%REUSE_FOREACH ExistingForEachName NewLoopName %>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
@@ -30,7 +30,7 @@ namespace Test.Template
         public void ItShouldHandleBasicReuseWithInForEachToken()
         {
             const string templateText =
-                "<%FOREACH ExistingForEachName %><%REUSEFOREACH ExistingForEachName NewLoopName %><%ENDFOR%>";
+                "<%FOREACH ExistingForEachName %><%REUSE_FOREACH ExistingForEachName NewLoopName %><%ENDFOR%>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
@@ -44,7 +44,7 @@ namespace Test.Template
         [Test]
         public void ItShouldThrowExceptionForMissingNameForReuseForEach()
         {
-            const string templateText = "<%REUSEFOREACH ExistingForEachName %>";
+            const string templateText = "<%REUSE_FOREACH ExistingForEachName %>";
             var parser = new Parser();
             Assert.Throws<TokenMissingNameException>(() =>
             {
@@ -56,7 +56,7 @@ namespace Test.Template
         [Test]
         public void ItShouldThrowExceptionForMissingLoopNameForReuseForEach()
         {
-            const string templateText = "<%REUSEFOREACH %>";
+            const string templateText = "<%REUSE_FOREACH %>";
             var parser = new Parser();
             Assert.Throws<TokenMissingNameException>(() =>
             {
@@ -67,7 +67,7 @@ namespace Test.Template
         [Test]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse()
         {
-            const string templateText = "<%REUSEFOREACH ExistingForEachName NewLoopName %>";
+            const string templateText = "<%REUSE_FOREACH ExistingForEachName NewLoopName %>";
             var parser = new Parser();
             Assert.Throws<ForEachMissingForReuseException>(() =>
             {
@@ -78,7 +78,7 @@ namespace Test.Template
         [Test]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse2()
         {
-            const string templateText = "<%FOREACH SomeName%><%ENDFOR%><%REUSEFOREACH ExistingForEachName NewLoopName %>";
+            const string templateText = "<%FOREACH SomeName%><%ENDFOR%><%REUSE_FOREACH ExistingForEachName NewLoopName %>";
             var parser = new Parser();
             Assert.Throws<ForEachMissingForReuseException>(() =>
             {

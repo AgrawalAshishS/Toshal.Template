@@ -80,6 +80,11 @@ namespace Toshal.Template
         /// </summary>
         public Func<TokenArgs, object> WithValueProvider { get; set; }
 
+        /// <summary>
+        ///     Gets or sets the process template value provider.
+        /// </summary>
+        public Func<ProcessTemplateArgs, List<IToken>> ProcessTemplateValueProvider { get; set; }
+
         #endregion
 
         #region Methods
@@ -287,7 +292,7 @@ namespace Toshal.Template
 
         private bool HandleRemovePreviousNewLine(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
-            var removeToken = token as RemovePreviousNewLine;
+            var removeToken = token as RemovePreviousNewLineToken;
             if (removeToken == null) return false;
 
             if (output.Length == 0) return true;
@@ -303,13 +308,31 @@ namespace Toshal.Template
 
         private bool HandleRemovePreviousChars(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
         {
-            var removeToken = token as RemovePreviousChars;
+            var removeToken = token as RemovePreviousCharsToken;
             if (removeToken == null) return false;
 
             var count = removeToken.CharCount;
             if (output.Length < removeToken.CharCount) count = output.Length;
 
             output = output.Remove(output.Length - count, count);
+
+            return true;
+        }
+
+        private bool HandleProcessTemplateToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        {
+            var processTemplateToken = token as ProcessTemplateToken;
+            if (processTemplateToken == null) return false;
+            if (this.ProcessTemplateValueProvider == null) return true;//skip as there is no value provider;
+
+            var args = new ProcessTemplateArgs(processTemplateToken, context, parentContext);
+
+            var val = this.ProcessTemplateValueProvider(args);
+            if (val != null)
+            {
+                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                this.Process(output, val, context, parentContext, newCustomTokens);
+            }
 
             return true;
         }
@@ -368,6 +391,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleRemovePreviousChars(output, token, context, customTokens))
+                {
+                    continue;
+                }
+
+                if (this.HandleProcessTemplateToken(output, token, context, parentContext, customTokens))
                 {
                     continue;
                 }

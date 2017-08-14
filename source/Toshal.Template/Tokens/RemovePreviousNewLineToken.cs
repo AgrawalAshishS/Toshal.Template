@@ -22,9 +22,9 @@
 
 namespace Toshal.Template.Tokens
 {
-    public class RemovePreviousNewLine : Token
+    public class RemovePreviousNewLineToken : Token
     {
-        public RemovePreviousNewLine(Split split)
+        public RemovePreviousNewLineToken(Split split)
         {
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;

@@ -61,7 +61,7 @@ namespace Toshal.Template
         {
             this.Attributes = token.Attributes;
         }
-
+        
         #endregion
 
         #region Public Properties

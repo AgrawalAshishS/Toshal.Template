@@ -45,7 +45,7 @@ namespace Toshal.Template.Tokens
         {
             this.Name = string.Empty;
 
-            const string reuseForEachTokenExpression = "<%REUSEFOREACH\\s(?<ExistingForEachName>.+?)\\s(?<Name>.+?)%>";
+            const string reuseForEachTokenExpression = "<%REUSE_FOREACH\\s(?<ExistingForEachName>.+?)\\s(?<Name>.+?)%>";
             var m = Regex.Match(split.Content, reuseForEachTokenExpression);
 
             this.ExistingForEachName = m.Groups["ExistingForEachName"].Value.Trim().ToLower();

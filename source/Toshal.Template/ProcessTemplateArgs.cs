@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
+// <copyright file="ProcessTemplateArgs.cs" company="Toshal Infotech">
 //   http://www.ToshalInfotech.com
 //   Copyright (c) 2014-2015
 //   by Toshal Infotech
@@ -20,30 +20,47 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Text.RegularExpressions;
-using Toshal.Template.Exceptions;
-
-
-namespace Toshal.Template.Tokens
+namespace Toshal.Template
 {
-    public class RemovePreviousChars : Token
+    using System.Collections.Generic;
+    using Template.Tokens;
+
+    /// <summary>
+    /// The token args.
+    /// </summary>
+    public class ProcessTemplateArgs : ArgsBase
     {
-        public RemovePreviousChars(Split split)
+        #region Constructors and Destructor
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProcessTemplateArgs"/> class.
+        /// </summary>
+        /// <param name="token">
+        /// The token.
+        /// </param>
+        /// <param name="context">
+        /// The context.
+        /// </param>
+        public ProcessTemplateArgs(ProcessTemplateToken token, object context, List<object> parentContext)
+            : base(token.Name, context, parentContext)
         {
-            const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
-            string tempString = Regex.Match(split.Content, tokenExpression).Groups["charcount"].Value.Trim();
-
-            int charCount = 0;
-            if(int.TryParse(tempString, out charCount) == false)
-            {
-                throw new ParserException(split, "Char count is missing or not integer");
-            }
-
-            this.CharCount = charCount;
-            this.LineNumber = split.LineNumber;
-            this.StartingPosition = split.StartingPosition;
+            this.Attributes = token.Attributes;
         }
 
-        public int CharCount { get; private set; }
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        public TokenAttributeDictionary Attributes { get; private set; }
+
+        #endregion
+
+        public string GetAttribute(string key, string defaultValue)
+        {
+            return Attributes.GetValue(key, defaultValue);
+        }
     }
 }

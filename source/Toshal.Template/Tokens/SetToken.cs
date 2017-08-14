@@ -43,11 +43,8 @@ namespace Toshal.Template.Tokens
         /// </exception>
         public SetToken(Split split)
         {
-            this.Name = string.Empty;
-            this.Attributes = new TokenAttributeDictionary();
-
             const string tokenExpression = "<%SET\\s(?<Name>.+?)%>";
-            this.Name = NamedToken.GetNameAndAttributes(
+            this.Name = TokenAttributeDictionary.GetNameAndAttributes(
                 split,
                 Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim(),
                 this.Attributes);
@@ -68,12 +65,12 @@ namespace Toshal.Template.Tokens
         /// <summary>
         /// Gets the name.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
         /// <summary>
         ///     Gets the attributes.
         /// </summary>
-        public TokenAttributeDictionary Attributes { get; }
+        public TokenAttributeDictionary Attributes { get; } = new TokenAttributeDictionary();
 
         #endregion
 

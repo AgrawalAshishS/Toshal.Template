@@ -22,7 +22,9 @@
 
 namespace Toshal.Template.Tokens
 {
+    using Exceptions;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     ///     The token attribute dictionary.
@@ -36,5 +38,54 @@ namespace Toshal.Template.Tokens
             if (this.TryGetValue(attributeName, out retVal)) return retVal;
             return defaultValue;
         }
+
+
+
+        /// <summary>
+        /// The get name and attributes.
+        /// </summary>
+        /// <param name="split">
+        /// The split.
+        /// </param>
+        /// <param name="nameString">
+        /// The name string.
+        /// </param>
+        /// <param name="attributes">
+        /// The attributes.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="InvalidTokenAttributeException">
+        /// </exception>
+        internal static string GetNameAndAttributes(
+            Split split,
+            string nameString,
+            TokenAttributeDictionary attributes)
+        {
+            string retVal = nameString;
+
+            if (nameString.IndexOf('=') > -1)
+            {
+                string[] nameSplit = nameString.Split(' ');
+                retVal = nameSplit[0];
+
+                const string tokenAttributeExpression = "(?<Name>\\w+)=\"(?<Value>[^\"]*)\"";
+
+                for (int i = 1; i < nameSplit.Length; i++)
+                {
+                    Match m = Regex.Match(nameSplit[i], tokenAttributeExpression);
+                    if (m.Success == false)
+                    {
+                        throw new InvalidTokenAttributeException(split);
+                    }
+
+                    attributes.Add(m.Groups["Name"].Value.ToLower(), m.Groups["Value"].Value);
+                }
+            }
+
+            return retVal.Trim().ToLower();
+        }
+
     }
 }

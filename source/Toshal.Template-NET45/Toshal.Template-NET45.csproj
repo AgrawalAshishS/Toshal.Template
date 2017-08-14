@@ -74,11 +74,17 @@
     <Compile Include="..\Toshal.Template\ProcessorArgs.cs">
       <Link>ProcessorArgs.cs</Link>
     </Compile>
+    <Compile Include="..\Toshal.Template\ProcessTemplateArgs.cs">
+      <Link>ProcessTemplateArgs.cs</Link>
+    </Compile>
     <Compile Include="..\Toshal.Template\Signatures\IConditionValueProvider.cs">
       <Link>Signatures\IConditionValueProvider.cs</Link>
     </Compile>
     <Compile Include="..\Toshal.Template\Signatures\ILoopValueProvider.cs">
       <Link>Signatures\ILoopValueProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Toshal.Template\Signatures\IProcessTemplateValueProvider.cs">
+      <Link>Signatures\IProcessTemplateValueProvider.cs</Link>
     </Compile>
     <Compile Include="..\Toshal.Template\Signatures\ITokenValueProvider.cs">
       <Link>Signatures\ITokenValueProvider.cs</Link>
@@ -116,11 +122,14 @@
     <Compile Include="..\Toshal.Template\Tokens\NamedToken.cs">
       <Link>Tokens\NamedToken.cs</Link>
     </Compile>
-    <Compile Include="..\Toshal.Template\Tokens\RemovePreviousChars.cs">
-      <Link>Tokens\RemovePreviousChars.cs</Link>
+    <Compile Include="..\Toshal.Template\Tokens\ProcessTemplateToken.cs">
+      <Link>Tokens\ProcessTemplateToken.cs</Link>
     </Compile>
-    <Compile Include="..\Toshal.Template\Tokens\RemovePreviousNewLine.cs">
-      <Link>Tokens\RemovePreviousNewLine.cs</Link>
+    <Compile Include="..\Toshal.Template\Tokens\RemovePreviousCharsToken.cs">
+      <Link>Tokens\RemovePreviousCharsToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Toshal.Template\Tokens\RemovePreviousNewLineToken.cs">
+      <Link>Tokens\RemovePreviousNewLineToken.cs</Link>
     </Compile>
     <Compile Include="..\Toshal.Template\Tokens\ReuseForEachToken.cs">
       <Link>Tokens\ReuseForEachToken.cs</Link>

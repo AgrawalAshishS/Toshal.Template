@@ -445,7 +445,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsReuseForEach(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%REUSEFOREACH ") == false)
+            if (split.Content.StartsWith("<%REUSE_FOREACH ") == false)
             {
                 return false;
             }
@@ -539,7 +539,7 @@ namespace Toshal.Template
                 return false;
             }
 
-            tokenList.Add(new RemovePreviousNewLine(split));
+            tokenList.Add(new RemovePreviousNewLineToken(split));
 
             return true;
         }
@@ -551,7 +551,19 @@ namespace Toshal.Template
                 return false;
             }
 
-            tokenList.Add(new RemovePreviousChars(split));
+            tokenList.Add(new RemovePreviousCharsToken(split));
+
+            return true;
+        }
+
+        private bool HandleAsProcessTemplate(Split split, List<IToken> tokenList)
+        {
+            if (split.Content.StartsWith("<%PROCESS_TEMPLATE ") == false)
+            {
+                return false;
+            }
+
+            tokenList.Add(new ProcessTemplateToken(split));
 
             return true;
         }
@@ -612,6 +624,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleRemovePreviousChars(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandleAsProcessTemplate(split, tokenList))
                 {
                     continue;
                 }

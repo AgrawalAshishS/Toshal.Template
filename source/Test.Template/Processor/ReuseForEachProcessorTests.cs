@@ -20,7 +20,7 @@ namespace Test.Template
         [Test]
         public void ReUseForEachWithinLoop()
         {
-            string templateText = "<%FOREACH Users%><%=Name%> K:<%REUSEFOREACH Users Related%><%ENDFOR%>";
+            string templateText = "<%FOREACH Users%><%=Name%> K:<%REUSE_FOREACH Users Related%><%ENDFOR%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
@@ -56,7 +56,7 @@ namespace Test.Template
         [Test]
         public void ReUseForEachOutsideLoop()
         {
-            string templateText = "<%FOREACH Users%><%=Name%><%ENDFOR%><%REUSEFOREACH Users Related%>";
+            string templateText = "<%FOREACH Users%><%=Name%><%ENDFOR%><%REUSE_FOREACH Users Related%>";
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(templateText);
 
