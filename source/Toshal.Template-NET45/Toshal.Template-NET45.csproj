@@ -107,6 +107,9 @@
     <Compile Include="..\Toshal.Template\Tokens\ContentToken.cs">
       <Link>Tokens\ContentToken.cs</Link>
     </Compile>
+    <Compile Include="..\Toshal.Template\Tokens\ContextAsStringToken.cs">
+      <Link>Tokens\ContextAsStringToken.cs</Link>
+    </Compile>
     <Compile Include="..\Toshal.Template\Tokens\ElseToken.cs">
       <Link>Tokens\ElseToken.cs</Link>
     </Compile>

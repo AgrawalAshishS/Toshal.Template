@@ -532,7 +532,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleRemovePreviousNewLine(Split split, List<IToken> tokenList)
+        private bool HandledAsRemovePreviousNewLine(Split split, List<IToken> tokenList)
         {
             if (split.Content != "<%REMOVE_PREVIOUS_NEW_LINE%>")
             {
@@ -544,7 +544,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleRemovePreviousChars(Split split, List<IToken> tokenList)
+        private bool HandledAsRemovePreviousChars(Split split, List<IToken> tokenList)
         {
             if (split.Content.StartsWith("<%REMOVE_PREVIOUS ") == false)
             {
@@ -556,7 +556,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleAsProcessTemplate(Split split, List<IToken> tokenList)
+        private bool HandledAsProcessTemplate(Split split, List<IToken> tokenList)
         {
             if (split.Content.StartsWith("<%PROCESS_TEMPLATE ") == false)
             {
@@ -564,6 +564,18 @@ namespace Toshal.Template
             }
 
             tokenList.Add(new ProcessTemplateToken(split));
+
+            return true;
+        }
+
+        private bool HandledAsContextAsString(Split split, List<IToken> tokenList)
+        {
+            if (split.Content != "<%CONTEXT_AS_STRING%>")
+            {
+                return false;
+            }
+
+            tokenList.Add(new ContextAsStringToken(split));
 
             return true;
         }
@@ -618,17 +630,22 @@ namespace Toshal.Template
                     continue;
                 }
 
-                if (this.HandleRemovePreviousNewLine(split, tokenList))
+                if (this.HandledAsRemovePreviousNewLine(split, tokenList))
                 {
                     continue;
                 }
 
-                if (this.HandleRemovePreviousChars(split, tokenList))
+                if (this.HandledAsRemovePreviousChars(split, tokenList))
                 {
                     continue;
                 }
 
-                if (this.HandleAsProcessTemplate(split, tokenList))
+                if (this.HandledAsProcessTemplate(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandledAsContextAsString(split, tokenList))
                 {
                     continue;
                 }

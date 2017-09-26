@@ -337,6 +337,18 @@ namespace Toshal.Template
             return true;
         }
 
+        private bool HandleContextAsString(StringBuilder output, IToken token, object context)
+        {
+            var contextToken = token as ContextAsStringToken;
+            if (contextToken == null) return false;
+
+            if (context == null) return true;
+
+            output.Append(context.ToString());
+
+            return true;
+        }
+
         /// <summary>
         ///     The process.
         /// </summary>
@@ -396,6 +408,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandleProcessTemplateToken(output, token, context, parentContext, customTokens))
+                {
+                    continue;
+                }
+
+                if (this.HandleContextAsString(output, token, context))
                 {
                     continue;
                 }
