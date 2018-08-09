@@ -403,5 +403,7 @@ namespace Test.Template
             Assert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
             Assert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
         }
+
+        
     }
 }

@@ -44,14 +44,21 @@ namespace Toshal.Template
         public ConditionArgs(ConditionToken token, object context, List<object> parentContext)
             : base(token.Name, context, parentContext)
         {
+            this.Attributes = token.Attributes;
         }
 
         public ConditionArgs(ConditionArgs args, object context)
             : base(args.Name, context, args.ParentContext)
         {
             ParentContext.Add(args.Context);
+            this.Attributes = args.Attributes;
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        public TokenAttributeDictionary Attributes { get; private set; }
     }
 }

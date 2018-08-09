@@ -74,11 +74,14 @@ namespace Toshal.Template.Tokens
                 throw new TokenMissingNameException(split);
             }
 
+
             if (Name.StartsWith("not "))
             {
                 this.IsPositive = false;
                 Name = Name.Substring(4);
             }
+
+            this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, Name, this.Attributes);
         }
 
         #endregion
@@ -96,6 +99,11 @@ namespace Toshal.Template.Tokens
         ///     Gets the name.
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        public TokenAttributeDictionary Attributes { get; private set; } = new TokenAttributeDictionary();
 
         #endregion
     }

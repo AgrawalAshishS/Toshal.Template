@@ -217,7 +217,7 @@ namespace Toshal.Template
             if (reuseForEachToken == null) return false;
             if (this.LoopValueProvider == null) return true;
 
-            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext);
+            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, reuseForEachToken.ExistingForEachToken.Attributes);
             return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken, customTokens);
         }
 

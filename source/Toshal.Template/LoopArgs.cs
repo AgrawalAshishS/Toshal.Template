@@ -41,9 +41,10 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        public LoopArgs(string loopName, object context, List<object> parentContext)
+        public LoopArgs(string loopName, object context, List<object> parentContext, TokenAttributeDictionary attributes)
             : base(loopName, context, parentContext)
         {
+            this.Attributes = attributes;
         }
 
         /// <summary>
@@ -56,16 +57,23 @@ namespace Toshal.Template
         ///     The context.
         /// </param>
         public LoopArgs(ForEachToken token, object context, List<object> parentContext)
-            : this(token.Name, context, parentContext)
+            : base(token.Name, context, parentContext)
         {
+            this.Attributes = token.Attributes;
         }
 
         public LoopArgs(LoopArgs args, object context)
-            : this(args.Name, context, args.ParentContext)
+            : base(args.Name, context, args.ParentContext)
         {
             ParentContext.Add(args.Context);
+            this.Attributes = args.Attributes;
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        public TokenAttributeDictionary Attributes { get; private set; }
     }
 }

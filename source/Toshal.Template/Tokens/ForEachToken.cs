@@ -74,6 +74,8 @@ namespace Toshal.Template.Tokens
                 throw new TokenMissingNameException(split);
             }
 
+            this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, Name, this.Attributes);
+
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
         }
@@ -81,6 +83,11 @@ namespace Toshal.Template.Tokens
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        /// Gets the attributes.
+        /// </summary>
+        public TokenAttributeDictionary Attributes { get; private set; } = new TokenAttributeDictionary();
 
         /// <summary>
         ///     Gets the after alt row tokens.
