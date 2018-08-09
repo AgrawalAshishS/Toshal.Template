@@ -159,3 +159,4 @@ $RECYCLE.BIN/
 /RecKprs.SignalR.EventPublisher/Scripts
 nuget.exe
 _distribution/
+/source/Test.Template/project.lock.json

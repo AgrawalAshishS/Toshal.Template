@@ -1,5 +1,5 @@
 Param(
-    [string]$version = "1.0.23.0",
+    [string]$version = "1.0.24.0",
 	[string]$buildNumber = "0",
 	[string]$preRelease = $null
 )
@@ -23,6 +23,10 @@ gci .\source -Recurse "packages.config" |% {
 }
 
 .\.nuget\nuget.exe restore .\.nuget\packages.config -o .\source\packages
+
+cd source
+dotnet restore
+cd ..
 
 Import-Module .\source\packages\psake.4.4.1\tools\psake.psm1
 
