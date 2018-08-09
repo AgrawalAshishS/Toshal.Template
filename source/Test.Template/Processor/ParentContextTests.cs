@@ -71,7 +71,7 @@ namespace Test.Template
                 return new List<int>() { 1, 2 };
             };
             processor.TokenValueProvider = (args) => {
-                Assert.AreEqual(2, args.ParentContext.Count);
+                Assert.AreEqual(3, args.ParentContext.Count);
                 calledToken = true;
                 return "abc";
             };

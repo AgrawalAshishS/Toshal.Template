@@ -61,7 +61,14 @@ namespace Toshal.Template
         {
             this.Attributes = token.Attributes;
         }
-        
+
+        public TokenArgs(TokenArgs args, object context)
+            : base(args.Name, context, args.ParentContext)
+        {
+            ParentContext.Add(args.Context);
+            this.Attributes = args.Attributes;
+        }
+
         #endregion
 
         #region Public Properties

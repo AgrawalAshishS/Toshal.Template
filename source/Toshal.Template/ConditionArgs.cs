@@ -46,6 +46,12 @@ namespace Toshal.Template
         {
         }
 
+        public ConditionArgs(ConditionArgs args, object context)
+            : base(args.Name, context, args.ParentContext)
+        {
+            ParentContext.Add(args.Context);
+        }
+
         #endregion
     }
 }

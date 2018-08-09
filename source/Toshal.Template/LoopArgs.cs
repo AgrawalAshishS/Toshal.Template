@@ -60,6 +60,12 @@ namespace Toshal.Template
         {
         }
 
+        public LoopArgs(LoopArgs args, object context)
+            : this(args.Name, context, args.ParentContext)
+        {
+            ParentContext.Add(args.Context);
+        }
+
         #endregion
     }
 }
