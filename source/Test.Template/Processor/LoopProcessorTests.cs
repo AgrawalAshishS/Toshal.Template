@@ -555,5 +555,38 @@ namespace Test.Template
             StringBuilder result = processor.Process(process);
             Assert.AreEqual("-1=2+3!", result.ToString());
         }
+
+
+        [Test]
+        public void ForEachParentContextMaintained()
+        {
+            string templateText = "<%FOREACH LoopName%>";
+            templateText += "<%HEADER%><%=my_count%><%ENDHEADER%>";
+            templateText += "<%ROW%><%=Value%><%ENDROW%>";
+            templateText += "<%ENDFOR%>";
+
+            var parser = new Parser();
+            List<IToken> tokens = parser.Parse(templateText);
+
+            var processor = new Processor();
+            processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
+            processor.TokenValueProvider = (TokenArgs args) =>
+            {
+                if (args.Name == "my_count")
+                {
+                    Assert.AreEqual(2, args.ParentContext.Count);
+                    Assert.IsInstanceOf<List<int>>(args.Context);
+                    return ((List<int>)args.Context).Count.ToString();
+                }
+                Assert.AreEqual(3, args.ParentContext.Count);
+                return args.Context.ToString();
+            };
+
+            var process = new ProcessorArgs(tokens);
+            process.Context = "ParentContext";
+
+            StringBuilder result = processor.Process(process);
+            Assert.AreEqual("3123", result.ToString());
+        }
     }
 }

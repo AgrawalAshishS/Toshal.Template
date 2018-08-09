@@ -87,8 +87,6 @@ namespace Toshal.Template
 
         #endregion
 
-        #region Methods
-
         /// <summary>
         ///     The handle condition token.
         /// </summary>
@@ -455,10 +453,12 @@ namespace Toshal.Template
                 return true;
             }
 
+            args.ParentContext.Add(val);
+
             if (forEachToken.HeaderTokens.Count > 0)
             {
                 var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, forEachToken.HeaderTokens, context, args.ParentContext, newCustomTokens);
+                this.Process(output, forEachToken.HeaderTokens, val, args.ParentContext, newCustomTokens);
             }
 
             for (var i = 0; i < val.Count; i++)
@@ -528,12 +528,12 @@ namespace Toshal.Template
             if (forEachToken.FooterTokens.Count > 0)
             {
                 var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, forEachToken.FooterTokens, context, args.ParentContext, newCustomTokens);
+                this.Process(output, forEachToken.FooterTokens, val, args.ParentContext, newCustomTokens);
             }
+
+            args.ParentContext.Remove(val);
 
             return true;
         }
-
-        #endregion
     }
 }
