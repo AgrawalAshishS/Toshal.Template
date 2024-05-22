@@ -244,10 +244,10 @@ namespace Toshal.Template
             var val = this.WithValueProvider(args);
             if (val != null)
             {
-                parentContext.Add(val);
+                args.ParentContext.Add(val);
                 var newCustomTokens = new Dictionary<string, string>(customTokens, StringComparer.OrdinalIgnoreCase); // Use StringComparer for better performance
                 this.Process(output, withToken.InnerTokens, val, parentContext, newCustomTokens);
-                parentContext.Remove(val);
+                args.ParentContext.Remove(val);
             }
 
             return true;
