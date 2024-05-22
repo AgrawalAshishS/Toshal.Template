@@ -48,7 +48,7 @@ namespace Toshal.Template
         public StringBuilder Process(ProcessorArgs args)
         {
             var retVal = new StringBuilder();
-            var parentContext = new List<object>();
+            var parentContext = new List<object>(1); // Pre-allocate with initial capacity
             if (args.Context != null) { parentContext.Add(args.Context); }
 
             this.Process(retVal, args.TokenList, args.Context, parentContext, new Dictionary<string, string>());
@@ -245,7 +245,7 @@ namespace Toshal.Template
             if (val != null)
             {
                 parentContext.Add(val);
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                var newCustomTokens = new Dictionary<string, string>(customTokens, StringComparer.Ordinal); // Use StringComparer for better performance
                 this.Process(output, withToken.InnerTokens, val, parentContext, newCustomTokens);
                 parentContext.Remove(val);
             }
@@ -276,14 +276,7 @@ namespace Toshal.Template
             var valueOutput = new StringBuilder();
             this.Process(valueOutput, setToken.InnerTokens, context, parentContext, customTokens);
 
-            if (customTokens.ContainsKey(setToken.Name) == false)
-            {
-                customTokens.Add(setToken.Name, valueOutput.ToString());
-            }
-            else
-            {
-                customTokens[setToken.Name] = valueOutput.ToString();
-            }
+            customTokens[setToken.Name] = valueOutput.ToString(); // Simplify dictionary update
 
             return true;
         }
@@ -295,11 +288,11 @@ namespace Toshal.Template
 
             if (output.Length == 0) return true;
 
-            if (output[output.Length - 1] == '\n')
-                output = output.Remove(output.Length - 1, 1);
+            if (output.Length > 0 && output[output.Length - 1] == '\n')
+                output.Length--;
 
-            if (output[output.Length - 1] == '\r')
-                output = output.Remove(output.Length - 1, 1);
+            if (output.Length > 0 && output[output.Length - 1] == '\r')
+                output.Length--;
 
             return true;
         }
@@ -312,7 +305,7 @@ namespace Toshal.Template
             var count = removeToken.CharCount;
             if (output.Length < removeToken.CharCount) count = output.Length;
 
-            output = output.Remove(output.Length - count, count);
+            output.Length -= count;
 
             return true;
         }
@@ -328,7 +321,7 @@ namespace Toshal.Template
             var val = this.ProcessTemplateValueProvider(args);
             if (val != null)
             {
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
+                var newCustomTokens = new Dictionary<string, string>(customTokens, StringComparer.Ordinal); // Use StringComparer for better performance
                 this.Process(output, val, context, parentContext, newCustomTokens);
             }
 
@@ -439,7 +432,7 @@ namespace Toshal.Template
         /// </returns>
         private bool ProcessForEach(StringBuilder output, object context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
         {
-            var rowLevelShared = new Dictionary<string, string>(customTokens);
+            var rowLevelShared = new Dictionary<string, string>(customTokens, StringComparer.Ordinal); // Use StringComparer for better performance
 
             var val = this.LoopValueProvider(args);
             if (val == null || val.Count == 0)
@@ -507,7 +500,7 @@ namespace Toshal.Template
 
                 if (beforeTokens.Count > 0)
                 {
-                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
+                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared, StringComparer.Ordinal); // Use StringComparer for better performance
                     this.Process(output, beforeTokens, item, args.ParentContext, newCustomTokens);
                 }
 

@@ -59,7 +59,7 @@ namespace Toshal.Template
         /// </exception>
         public List<IToken> Parse(string templateText)
         {
-            var retList = new List<IToken>();
+            var retList = new List<IToken>(templateText.Length / 10); // Pre-allocate based on an estimate
 
             this._splits = SplitTemplateByTokens(templateText);
 
@@ -81,8 +81,8 @@ namespace Toshal.Template
 
         private List<Split> SplitTemplateByTokens(string templateText)
         {
-            var retList = new List<Split>();
-            var split = new Split();
+            var retList = new List<Split>(templateText.Length / 20); // Pre-allocate based on an estimate
+            var split = new Split { Content = new StringBuilder() }; // Use StringBuilder for content
             int lineNumber = 1;
             int charIndex = 1;
 
@@ -102,7 +102,7 @@ namespace Toshal.Template
                             split = new Split();
                             split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
-                            split.Content = "<%";
+                            split.Content.Append("<%");
                             i++;
                             charIndex++;
                             charIndex++;
@@ -120,7 +120,7 @@ namespace Toshal.Template
                             {
                                 retList.Add(split);
                             }
-                            split.Content += "%>";
+                            split.Content.Append("%>");
                             split = new Split();
                             split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
@@ -132,7 +132,7 @@ namespace Toshal.Template
                     }
                 }
 
-                split.Content += templateText[i];
+                split.Content.Append(templateText[i]);
                 charIndex++;
                 if (templateText[i] == '\n')
                 {
@@ -143,6 +143,7 @@ namespace Toshal.Template
 
             if (split.Content.Length > 0)
             {
+                split.Content = split.Content.ToString();
                 retList.Add(split);
             }
 
