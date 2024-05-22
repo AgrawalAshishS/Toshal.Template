@@ -41,7 +41,7 @@ namespace Toshal.Template
         /// <param name="context">
         /// The context.
         /// </param>
-        public ProcessTemplateArgs(ProcessTemplateToken token, object context, List<object> parentContext)
+        public ProcessTemplateArgs(ProcessTemplateToken token, object context, IReadOnlyList<object> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
