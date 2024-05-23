@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -92,7 +93,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Name:My User", result.ToString());
+            ClassicAssert.AreEqual("Name:My User", result.ToString());
         }
 
         [Test]
@@ -116,7 +117,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Name:My User", result.ToString());
+            ClassicAssert.AreEqual("Name:My User", result.ToString());
         }
 
         [Test]
@@ -140,7 +141,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
         }
 
         [Test]
@@ -173,7 +174,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
         }
 
         [Test]
@@ -207,7 +208,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
         }
     }
 }

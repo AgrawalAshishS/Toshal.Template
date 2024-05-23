@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -20,7 +21,7 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(templateText, result.ToString());
+            ClassicAssert.AreEqual(templateText, result.ToString());
         }
 
         [Test]
@@ -31,7 +32,7 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -45,7 +46,7 @@ namespace Test.Template
             processor.TokenValueProvider = (TokenArgs arg) => "some";
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual("some", result.ToString());
+            ClassicAssert.AreEqual("some", result.ToString());
         }
 
         [Test]
@@ -59,7 +60,7 @@ namespace Test.Template
             processor.TokenValueProvider = (TokenArgs args) => args.Attributes["attr"];
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual("Name", result.ToString());
+            ClassicAssert.AreEqual("Name", result.ToString());
         }
 
         [Test]
@@ -83,7 +84,7 @@ namespace Test.Template
             };
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual("First Value, Second Value", result.ToString());
+            ClassicAssert.AreEqual("First Value, Second Value", result.ToString());
         }
         
     }

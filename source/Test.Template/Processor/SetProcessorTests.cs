@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -22,7 +23,7 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("MyValue", result.ToString());
+            ClassicAssert.AreEqual("MyValue", result.ToString());
         }
 
         [Test]
@@ -35,7 +36,7 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -50,7 +51,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("MyValue", result.ToString());
+            ClassicAssert.AreEqual("MyValue", result.ToString());
         }
 
         [Test]
@@ -65,7 +66,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Out Out  In Out", result.ToString());
+            ClassicAssert.AreEqual("Out Out  In Out", result.ToString());
         }
 
         [Test]
@@ -79,7 +80,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
 
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("MyValueAbc", result.ToString());
+            ClassicAssert.AreEqual("MyValueAbc", result.ToString());
         }
     }
 }

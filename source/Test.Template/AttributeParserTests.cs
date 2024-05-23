@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using System.Text;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
@@ -19,12 +20,12 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (NamedToken)result[0];
-            Assert.AreEqual("token", token.Name);
-            Assert.AreEqual(2, token.Attributes.Count);
-            Assert.AreEqual("Value", token.Attributes["name"]);
-            Assert.AreEqual("value2", token.Attributes["name2"]);
+            ClassicAssert.AreEqual("token", token.Name);
+            ClassicAssert.AreEqual(2, token.Attributes.Count);
+            ClassicAssert.AreEqual("Value", token.Attributes["name"]);
+            ClassicAssert.AreEqual("value2", token.Attributes["name2"]);
         }
 
         [Test]
@@ -102,12 +103,12 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (WithToken)result[0];
-            Assert.AreEqual("withname", token.Name);
-            Assert.AreEqual(2, token.Attributes.Count);
-            Assert.AreEqual("Value", token.Attributes["name"]);
-            Assert.AreEqual("value2", token.Attributes["name2"]);
+            ClassicAssert.AreEqual("withname", token.Name);
+            ClassicAssert.AreEqual(2, token.Attributes.Count);
+            ClassicAssert.AreEqual("Value", token.Attributes["name"]);
+            ClassicAssert.AreEqual("value2", token.Attributes["name2"]);
         }
 
         [Test]
@@ -124,9 +125,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
-            Assert.AreEqual(true, ((ConditionToken)result[0]).IsPositive);
-            Assert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
+            ClassicAssert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
+            ClassicAssert.AreEqual(true, ((ConditionToken)result[0]).IsPositive);
+            ClassicAssert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
         }
 
         [Test]
@@ -143,9 +144,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
-            Assert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
-            Assert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
+            ClassicAssert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
+            ClassicAssert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
+            ClassicAssert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
         }
 
         [Test]
@@ -158,15 +159,15 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (ForEachToken)result[0];
-            Assert.AreEqual("name", token.Name);
-            Assert.AreEqual(1, token.Attributes.Count);
-            Assert.AreEqual("xyz", token.Attributes.GetValue("abc", "pqr"));
-            Assert.AreEqual(1, token.RowTokens.Count);
+            ClassicAssert.AreEqual("name", token.Name);
+            ClassicAssert.AreEqual(1, token.Attributes.Count);
+            ClassicAssert.AreEqual("xyz", token.Attributes.GetValue("abc", "pqr"));
+            ClassicAssert.AreEqual(1, token.RowTokens.Count);
 
             var content = (ContentToken)token.RowTokens[0];
-            Assert.AreEqual("Content within for", content.Content);
+            ClassicAssert.AreEqual("Content within for", content.Content);
         }
     }
 }

@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -50,7 +51,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1 K:2 K:3 K:4 K:", result.ToString());
+            ClassicAssert.AreEqual("1 K:2 K:3 K:4 K:", result.ToString());
         }
 
         [Test]
@@ -84,7 +85,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1234", result.ToString());
+            ClassicAssert.AreEqual("1234", result.ToString());
         }
     }
 }

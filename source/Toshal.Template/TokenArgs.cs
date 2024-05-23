@@ -41,7 +41,7 @@ namespace Toshal.Template
         /// <param name="context">
         /// The context.
         /// </param>
-        public TokenArgs(NamedToken token, object context, IReadOnlyList<object> parentContext)
+        public TokenArgs(NamedToken token, object context, List<object> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
@@ -56,13 +56,13 @@ namespace Toshal.Template
         /// <param name="context">
         /// The context.
         /// </param>
-        public TokenArgs(WithToken token, object context, IReadOnlyList<object> parentContext)
+        public TokenArgs(WithToken token, object context, List<object> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
 
-        public TokenArgs(TokenArgs args, object context) : base(args.Name, context, args.ParentContext)
+        public TokenArgs(TokenArgs args, object context)
             : base(args.Name, context, args.ParentContext)
         {
             ParentContext.Add(args.Context);

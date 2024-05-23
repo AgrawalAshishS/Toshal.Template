@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using System.Text;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
@@ -27,7 +28,7 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -41,7 +42,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = null;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -55,7 +56,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = "testing";
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("testing", result.ToString());
+            ClassicAssert.AreEqual("testing", result.ToString());
         }
 
         [Test]
@@ -69,7 +70,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = parser;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Toshal.Template.Parser", result.ToString());
+            ClassicAssert.AreEqual("Toshal.Template.Parser", result.ToString());
         }
     }
 }

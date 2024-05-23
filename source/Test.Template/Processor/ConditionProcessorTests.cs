@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -35,7 +36,7 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -49,7 +50,7 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => false;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -63,7 +64,7 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => true;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Inner Content", result.ToString());
+            ClassicAssert.AreEqual("Inner Content", result.ToString());
         }
 
         [Test]
@@ -82,14 +83,14 @@ namespace Test.Template
             process.Context = user;
 
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
 
             user = new TestUser { Name = "ConditionName" };
             process = new ProcessorArgs(tokens);
             process.Context = user;
 
             result = processor.Process(process);
-            Assert.AreEqual("Inner Content", result.ToString());
+            ClassicAssert.AreEqual("Inner Content", result.ToString());
         }
 
         [Test]
@@ -115,7 +116,7 @@ namespace Test.Template
 
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("Content within IF", result.ToString());
+            ClassicAssert.AreEqual("Content within IF", result.ToString());
         }
 
         [Test]
@@ -141,7 +142,7 @@ namespace Test.Template
 
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("More content", result.ToString());
+            ClassicAssert.AreEqual("More content", result.ToString());
         }
 
         [Test]
@@ -166,7 +167,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("Content within IF", result.ToString());
+            ClassicAssert.AreEqual("Content within IF", result.ToString());
         }
 
         [Test]
@@ -201,7 +202,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("More content", result.ToString());
+            ClassicAssert.AreEqual("More content", result.ToString());
         }
 
         [Test]
@@ -228,7 +229,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("Else Content", result.ToString());
+            ClassicAssert.AreEqual("Else Content", result.ToString());
         }
 
         [Test]
@@ -254,7 +255,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -268,7 +269,7 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => false;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Inner Content", result.ToString());
+            ClassicAssert.AreEqual("Inner Content", result.ToString());
         }
 
         [Test]
@@ -282,7 +283,7 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => true;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
     }
 }

@@ -40,7 +40,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        protected ArgsBase(string name, object context, IReadOnlyList<object> parentContext)
+        protected ArgsBase(string name, object context, List<object> parentContext)
         {
             this.Name = name;
             this.Context = context;

@@ -39,7 +39,7 @@ namespace Toshal.Template
         /// <param name="tokenList">
         ///     The token list.
         /// </param>
-        public ProcessorArgs(IReadOnlyList<IToken> tokenList)
+        public ProcessorArgs(List<IToken> tokenList)
         {
             this.TokenList = tokenList;
         }

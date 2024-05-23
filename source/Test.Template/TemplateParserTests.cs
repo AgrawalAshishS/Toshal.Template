@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -19,9 +20,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
         }
 
         [Test]
@@ -38,7 +39,7 @@ namespace Test.Template
                 }
                 catch (ParserException ex)
                 {
-                    Assert.AreEqual("<%%>", ex.Split.Content);
+                    ClassicAssert.AreEqual("<%%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -50,8 +51,8 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<NamedToken>(result[0]);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<NamedToken>(result[0]);
         }
 
         [Test]
@@ -60,8 +61,8 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("name", ((NamedToken)result[0]).Name);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual("name", ((NamedToken)result[0]).Name);
         }
 
         [Test]
@@ -76,7 +77,7 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.AreEqual("<%=%>", ex.Split.Content);
+                    ClassicAssert.AreEqual("<%=%>", ex.Split.Content);
                     throw;
                 }
             });
@@ -99,11 +100,11 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(4, result.Count);
-            Assert.AreEqual(part1, ((ContentToken)result[0]).Content);
-            Assert.AreEqual(part3.ToLower(), ((NamedToken)result[1]).Name);
-            Assert.AreEqual(part5, ((ContentToken)result[2]).Content);
-            Assert.AreEqual(part7.ToLower(), ((NamedToken)result[3]).Name);
+            ClassicAssert.AreEqual(4, result.Count);
+            ClassicAssert.AreEqual(part1, ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual(part3.ToLower(), ((NamedToken)result[1]).Name);
+            ClassicAssert.AreEqual(part5, ((ContentToken)result[2]).Content);
+            ClassicAssert.AreEqual(part7.ToLower(), ((NamedToken)result[3]).Name);
         }
 
         [Test]
@@ -113,9 +114,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
         }
 
         [Test]
@@ -125,9 +126,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
         }
 
         [Test]
@@ -137,9 +138,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
         }
     }
 }

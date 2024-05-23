@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -37,7 +38,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("My User", result.ToString());
+            ClassicAssert.AreEqual("My User", result.ToString());
         }
 
         [Test]
@@ -64,7 +65,7 @@ namespace Test.Template
             process.Context = new { Name = "Wrong User" };
 
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -91,13 +92,13 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user1;
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Last Name", result.ToString());
+            ClassicAssert.AreEqual("Last Name", result.ToString());
 
             process = new ProcessorArgs(tokens);
             process.Context = user2;
 
             result = processor.Process(process);
-            Assert.AreEqual("First Name", result.ToString());
+            ClassicAssert.AreEqual("First Name", result.ToString());
         }
 
         [Test]
@@ -120,7 +121,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("+1!", result.ToString());
+            ClassicAssert.AreEqual("+1!", result.ToString());
         }
     }
 }

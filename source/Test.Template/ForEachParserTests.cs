@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -23,13 +24,13 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (ForEachToken)result[0];
-            Assert.AreEqual("name", token.Name);
-            Assert.AreEqual(1, token.RowTokens.Count);
+            ClassicAssert.AreEqual("name", token.Name);
+            ClassicAssert.AreEqual(1, token.RowTokens.Count);
 
             var content = (ContentToken)token.RowTokens[0];
-            Assert.AreEqual("Content within for", content.Content);
+            ClassicAssert.AreEqual("Content within for", content.Content);
         }
 
         [Test]
@@ -47,8 +48,8 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
+                    ClassicAssert.AreEqual("name", ex.TokenName);
+                    ClassicAssert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -68,7 +69,7 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.AreEqual("<%FOREACH %>", ex.Split.Content);
+                    ClassicAssert.AreEqual("<%FOREACH %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -84,13 +85,13 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (ForEachToken)result[0];
-            Assert.AreEqual("name", token.Name);
-            Assert.AreEqual(1, token.RowTokens.Count);
+            ClassicAssert.AreEqual("name", token.Name);
+            ClassicAssert.AreEqual(1, token.RowTokens.Count);
 
             var content = (ContentToken)token.RowTokens[0];
-            Assert.AreEqual("Content within for", content.Content);
+            ClassicAssert.AreEqual("Content within for", content.Content);
         }
 
         [Test]
@@ -109,9 +110,9 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%ROW%>", ex.Split.Content);
-                    Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
+                    ClassicAssert.AreEqual("name", ex.TokenName);
+                    ClassicAssert.AreEqual("<%ROW%>", ex.Split.Content);
+                    ClassicAssert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
             });
@@ -132,9 +133,9 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%ROW%>", ex.Split.Content);
-                    Assert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
+                    ClassicAssert.AreEqual("name", ex.TokenName);
+                    ClassicAssert.AreEqual("<%ROW%>", ex.Split.Content);
+                    ClassicAssert.AreEqual("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
             });
@@ -156,8 +157,8 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.AreEqual("name", ex.TokenName);
-                    Assert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
+                    ClassicAssert.AreEqual("name", ex.TokenName);
+                    ClassicAssert.AreEqual("<%FOREACH Name %>", ex.Split.Content);
                     throw;
                 }
             });
@@ -199,14 +200,14 @@ namespace Test.Template
             var assertMethod = new Action<List<IToken>, string>(
                 (tokenList, innerContent) =>
                 {
-                    Assert.AreEqual(1, tokenList.Count);
+                    ClassicAssert.AreEqual(1, tokenList.Count);
                     var content = (ContentToken)tokenList[0];
-                    Assert.AreEqual(innerContent, content.Content);
+                    ClassicAssert.AreEqual(innerContent, content.Content);
                 });
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (ForEachToken)result[0];
-            Assert.AreEqual("name", token.Name);
+            ClassicAssert.AreEqual("name", token.Name);
 
             assertMethod(token.NoRecordTokens, "Content within NORECORD");
             assertMethod(token.HeaderTokens, "Content within HEADER");
@@ -247,13 +248,13 @@ namespace Test.Template
                     }
                     catch (TokenNotClosedException ex)
                     {
-                        Assert.AreEqual("name", ex.TokenName);
-                        Assert.AreEqual("<%" + token + "%>", ex.Split.Content);
-                        Assert.AreEqual("<%" + token + "%> not closed for <%FOREACH Name %>", ex.Message);
+                        ClassicAssert.AreEqual("name", ex.TokenName);
+                        ClassicAssert.AreEqual("<%" + token + "%>", ex.Split.Content);
+                        ClassicAssert.AreEqual("<%" + token + "%> not closed for <%FOREACH Name %>", ex.Message);
                         return;
                     }
 
-                    Assert.IsTrue(false); //this is to ensure try catch actually ran.
+                    ClassicAssert.IsTrue(false); //this is to ensure try catch actually ran.
                 });
 
             assertMethod("NORECORD");
@@ -384,14 +385,14 @@ namespace Test.Template
             var assertMethod = new Action<List<IToken>, string>(
                 (tokenList, innerContent) =>
                 {
-                    Assert.AreEqual(1, tokenList.Count);
+                    ClassicAssert.AreEqual(1, tokenList.Count);
                     var content = (ContentToken)tokenList[0];
-                    Assert.AreEqual(innerContent, content.Content);
+                    ClassicAssert.AreEqual(innerContent, content.Content);
                 });
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (ForEachToken)result[0];
-            Assert.AreEqual("name", token.Name);
+            ClassicAssert.AreEqual("name", token.Name);
 
             assertMethod(token.HeaderTokens, "Content within HEADER");
 

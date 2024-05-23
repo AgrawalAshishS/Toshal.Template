@@ -160,3 +160,4 @@ $RECYCLE.BIN/
 nuget.exe
 _distribution/
 /source/Test.Template/project.lock.json
+.aider*

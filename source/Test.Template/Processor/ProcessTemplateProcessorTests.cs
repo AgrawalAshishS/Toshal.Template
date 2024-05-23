@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -21,12 +22,12 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(mainTemplateText);
 
-            Assert.AreEqual(2, tokens.Count);
-            Assert.IsInstanceOf<ContentToken>(tokens[0]);
-            Assert.IsInstanceOf<ProcessTemplateToken>(tokens[1]);
-            Assert.AreEqual("This is ", ((ContentToken)tokens[0]).Content);
-            Assert.AreEqual("sample", ((ProcessTemplateToken)tokens[1]).Name);
-            Assert.AreEqual("abc", ((ProcessTemplateToken)tokens[1]).GetAttribute("context", "xyz"));
+            ClassicAssert.AreEqual(2, tokens.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(tokens[0]);
+            ClassicAssert.IsInstanceOf<ProcessTemplateToken>(tokens[1]);
+            ClassicAssert.AreEqual("This is ", ((ContentToken)tokens[0]).Content);
+            ClassicAssert.AreEqual("sample", ((ProcessTemplateToken)tokens[1]).Name);
+            ClassicAssert.AreEqual("abc", ((ProcessTemplateToken)tokens[1]).GetAttribute("context", "xyz"));
 
             var processor = new Processor();
             processor.ProcessTemplateValueProvider = (args) => {
@@ -34,7 +35,7 @@ namespace Test.Template
             };
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
 
-            Assert.AreEqual("This is sample.", result.ToString());
+            ClassicAssert.AreEqual("This is sample.", result.ToString());
         }
         
     }

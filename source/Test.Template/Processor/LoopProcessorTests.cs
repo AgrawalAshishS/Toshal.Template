@@ -6,6 +6,7 @@ using Test.Template.SupportClass;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
@@ -58,7 +59,7 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -72,7 +73,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -88,7 +89,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1", result.ToString());
+            ClassicAssert.AreEqual("1", result.ToString());
         }
 
         [Test]
@@ -104,7 +105,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("123", result.ToString());
+            ClassicAssert.AreEqual("123", result.ToString());
         }
 
         [Test]
@@ -118,7 +119,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Some", result.ToString());
+            ClassicAssert.AreEqual("Some", result.ToString());
         }
 
         [Test]
@@ -132,7 +133,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("row content", result.ToString());
+            ClassicAssert.AreEqual("row content", result.ToString());
         }
 
         [Test]
@@ -147,7 +148,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("Nothing", result.ToString());
+            ClassicAssert.AreEqual("Nothing", result.ToString());
         }
 
         [Test]
@@ -161,7 +162,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("", result.ToString());
+            ClassicAssert.AreEqual("", result.ToString());
         }
 
         [Test]
@@ -175,7 +176,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("HeadFoot", result.ToString());
+            ClassicAssert.AreEqual("HeadFoot", result.ToString());
         }
 
         [Test]
@@ -189,7 +190,7 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("HeadFoot", result.ToString());
+            ClassicAssert.AreEqual("HeadFoot", result.ToString());
         }
 
         [Test]
@@ -205,7 +206,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("123", result.ToString());
+            ClassicAssert.AreEqual("123", result.ToString());
         }
 
         [Test]
@@ -221,7 +222,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("A1A2A3", result.ToString());
+            ClassicAssert.AreEqual("A1A2A3", result.ToString());
         }
 
         [Test]
@@ -237,7 +238,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1B2B3B", result.ToString());
+            ClassicAssert.AreEqual("1B2B3B", result.ToString());
         }
 
         [Test]
@@ -254,7 +255,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("A1BA2BA3B", result.ToString());
+            ClassicAssert.AreEqual("A1BA2BA3B", result.ToString());
         }
 
         [Test]
@@ -270,7 +271,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1A2B3A", result.ToString());
+            ClassicAssert.AreEqual("1A2B3A", result.ToString());
         }
 
         [Test]
@@ -294,7 +295,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1A=+2B!-3A=", result.ToString());
+            ClassicAssert.AreEqual("-1A=+2B!-3A=", result.ToString());
         }
 
         [Test]
@@ -316,7 +317,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1A=-2B=-3A=", result.ToString());
+            ClassicAssert.AreEqual("-1A=-2B=-3A=", result.ToString());
         }
 
         [Test]
@@ -339,7 +340,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1A=+2A!-3A=", result.ToString());
+            ClassicAssert.AreEqual("-1A=+2A!-3A=", result.ToString());
         }
 
         [Test]
@@ -359,7 +360,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1=3", result.ToString());
+            ClassicAssert.AreEqual("-1=3", result.ToString());
         }
 
         [Test]
@@ -380,7 +381,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1+2=3", result.ToString());
+            ClassicAssert.AreEqual("-1+2=3", result.ToString());
         }
 
         [Test]
@@ -401,7 +402,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1+2A=3", result.ToString());
+            ClassicAssert.AreEqual("-1+2A=3", result.ToString());
         }
 
         [Test]
@@ -422,7 +423,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1=23", result.ToString());
+            ClassicAssert.AreEqual("-1=23", result.ToString());
         }
 
         [Test]
@@ -444,7 +445,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1F!-2!-3!", result.ToString());
+            ClassicAssert.AreEqual("-1F!-2!-3!", result.ToString());
         }
 
         [Test]
@@ -465,7 +466,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("12-3=", result.ToString());
+            ClassicAssert.AreEqual("12-3=", result.ToString());
         }
 
         [Test]
@@ -487,7 +488,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1!-2!-3L!", result.ToString());
+            ClassicAssert.AreEqual("-1!-2!-3L!", result.ToString());
         }
 
         [Test]
@@ -508,7 +509,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-2=", result.ToString());
+            ClassicAssert.AreEqual("-2=", result.ToString());
         }
 
         [Test]
@@ -530,7 +531,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("1-2L!", result.ToString());
+            ClassicAssert.AreEqual("1-2L!", result.ToString());
         }
 
         [Test]
@@ -553,7 +554,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("-1=2+3!", result.ToString());
+            ClassicAssert.AreEqual("-1=2+3!", result.ToString());
         }
 
 
@@ -574,11 +575,11 @@ namespace Test.Template
             {
                 if (args.Name == "my_count")
                 {
-                    Assert.AreEqual(2, args.ParentContext.Count);
-                    Assert.IsInstanceOf<List<int>>(args.Context);
+                    ClassicAssert.AreEqual(2, args.ParentContext.Count);
+                    ClassicAssert.IsInstanceOf<List<int>>(args.Context);
                     return ((List<int>)args.Context).Count.ToString();
                 }
-                Assert.AreEqual(3, args.ParentContext.Count);
+                ClassicAssert.AreEqual(3, args.ParentContext.Count);
                 return args.Context.ToString();
             };
 
@@ -586,7 +587,7 @@ namespace Test.Template
             process.Context = "ParentContext";
 
             StringBuilder result = processor.Process(process);
-            Assert.AreEqual("3123", result.ToString());
+            ClassicAssert.AreEqual("3123", result.ToString());
         }
     }
 }

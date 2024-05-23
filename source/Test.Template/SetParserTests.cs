@@ -4,6 +4,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -18,13 +19,13 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(2, result.Count);
+            ClassicAssert.AreEqual(2, result.Count);
             var token = (SetToken)result[0];
-            Assert.AreEqual("MyTokenName".ToLower(), token.Name);
-            Assert.AreEqual(1, token.InnerTokens.Count);
+            ClassicAssert.AreEqual("MyTokenName".ToLower(), token.Name);
+            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
 
             var namedToken = (NamedToken)result[1];
-            Assert.AreEqual("MyTokenName".ToLower(), namedToken.Name);
+            ClassicAssert.AreEqual("MyTokenName".ToLower(), namedToken.Name);
         }
 
         [Test]
@@ -34,10 +35,10 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var token = (SetToken)result[0];
-            Assert.AreEqual("MyTokenName".ToLower(), token.Name);
-            Assert.AreEqual(0, token.InnerTokens.Count);
+            ClassicAssert.AreEqual("MyTokenName".ToLower(), token.Name);
+            ClassicAssert.AreEqual(0, token.InnerTokens.Count);
         }
     }
 }

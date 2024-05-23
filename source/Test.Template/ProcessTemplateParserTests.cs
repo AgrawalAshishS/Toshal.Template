@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -19,12 +20,12 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(mainTemplateText);
-            Assert.AreEqual(2, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.IsInstanceOf<ProcessTemplateToken>(result[1]);
-            Assert.AreEqual("This is ", ((ContentToken)result[0]).Content);
-            Assert.AreEqual("sample", ((ProcessTemplateToken)result[1]).Name);
-            Assert.AreEqual("abc", ((ProcessTemplateToken)result[1]).GetAttribute("context","xyz"));
+            ClassicAssert.AreEqual(2, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.IsInstanceOf<ProcessTemplateToken>(result[1]);
+            ClassicAssert.AreEqual("This is ", ((ContentToken)result[0]).Content);
+            ClassicAssert.AreEqual("sample", ((ProcessTemplateToken)result[1]).Name);
+            ClassicAssert.AreEqual("abc", ((ProcessTemplateToken)result[1]).GetAttribute("context","xyz"));
         }
     }
 }

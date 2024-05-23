@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -20,10 +21,10 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(2, result.Count);
+            ClassicAssert.AreEqual(2, result.Count);
             var token = (ReuseForEachToken)result[1];
-            Assert.AreEqual("newloopname", token.Name);
-            Assert.AreEqual("existingforeachname", token.ExistingForEachName);
+            ClassicAssert.AreEqual("newloopname", token.Name);
+            ClassicAssert.AreEqual("existingforeachname", token.ExistingForEachName);
         }
 
         [Test]
@@ -34,11 +35,11 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.AreEqual(1, result.Count);
+            ClassicAssert.AreEqual(1, result.Count);
             var forToken = (ForEachToken)result[0];
             var token = (ReuseForEachToken)forToken.RowTokens[0];
-            Assert.AreEqual("newloopname", token.Name);
-            Assert.AreEqual("existingforeachname", token.ExistingForEachName);
+            ClassicAssert.AreEqual("newloopname", token.Name);
+            ClassicAssert.AreEqual("existingforeachname", token.ExistingForEachName);
         }
 
         [Test]

@@ -2,6 +2,7 @@
 using System.Text;
 
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Test.Template.SupportClass;
 using Toshal.Template;
 using Toshal.Template.Tokens;
@@ -26,7 +27,7 @@ namespace Test.Template
 
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"My basic text 
+            ClassicAssert.AreEqual(@"My basic text 
 ", result.ToString());
         }
 
@@ -43,7 +44,7 @@ namespace Test.Template
 
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"My basic text", result.ToString());
+            ClassicAssert.AreEqual(@"My basic text", result.ToString());
         }
 
         [Test]
@@ -57,7 +58,7 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"", result.ToString());
+            ClassicAssert.AreEqual(@"", result.ToString());
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"My basic tex", result.ToString());
+            ClassicAssert.AreEqual(@"My basic tex", result.ToString());
         }
 
         [Test]
@@ -86,7 +87,7 @@ My basic text <%REMOVE_PREVIOUS 20%>";
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"", result.ToString());
+            ClassicAssert.AreEqual(@"", result.ToString());
         }
 
         [Test]
@@ -102,7 +103,7 @@ My basic text <%REMOVE_PREVIOUS 20%>";
             var processor = new Processor();
             processor.ConditionValueProvider = (arg) => false;
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            Assert.AreEqual(@"My basic text", result.ToString());
+            ClassicAssert.AreEqual(@"My basic text", result.ToString());
         }
     }
 }

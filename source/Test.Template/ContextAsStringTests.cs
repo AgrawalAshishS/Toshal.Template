@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 namespace Test.Template
 {
+    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -19,8 +20,8 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsInstanceOf<ContextAsStringToken>(result[0]);
+            ClassicAssert.AreEqual(1, result.Count);
+            ClassicAssert.IsInstanceOf<ContextAsStringToken>(result[0]);
         }
 
         [Test]
@@ -30,9 +31,9 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.AreEqual(2, result.Count);
-            Assert.IsInstanceOf<ContentToken>(result[0]);
-            Assert.IsInstanceOf<ContextAsStringToken>(result[1]);
+            ClassicAssert.AreEqual(2, result.Count);
+            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
+            ClassicAssert.IsInstanceOf<ContextAsStringToken>(result[1]);
         }
 
     }
