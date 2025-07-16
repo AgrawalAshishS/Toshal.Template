@@ -296,10 +296,10 @@ namespace Toshal.Template
             if (output.Length == 0) return true;
 
             if (output[output.Length - 1] == '\n')
-                output = output.Remove(output.Length - 1, 1);
+                output.Remove(output.Length - 1, 1);
 
-            if (output[output.Length - 1] == '\r')
-                output = output.Remove(output.Length - 1, 1);
+            if (output.Length > 0 && output[output.Length - 1] == '\r')
+                output.Remove(output.Length - 1, 1);
 
             return true;
         }
@@ -312,7 +312,7 @@ namespace Toshal.Template
             var count = removeToken.CharCount;
             if (output.Length < removeToken.CharCount) count = output.Length;
 
-            output = output.Remove(output.Length - count, count);
+            output.Remove(output.Length - count, count);
 
             return true;
         }

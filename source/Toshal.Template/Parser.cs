@@ -25,6 +25,7 @@ namespace Toshal.Template
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
@@ -83,6 +84,7 @@ namespace Toshal.Template
         {
             var retList = new List<Split>();
             var split = new Split();
+            var contentBuilder = new StringBuilder();
             int lineNumber = 1;
             int charIndex = 1;
 
@@ -94,15 +96,17 @@ namespace Toshal.Template
                     {
                         if (templateText[i + 1] == '%')
                         {
-                            if (split.Content.Length > 0)
+                            if (contentBuilder.Length > 0)
                             {
+                                split.Content = contentBuilder.ToString();
                                 retList.Add(split);
+                                contentBuilder.Clear();
                             }
 
                             split = new Split();
                             split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
-                            split.Content = "<%";
+                            contentBuilder.Append("<%");
                             i++;
                             charIndex++;
                             charIndex++;
@@ -116,11 +120,13 @@ namespace Toshal.Template
                     {
                         if (templateText[i + 1] == '>')
                         {
-                            if (split.Content.Length > 0)
+                            if (contentBuilder.Length > 0)
                             {
+                                split.Content = contentBuilder.ToString();
                                 retList.Add(split);
+                                contentBuilder.Clear();
                             }
-                            split.Content += "%>";
+                            split.Content += "%>" ;
                             split = new Split();
                             split.StartingPosition = charIndex;
                             split.LineNumber = lineNumber;
@@ -132,7 +138,7 @@ namespace Toshal.Template
                     }
                 }
 
-                split.Content += templateText[i];
+                contentBuilder.Append(templateText[i]);
                 charIndex++;
                 if (templateText[i] == '\n')
                 {
@@ -141,8 +147,9 @@ namespace Toshal.Template
                 }
             }
 
-            if (split.Content.Length > 0)
+            if (contentBuilder.Length > 0)
             {
+                split.Content = contentBuilder.ToString();
                 retList.Add(split);
             }
 
@@ -668,18 +675,15 @@ namespace Toshal.Template
                 return;
             }
 
+            var forEachTokenMap = this._allForEachTokens.ToDictionary(t => t.Name);
+
             foreach (var reuseForEachToken in this._allReuseForEachTokens)
             {
-                foreach (var forEachToken in this._allForEachTokens)
+                if (forEachTokenMap.TryGetValue(reuseForEachToken.ExistingForEachName, out var forEachToken))
                 {
-                    if (reuseForEachToken.ExistingForEachName == forEachToken.Name)
-                    {
-                        reuseForEachToken.ExistingForEachToken = forEachToken;
-                        break;
-                    }
+                    reuseForEachToken.ExistingForEachToken = forEachToken;
                 }
-
-                if (reuseForEachToken.ExistingForEachToken == null)
+                else
                 {
                     throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition);
                 }
