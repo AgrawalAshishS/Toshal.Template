@@ -62,6 +62,10 @@ namespace Toshal.Template
         {
             var retList = new List<IToken>();
 
+            // A parser can be used for many templates. Each template only sees its own FOREACH blocks.
+            this._allForEachTokens.Clear();
+            this._allReuseForEachTokens.Clear();
+
             this._splits = SplitTemplateByTokens(templateText);
 
             //this._splits =
@@ -675,13 +679,17 @@ namespace Toshal.Template
                 return;
             }
 
-            var forEachTokenMap = this._allForEachTokens.ToDictionary(t => t.Name);
-
             foreach (var reuseForEachToken in this._allReuseForEachTokens)
             {
-                if (forEachTokenMap.TryGetValue(reuseForEachToken.ExistingForEachName, out var forEachToken))
+                var matches = this._allForEachTokens.Where(t => t.Name == reuseForEachToken.ExistingForEachName).ToList();
+                if (matches.Count > 1)
                 {
-                    reuseForEachToken.ExistingForEachToken = forEachToken;
+                    throw new ArgumentException("FOREACH name " + reuseForEachToken.ExistingForEachName + " is used more than once, so REUSE_FOREACH " + reuseForEachToken.Name + " cannot pick one.");
+                }
+
+                if (matches.Count == 1)
+                {
+                    reuseForEachToken.ExistingForEachToken = matches[0];
                 }
                 else
                 {
