@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>1.2.0</VersionPrefix>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Toshal.Template</AssemblyName>
+    <PackageId>Toshal.Template</PackageId>
+  </PropertyGroup>
+
+</Project>

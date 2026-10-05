@@ -159,5 +159,10 @@ $RECYCLE.BIN/
 /RecKprs.SignalR.EventPublisher/Scripts
 nuget.exe
 _distribution/
-/source/Test.Template/project.lock.json
+/tests/Toshal.Template.Tests/project.lock.json
 .aider*
+
+# Build output of the new layout
+coverage/
+artifacts/
+TestResults/
