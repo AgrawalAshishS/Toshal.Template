@@ -519,7 +519,7 @@ namespace Toshal.Template
                 if (afterTokens.Count > 0)
                 {
                     var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
-                    this.Process(output, afterTokens, item, args.ParentContext, customTokens);
+                    this.Process(output, afterTokens, item, args.ParentContext, newCustomTokens);
                 }
 
                 args.ParentContext.Remove(item);
