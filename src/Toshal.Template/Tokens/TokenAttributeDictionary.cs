@@ -65,22 +65,25 @@ namespace Toshal.Template.Tokens
         {
             string retVal = nameString;
 
-            if (nameString.IndexOf('=') > -1)
+            int firstSpace = nameString.IndexOf(' ');
+            if (nameString.IndexOf('=') > -1 && firstSpace > -1)
             {
-                string[] nameSplit = nameString.Split(' ');
-                retVal = nameSplit[0];
+                retVal = nameString.Substring(0, firstSpace);
+                string rest = nameString.Substring(firstSpace);
 
-                const string tokenAttributeExpression = "(?<Name>\\w+)=\"(?<Value>[^\"]*)\"";
+                // Attributes follow each other: name="value". A quoted value may contain spaces.
+                const string tokenAttributeExpression = "\\G\\s*(?<Name>\\w+)=\"(?<Value>[^\"]*)\"";
 
-                for (int i = 1; i < nameSplit.Length; i++)
+                int end = 0;
+                foreach (Match m in Regex.Matches(rest, tokenAttributeExpression))
                 {
-                    Match m = Regex.Match(nameSplit[i], tokenAttributeExpression);
-                    if (m.Success == false)
-                    {
-                        throw new InvalidTokenAttributeException(split);
-                    }
-
                     attributes.Add(m.Groups["Name"].Value.ToLower(), m.Groups["Value"].Value);
+                    end = m.Index + m.Length;
+                }
+
+                if (end == 0 || rest.Substring(end).Trim().Length > 0)
+                {
+                    throw new InvalidTokenAttributeException(split);
                 }
             }
 
