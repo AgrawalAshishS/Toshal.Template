@@ -97,7 +97,7 @@ internal static class SiteBuilder
         }
         foreach (var sub in GeneratedFolders) Directory.CreateDirectory(Path.Combine(docs, sub));
 
-        File.WriteAllText(Path.Combine(docs, "assets", "site.css"), Css);
+        File.WriteAllText(Path.Combine(docs, "assets", "site.css"), Css.Replace("\r\n", "\n"));
         File.WriteAllText(Path.Combine(docs, ".nojekyll"), "");
 
         string content = Path.Combine(root, "tools", "Toshal.Template.Tools", "content");
