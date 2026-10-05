@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
+    <!-- The examples check their own output; the tests run them, including the fake half of the pattern example. -->
+    <ProjectReference Include="..\..\examples\Toshal.Template.Examples\Toshal.Template.Examples.csproj" />
   </ItemGroup>
 
   <ItemGroup>

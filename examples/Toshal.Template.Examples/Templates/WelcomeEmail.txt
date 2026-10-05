@@ -1,0 +1,11 @@
+Subject: Welcome to <%=Product%>, <%=FirstName%>!
+
+Hi <%=FirstName%>,
+
+Thanks for joining <%=Product%> on the <%=Plan%> plan.<%IF IsTrial%>
+Your free trial ends on <%=TrialEnds format="dd MMM yyyy"%>.<%ENDIF%>
+
+<%IF HasTeam%>You invited <%=TeamCount%> people:<%FOREACH Team%>
+  - <%=Name%> <<%=Email%>><%ENDFOR%><%ELSE%>Invite your team from Settings > Team.<%ENDIF%>
+
+<%PROCESS_TEMPLATE Signature%>

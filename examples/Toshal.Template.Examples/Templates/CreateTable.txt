@@ -1,0 +1,5 @@
+create table <%=Table%>
+(<%FOREACH Columns%>
+    <%=Name%> <%=SqlType%><%IF not Nullable%> not null<%ENDIF%>,<%ENDFOR%><%REMOVE_PREVIOUS 1%><%IF HasKey%>,
+    primary key (<%FOREACH Columns%><%IF Key%><%=Name%>, <%ENDIF%><%ENDFOR%><%REMOVE_PREVIOUS 2%>)<%ENDIF%>
+);

@@ -1,0 +1,6 @@
+<%PROCESS_TEMPLATE Header%>
+public class SmokeTests
+{
+    [Xunit.Fact]
+    public void Runs() { }
+}
