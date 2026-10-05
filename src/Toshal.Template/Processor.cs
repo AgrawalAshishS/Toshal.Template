@@ -115,7 +115,7 @@ namespace Toshal.Template
             {
                 this.Process(output, conditionToken.InnerTokens, context, parentContext, customTokens);
             }
-            else if (conditionToken.FalsePart != null && conditionToken.FalsePart.InnerTokens.Count > 0)
+            else if (conditionToken.FalsePart != null)
             {
                 var elseToken = conditionToken.FalsePart as ElseToken;
                 if (elseToken != null)
