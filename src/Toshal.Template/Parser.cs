@@ -124,6 +124,16 @@ namespace Toshal.Template
                     {
                         if (templateText[i + 1] == '>')
                         {
+                            if (contentBuilder.Length == 0)
+                            {
+                                // "%>" with no open tag and no text before it is plain text.
+                                contentBuilder.Append("%>");
+                                i++;
+                                charIndex++;
+                                charIndex++;
+                                continue;
+                            }
+
                             if (contentBuilder.Length > 0)
                             {
                                 split.Content = contentBuilder.ToString();
