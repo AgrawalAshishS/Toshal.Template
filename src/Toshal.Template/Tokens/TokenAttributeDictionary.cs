@@ -88,4 +88,4 @@ namespace Toshal.Template.Tokens
         }
 
     }
-}
+}

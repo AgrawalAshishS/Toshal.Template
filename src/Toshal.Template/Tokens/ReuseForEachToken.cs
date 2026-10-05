@@ -72,7 +72,7 @@ namespace Toshal.Template.Tokens
         /// <summary>
         ///     Gets or sets the existing for each token.
         /// </summary>
-        public ForEachToken ExistingForEachToken { get; set; }
+        public ForEachToken? ExistingForEachToken { get; set; }
 
         /// <summary>
         ///     Gets the name.
@@ -81,4 +81,4 @@ namespace Toshal.Template.Tokens
 
         #endregion
     }
-}
+}

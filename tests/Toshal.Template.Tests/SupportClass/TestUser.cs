@@ -2,7 +2,7 @@
 {
 	public class TestUser
 	{
-		public string Name { get; set; }
-		public TestUserProfile Profile { get; set; }
+		public string Name { get; set; } = null!;
+		public TestUserProfile Profile { get; set; } = null!;
 	}
 }

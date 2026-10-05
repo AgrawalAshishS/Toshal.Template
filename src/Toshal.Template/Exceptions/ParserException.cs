@@ -55,7 +55,7 @@ namespace Toshal.Template.Exceptions
 
         #region Public Properties
 
-        public Split Split { get; set; }
+        public Split? Split { get; set; }
 
         public int LineNumber { get; private set; }
 
@@ -63,4 +63,4 @@ namespace Toshal.Template.Exceptions
 
         #endregion
     }
-}
+}

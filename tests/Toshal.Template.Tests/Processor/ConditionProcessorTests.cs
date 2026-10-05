@@ -75,7 +75,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.ConditionValueProvider =
-                (ConditionArgs args) => { return ((TestUser)args.Context).Name == "ConditionName"; };
+                (ConditionArgs args) => { return ((TestUser)args.Context!).Name == "ConditionName"; };
 
             var process = new ProcessorArgs(tokens);
             process.Context = user;

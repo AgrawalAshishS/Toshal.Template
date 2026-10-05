@@ -37,7 +37,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (ParserException ex)
                 {
-                    Assert.Equal("<%%>", ex.Split.Content);
+                    Assert.Equal("<%%>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -75,7 +75,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.Equal("<%=%>", ex.Split.Content);
+                    Assert.Equal("<%=%>", ex.Split!.Content);
                     throw;
                 }
             });

@@ -47,7 +47,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("name", ex.TokenName);
-                    Assert.Equal("<%FOREACH Name %>", ex.Split.Content);
+                    Assert.Equal("<%FOREACH Name %>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -67,7 +67,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.Equal("<%FOREACH %>", ex.Split.Content);
+                    Assert.Equal("<%FOREACH %>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -109,7 +109,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("name", ex.TokenName);
-                    Assert.Equal("<%ROW%>", ex.Split.Content);
+                    Assert.Equal("<%ROW%>", ex.Split!.Content);
                     Assert.Equal("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -132,7 +132,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("name", ex.TokenName);
-                    Assert.Equal("<%ROW%>", ex.Split.Content);
+                    Assert.Equal("<%ROW%>", ex.Split!.Content);
                     Assert.Equal("<%ROW%> not closed for <%FOREACH Name %>", ex.Message);
                     throw;
                 }
@@ -156,7 +156,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("name", ex.TokenName);
-                    Assert.Equal("<%FOREACH Name %>", ex.Split.Content);
+                    Assert.Equal("<%FOREACH Name %>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -247,7 +247,7 @@ namespace Toshal.Template.Tests
                     catch (TokenNotClosedException ex)
                     {
                         Assert.Equal("name", ex.TokenName);
-                        Assert.Equal("<%" + token + "%>", ex.Split.Content);
+                        Assert.Equal("<%" + token + "%>", ex.Split!.Content);
                         Assert.Equal("<%" + token + "%> not closed for <%FOREACH Name %>", ex.Message);
                         return;
                     }

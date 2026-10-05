@@ -42,4 +42,4 @@ namespace Toshal.Template.Exceptions
 
         #endregion
     }
-}
+}

@@ -41,13 +41,13 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        public ConditionArgs(ConditionToken token, object context, List<object> parentContext)
+        public ConditionArgs(ConditionToken token, object? context, List<object?> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
 
-        public ConditionArgs(ConditionArgs args, object context)
+        public ConditionArgs(ConditionArgs args, object? context)
             : base(args.Name, context, args.ParentContext)
         {
             ParentContext.Add(args.Context);
@@ -61,4 +61,4 @@ namespace Toshal.Template
         /// </summary>
         public TokenAttributeDictionary Attributes { get; private set; }
     }
-}
+}

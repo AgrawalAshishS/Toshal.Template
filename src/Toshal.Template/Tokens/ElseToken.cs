@@ -33,4 +33,4 @@ namespace Toshal.Template.Tokens
             this.StartingPosition = split.StartingPosition;
         }
     }
-}
+}

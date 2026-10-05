@@ -83,7 +83,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -99,7 +99,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -200,7 +200,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -216,7 +216,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -232,7 +232,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -249,7 +249,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -265,7 +265,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -289,7 +289,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -311,7 +311,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -334,7 +334,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -354,7 +354,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -375,7 +375,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -396,7 +396,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -417,7 +417,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -439,7 +439,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -460,7 +460,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -482,7 +482,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -503,7 +503,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -525,7 +525,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -548,7 +548,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
@@ -574,11 +574,11 @@ namespace Toshal.Template.Tests
                 if (args.Name == "my_count")
                 {
                     Assert.Equal(2, args.ParentContext.Count);
-                    Assert.IsAssignableFrom<List<int>>(args.Context);
-                    return ((List<int>)args.Context).Count.ToString();
+                    Assert.IsAssignableFrom<List<int>>(args.Context!);
+                    return ((List<int>)args.Context!).Count.ToString();
                 }
                 Assert.Equal(3, args.ParentContext.Count);
-                return args.Context.ToString();
+                return args.Context!.ToString();
             };
 
             var process = new ProcessorArgs(tokens);

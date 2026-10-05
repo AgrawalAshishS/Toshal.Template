@@ -64,7 +64,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    Assert.Equal("<%IF  %>", ex.Split.Content);
+                    Assert.Equal("<%IF  %>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -114,7 +114,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -140,7 +140,7 @@ namespace Toshal.Template.Tests
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -234,9 +234,9 @@ namespace Toshal.Template.Tests
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal(part4, content.Content);
-            Assert.Equal(1, token.FalsePart.InnerTokens.Count);
+            Assert.Equal(1, token.FalsePart!.InnerTokens.Count);
 
-            content = (ContentToken)token.FalsePart.InnerTokens[0];
+            content = (ContentToken)token.FalsePart!.InnerTokens[0];
             Assert.Equal(part6, content.Content);
         }
 
@@ -264,9 +264,9 @@ namespace Toshal.Template.Tests
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal(part4, content.Content);
-            Assert.Equal(1, token.FalsePart.InnerTokens.Count);
+            Assert.Equal(1, token.FalsePart!.InnerTokens.Count);
 
-            content = (ContentToken)token.FalsePart.InnerTokens[0];
+            content = (ContentToken)token.FalsePart!.InnerTokens[0];
             Assert.Equal(part6, content.Content);
         }
 
@@ -297,28 +297,28 @@ namespace Toshal.Template.Tests
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("Content within IF", content.Content);
 
-            token = (ConditionToken)token.FalsePart;
+            token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif1", token.Name);
             Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("1st content", content.Content);
 
-            token = (ConditionToken)token.FalsePart;
+            token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif2", token.Name);
             Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("2nd content", content.Content);
 
-            token = (ConditionToken)token.FalsePart;
+            token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif3", token.Name);
             Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("3rd content", content.Content);
 
-            var elseToken = (ElseToken)token.FalsePart;
+            var elseToken = (ElseToken)token.FalsePart!;
             Assert.Equal(2, elseToken.InnerTokens.Count);
 
             content = (ContentToken)elseToken.InnerTokens[0];
@@ -349,7 +349,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("othercondition", ex.TokenName);
-                    Assert.Equal("<%ELSEIF OtherCondition THEN%>", ex.Split.Content);
+                    Assert.Equal("<%ELSEIF OtherCondition THEN%>", ex.Split!.Content);
                     throw;
                 }
             });
@@ -378,7 +378,7 @@ namespace Toshal.Template.Tests
                 catch (TokenNotClosedException ex)
                 {
                     Assert.Equal("conditionname", ex.TokenName);
-                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split!.Content);
                     throw;
                 }
             });

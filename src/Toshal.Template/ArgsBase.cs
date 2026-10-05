@@ -40,7 +40,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        protected ArgsBase(string name, object context, List<object> parentContext)
+        protected ArgsBase(string name, object? context, List<object?> parentContext)
         {
             this.Name = name;
             this.Context = context;
@@ -54,15 +54,15 @@ namespace Toshal.Template
         /// <summary>
         ///     Gets the context.
         /// </summary>
-        public object Context { get; private set; }
+        public object? Context { get; private set; }
 
         /// <summary>
         ///     Gets the name.
         /// </summary>
         public string Name { get; private set; }
 
-        public List<object> ParentContext { get; private set; }
+        public List<object?> ParentContext { get; private set; }
 
         #endregion
     }
-}
+}

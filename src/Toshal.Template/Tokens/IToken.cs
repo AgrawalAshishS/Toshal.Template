@@ -30,4 +30,4 @@ namespace Toshal.Template.Tokens
         int StartingPosition { get; set; }
         int LineNumber { get; set; }
     }
-}
+}

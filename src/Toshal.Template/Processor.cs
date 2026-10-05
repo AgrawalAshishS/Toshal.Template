@@ -48,7 +48,7 @@ namespace Toshal.Template
         public StringBuilder Process(ProcessorArgs args)
         {
             var retVal = new StringBuilder();
-            var parentContext = new List<object>();
+            var parentContext = new List<object?>();
             if (args.Context != null) { parentContext.Add(args.Context); }
 
             this.Process(retVal, args.TokenList, args.Context, parentContext, new Dictionary<string, string>());
@@ -63,27 +63,27 @@ namespace Toshal.Template
         /// <summary>
         ///     Gets or sets the condition value provider.
         /// </summary>
-        public Func<ConditionArgs, bool> ConditionValueProvider { get; set; }
+        public Func<ConditionArgs, bool>? ConditionValueProvider { get; set; }
 
         /// <summary>
         ///     Gets or sets the loop value provider.
         /// </summary>
-        public Func<LoopArgs, IList> LoopValueProvider { get; set; }
+        public Func<LoopArgs, IList?>? LoopValueProvider { get; set; }
 
         /// <summary>
         ///     Gets or sets the token value provider.
         /// </summary>
-        public Func<TokenArgs, string> TokenValueProvider { get; set; }
+        public Func<TokenArgs, string?>? TokenValueProvider { get; set; }
 
         /// <summary>
         ///     Gets or sets the with value provider.
         /// </summary>
-        public Func<TokenArgs, object> WithValueProvider { get; set; }
+        public Func<TokenArgs, object?>? WithValueProvider { get; set; }
 
         /// <summary>
         ///     Gets or sets the process template value provider.
         /// </summary>
-        public Func<ProcessTemplateArgs, List<IToken>> ProcessTemplateValueProvider { get; set; }
+        public Func<ProcessTemplateArgs, List<IToken>?>? ProcessTemplateValueProvider { get; set; }
 
         #endregion
 
@@ -102,7 +102,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleConditionToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleConditionToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var conditionToken = token as ConditionToken;
             if (conditionToken == null) return false;
@@ -146,7 +146,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleForEachToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var forEachToken = token as ForEachToken;
             if (forEachToken == null) return false;
@@ -171,12 +171,12 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleNamedToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleNamedToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var namedToken = token as NamedToken;
             if (namedToken == null) return false;
 
-            var value = "";
+            string? value = "";
             if (customTokens.TryGetValue(namedToken.Name, out value))
             {
                 output.Append(value);
@@ -211,14 +211,14 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleReuseForEachToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleReuseForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var reuseForEachToken = token as ReuseForEachToken;
             if (reuseForEachToken == null) return false;
             if (this.LoopValueProvider == null) return true;
 
-            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, reuseForEachToken.ExistingForEachToken.Attributes);
-            return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken, customTokens);
+            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, reuseForEachToken.ExistingForEachToken!.Attributes);
+            return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken!, customTokens);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        private bool HandleWithToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleWithToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var withToken = token as WithToken;
             if (withToken == null) return false;
@@ -268,7 +268,7 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool HandleSetToken(IToken token, object context, List<object> parentContext, ref Dictionary<string, string> customTokens)
+        private bool HandleSetToken(IToken token, object? context, List<object?> parentContext, ref Dictionary<string, string> customTokens)
         {
             var setToken = token as SetToken;
             if (setToken == null) return false;
@@ -288,7 +288,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleRemovePreviousNewLine(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
+        private bool HandleRemovePreviousNewLine(StringBuilder output, IToken token, object? context, Dictionary<string, string> customTokens)
         {
             var removeToken = token as RemovePreviousNewLineToken;
             if (removeToken == null) return false;
@@ -304,7 +304,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleRemovePreviousChars(StringBuilder output, IToken token, object context, Dictionary<string, string> customTokens)
+        private bool HandleRemovePreviousChars(StringBuilder output, IToken token, object? context, Dictionary<string, string> customTokens)
         {
             var removeToken = token as RemovePreviousCharsToken;
             if (removeToken == null) return false;
@@ -317,7 +317,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleProcessTemplateToken(StringBuilder output, IToken token, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private bool HandleProcessTemplateToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var processTemplateToken = token as ProcessTemplateToken;
             if (processTemplateToken == null) return false;
@@ -335,7 +335,7 @@ namespace Toshal.Template
             return true;
         }
 
-        private bool HandleContextAsString(StringBuilder output, IToken token, object context)
+        private bool HandleContextAsString(StringBuilder output, IToken token, object? context)
         {
             var contextToken = token as ContextAsStringToken;
             if (contextToken == null) return false;
@@ -359,7 +359,7 @@ namespace Toshal.Template
         /// <param name="context">
         ///     The context.
         /// </param>
-        private void Process(StringBuilder output, List<IToken> tokenList, object context, List<object> parentContext, Dictionary<string, string> customTokens)
+        private void Process(StringBuilder output, List<IToken> tokenList, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             foreach (var token in tokenList)
             {
@@ -437,11 +437,11 @@ namespace Toshal.Template
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        private bool ProcessForEach(StringBuilder output, object context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
+        private bool ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
         {
             var rowLevelShared = new Dictionary<string, string>(customTokens);
 
-            var val = this.LoopValueProvider(args);
+            var val = this.LoopValueProvider!(args);
             if (val == null || val.Count == 0)
             {
                 if (forEachToken.NoRecordTokens.Count > 0)
@@ -536,4 +536,4 @@ namespace Toshal.Template
             return true;
         }
     }
-}
+}

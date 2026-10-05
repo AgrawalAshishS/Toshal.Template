@@ -26,7 +26,7 @@ namespace Toshal.Template.Tests
             var processor = new Processor();
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
@@ -39,7 +39,7 @@ namespace Toshal.Template.Tests
                     case "users":
                         return new List<TestUser> { new TestUser { Name = "1" }, new TestUser { Name = "2" } };
                     case "related":
-                        if (((TestUser)args.Context).Name == "2")
+                        if (((TestUser)args.Context!).Name == "2")
                             return new List<TestUser> { new TestUser { Name = "3" }, new TestUser { Name = "4" } };
                         break;
                 }
@@ -62,7 +62,7 @@ namespace Toshal.Template.Tests
             var processor = new Processor();
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;

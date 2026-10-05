@@ -178,7 +178,7 @@ namespace Toshal.Template
         /// <summary>
         ///     The _splits.
         /// </summary>
-        private List<Split> _splits;
+        private List<Split> _splits = null!;
 
         #endregion
 
@@ -692,4 +692,4 @@ namespace Toshal.Template
 
         #endregion
     }
-}
+}

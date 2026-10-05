@@ -2,6 +2,6 @@
 {
 	public class TestUserProfile
 	{
-		public string Address { get; set; }
+		public string Address { get; set; } = null!;
 	}
 }

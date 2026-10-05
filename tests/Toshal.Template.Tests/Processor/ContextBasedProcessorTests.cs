@@ -28,7 +28,7 @@ namespace Toshal.Template.Tests
                 switch (args.Name)
                 {
                     case "name":
-                        return ((TestUser)args.Context).Name;
+                        return ((TestUser)args.Context!).Name;
                 }
                 return null;
             };
@@ -57,7 +57,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.ConditionValueProvider =
-                (ConditionArgs args) => { return ((dynamic)args.Context).Name == "Test User"; };
+                (ConditionArgs args) => { return ((dynamic)args.Context!).Name == "Test User"; };
 
             var process = new ProcessorArgs(tokens);
             process.Context = new { Name = "Wrong User" };
@@ -77,11 +77,11 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
 
-            processor.TokenValueProvider = (TokenArgs args) => ((TestUser)args.Context).Name;
+            processor.TokenValueProvider = (TokenArgs args) => ((TestUser)args.Context!).Name;
             processor.LoopValueProvider = (LoopArgs args) =>
             {
                 //in case of user1 context return user2 object.
-                if (((TestUser)args.Context).Name == "First Name")
+                if (((TestUser)args.Context!).Name == "First Name")
                     return new List<TestUser> { user2 };
 
                 return new List<TestUser> { user1 };
@@ -115,7 +115,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
-            processor.TokenValueProvider = (TokenArgs args) => args.Context.ToString();
+            processor.TokenValueProvider = (TokenArgs args) => args.Context!.ToString();
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);

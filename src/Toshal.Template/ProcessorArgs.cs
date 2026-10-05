@@ -51,7 +51,7 @@ namespace Toshal.Template
         /// <summary>
         ///     Gets or sets the context.
         /// </summary>
-        public object Context { get; set; }
+        public object? Context { get; set; }
 
         /// <summary>
         ///     Gets the token list.
@@ -60,4 +60,4 @@ namespace Toshal.Template
 
         #endregion
     }
-}
+}

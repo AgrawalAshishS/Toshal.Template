@@ -91,7 +91,7 @@ namespace Toshal.Template.Tokens
         /// <summary>
         ///     Gets or sets the false part.
         /// </summary>
-        public IContainerToken FalsePart { get; set; }
+        public IContainerToken? FalsePart { get; set; }
 
         public bool IsPositive { get; set; }
 
@@ -107,4 +107,4 @@ namespace Toshal.Template.Tokens
 
         #endregion
     }
-}
+}

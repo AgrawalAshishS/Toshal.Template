@@ -19,7 +19,7 @@ namespace Toshal.Template.Tests
 		 * With in case of Null return will not render
 		 */
 
-        private string UserTokenDataProvider(TokenArgs args)
+        private string? UserTokenDataProvider(TokenArgs args)
         {
             var arg = args.Context as TestUser;
             if (arg == null) return null;
@@ -32,7 +32,7 @@ namespace Toshal.Template.Tests
             return null;
         }
 
-        private string ProfileTokenDataProvider(TokenArgs args)
+        private string? ProfileTokenDataProvider(TokenArgs args)
         {
             var arg = args.Context as TestUserProfile;
             if (arg == null) return null;
@@ -82,7 +82,7 @@ namespace Toshal.Template.Tests
             var processor = new Processor();
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
@@ -106,7 +106,7 @@ namespace Toshal.Template.Tests
             processor.WithValueProvider = (TokenArgs args) => null;
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
@@ -127,10 +127,10 @@ namespace Toshal.Template.Tests
             var user = new TestUser { Name = "My User", Profile = new TestUserProfile { Address = "abcd" } };
 
             var processor = new Processor();
-            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context).Profile;
+            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context!).Profile;
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
@@ -152,7 +152,7 @@ namespace Toshal.Template.Tests
             var user = new TestUser { Name = "My User", Profile = new TestUserProfile { Address = "abcd" } };
 
             var processor = new Processor();
-            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context).Profile;
+            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context!).Profile;
             processor.ConditionValueProvider = (ConditionArgs args) =>
             {
                 bool? retVal = UserConditionValueProvider(args);
@@ -163,7 +163,7 @@ namespace Toshal.Template.Tests
 
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
@@ -186,7 +186,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.LoopValueProvider = (LoopArgs args) => new List<TestUser> { user };
-            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context).Profile;
+            processor.WithValueProvider = (TokenArgs args) => ((TestUser)args.Context!).Profile;
             processor.ConditionValueProvider = (ConditionArgs args) =>
             {
                 bool? retVal = UserConditionValueProvider(args);
@@ -197,7 +197,7 @@ namespace Toshal.Template.Tests
 
             processor.TokenValueProvider = (TokenArgs args) =>
             {
-                string retVal = UserTokenDataProvider(args);
+                string? retVal = UserTokenDataProvider(args);
                 if (retVal == null) retVal = ProfileTokenDataProvider(args);
 
                 return retVal;
