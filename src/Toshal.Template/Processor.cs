@@ -247,7 +247,7 @@ namespace Toshal.Template
                 parentContext.Add(val);
                 var newCustomTokens = new Dictionary<string, string>(customTokens);
                 this.Process(output, withToken.InnerTokens, val, parentContext, newCustomTokens);
-                parentContext.Remove(val);
+                RemoveLast(parentContext, val);
             }
 
             return true;
@@ -522,7 +522,7 @@ namespace Toshal.Template
                     this.Process(output, afterTokens, item, args.ParentContext, newCustomTokens);
                 }
 
-                args.ParentContext.Remove(item);
+                RemoveLast(args.ParentContext, item);
             }
 
             if (forEachToken.FooterTokens.Count > 0)
@@ -531,9 +531,21 @@ namespace Toshal.Template
                 this.Process(output, forEachToken.FooterTokens, val, args.ParentContext, newCustomTokens);
             }
 
-            args.ParentContext.Remove(val);
+            RemoveLast(args.ParentContext, val);
 
             return true;
+        }
+
+        /// <summary>
+        ///     Removes the last entry equal to the value. The parent context is a stack, so the entry a block added is the last one.
+        /// </summary>
+        private static void RemoveLast(List<object?> parentContext, object? value)
+        {
+            int index = parentContext.LastIndexOf(value);
+            if (index >= 0)
+            {
+                parentContext.RemoveAt(index);
+            }
         }
     }
 }
