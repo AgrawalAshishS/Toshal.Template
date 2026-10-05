@@ -87,10 +87,10 @@ namespace Toshal.Template
         private List<Split> SplitTemplateByTokens(string templateText)
         {
             var retList = new List<Split>();
-            var split = new Split();
-            var contentBuilder = new StringBuilder();
             int lineNumber = 1;
-            int charIndex = 1;
+            int charIndex = 1; // 1 based column of templateText[i]
+            var split = new Split { StartingPosition = charIndex, LineNumber = lineNumber };
+            var contentBuilder = new StringBuilder();
 
             for (int i = 0, len = templateText.Length; i < len; i++)
             {
@@ -142,7 +142,7 @@ namespace Toshal.Template
                             }
                             split.Content += "%>" ;
                             split = new Split();
-                            split.StartingPosition = charIndex;
+                            split.StartingPosition = charIndex + 2; // the text after "%>"
                             split.LineNumber = lineNumber;
                             i++;
                             charIndex++;
@@ -157,7 +157,7 @@ namespace Toshal.Template
                 if (templateText[i] == '\n')
                 {
                     lineNumber++;
-                    charIndex = 0;
+                    charIndex = 1;
                 }
             }
 
