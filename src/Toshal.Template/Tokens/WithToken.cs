@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="WithToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
@@ -27,23 +7,32 @@ namespace Toshal.Template.Tokens
     using Toshal.Template.Exceptions;
 
     /// <summary>
-    ///     The with token.
+    /// A parsed <c>&lt;%WITH name%&gt;</c> ... <c>&lt;%ENDWITH%&gt;</c> block. The processor asks <see cref="Processor.WithValueProvider"/> for an object,
+    /// and that object is the context of the tags inside the block. When the provider returns null the whole block is skipped.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// // &lt;%WITH Customer%&gt;Dear &lt;%=Name%&gt;,&lt;%ENDWITH%&gt;
+    /// processor.WithValueProvider = args =&gt; args.Name == "customer" ? ((Order)args.Context!).Customer : null;
+    /// </code>
+    /// </example>
     public class WithToken : ContainerTokenBase
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        ///     Initializes a new instance of the <see cref="WithToken" /> class.
+        /// Reads the name and attributes of the tag. The parser calls it and then fills <see cref="ContainerTokenBase.InnerTokens"/>.
         /// </summary>
-        /// <param name="split">
-        ///     The split.
-        /// </param>
-        /// <exception cref="TokenMissingNameException">
-        /// </exception>
+        /// <param name="split">The WITH tag.</param>
+        /// <exception cref="TokenMissingNameException">The tag has no name.</exception>
+        /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
+        /// <example>
+        /// <code>
+        /// var token = new WithToken(new Split { Content = "&lt;%WITH customer%&gt;" });
+        /// </code>
+        /// </example>
         public WithToken(Split split)
         {
             const string withTokenExpression = "<%WITH\\s(?<Name>.+?)%>";
+
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(
                 split,
                 Regex.Match(split.Content, withTokenExpression).Groups["Name"].Value.Trim(),
@@ -58,20 +47,24 @@ namespace Toshal.Template.Tokens
             }
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        ///     Gets the attributes.
+        /// Gets the attributes of the tag. Keys are lower case, values are kept as written.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string role = token.Attributes.GetValue("role", "billing");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; } = new TokenAttributeDictionary();
 
         /// <summary>
-        ///     Gets the name.
+        /// Gets the name in lower case, without the attributes.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string name = token.Name;   // "customer"
+        /// </code>
+        /// </example>
         public string Name { get; } = string.Empty;
-
-        #endregion
     }
-}
+}

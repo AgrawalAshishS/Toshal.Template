@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Processor.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template
 {
@@ -30,21 +10,42 @@ namespace Toshal.Template
     using Toshal.Template.Tokens;
 
     /// <summary>
-    ///     The processor.
+    /// Turns parsed tokens into text. The data comes from five provider delegates that you set: one for each kind of tag that needs data.
+    /// The processor does not read properties by reflection; your providers decide what each name means.
     /// </summary>
+    /// <remarks>
+    /// <para><b>Warning:</b> when a provider is not set, its tags are skipped without an error. An IF block (with its ELSE) is skipped when
+    /// <see cref="ConditionValueProvider"/> is null, a FOREACH block (with its NORECORD) when <see cref="LoopValueProvider"/> is null, and so on.
+    /// A <c>&lt;%=name%&gt;</c> still writes a SET variable of that name when there is one.</para>
+    /// <para>The processor keeps no state between calls other than the provider properties, so one instance can process many templates.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var processor = new Processor
+    /// {
+    ///     TokenValueProvider = args =&gt; args.Name == "name" ? ((Customer)args.Context!).Name : null,
+    ///     ConditionValueProvider = args =&gt; args.Name == "vip" &amp;&amp; ((Customer)args.Context!).IsVip,
+    /// };
+    /// string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }).ToString();
+    /// </code>
+    /// </example>
     public class Processor
     {
-        #region Public Methods and Operators
-
         /// <summary>
-        ///     The process.
+        /// Processes the tokens with the given top context and returns the text.
         /// </summary>
-        /// <param name="args">
-        ///     The args.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="StringBuilder" />.
-        /// </returns>
+        /// <param name="args">The tokens and the top context. Must not be null.</param>
+        /// <returns>A new <see cref="StringBuilder"/> with the text.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Known issue: the template has a <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> with a negative n. See docs/known-issues.md.</exception>
+        /// <remarks>
+        /// <para>Exceptions thrown by your providers are not caught; they reach the caller.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// StringBuilder text = processor.Process(new ProcessorArgs(tokens) { Context = order });
+        /// File.WriteAllText("order.txt", text.ToString());
+        /// </code>
+        /// </example>
         public StringBuilder Process(ProcessorArgs args)
         {
             var retVal = new StringBuilder();
@@ -56,52 +57,66 @@ namespace Toshal.Template
             return retVal;
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        ///     Gets or sets the condition value provider.
+        /// Gets or sets the provider for <c>&lt;%IF name%&gt;</c> and <c>&lt;%ELSEIF name%&gt;</c>. It returns whether the named condition is true.
+        /// For <c>&lt;%IF not name%&gt;</c> it gets the name without <c>not</c>, and the processor applies the <c>not</c>. The default is null.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// processor.ConditionValueProvider = args =&gt; args.Name switch
+        /// {
+        ///     "paid" =&gt; ((Invoice)args.Context!).Paid,
+        ///     _ =&gt; false,
+        /// };
+        /// </code>
+        /// </example>
         public Func<ConditionArgs, bool>? ConditionValueProvider { get; set; }
 
         /// <summary>
-        ///     Gets or sets the loop value provider.
+        /// Gets or sets the provider for <c>&lt;%FOREACH name%&gt;</c> and <c>&lt;%REUSE_FOREACH existing name%&gt;</c>. It returns the rows; each row is the
+        /// context of one row of the loop. Null or an empty list writes the NORECORD part. The default is null.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// processor.LoopValueProvider = args =&gt; args.Name == "lines" ? ((Order)args.Context!).Lines : null;
+        /// </code>
+        /// </example>
         public Func<LoopArgs, IList?>? LoopValueProvider { get; set; }
 
         /// <summary>
-        ///     Gets or sets the token value provider.
+        /// Gets or sets the provider for <c>&lt;%=name%&gt;</c>. It returns the text to write; null or an empty string writes nothing.
+        /// It is not called when a SET variable with that name exists. The default is null.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// processor.TokenValueProvider = args =&gt; args.Name == "today" ? DateTime.Today.ToString(args.GetAttribute("format", "d")) : null;
+        /// </code>
+        /// </example>
         public Func<TokenArgs, string?>? TokenValueProvider { get; set; }
 
         /// <summary>
-        ///     Gets or sets the with value provider.
+        /// Gets or sets the provider for <c>&lt;%WITH name%&gt;</c>. It returns the object that is the context inside the block; null skips the block.
+        /// The default is null.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// processor.WithValueProvider = args =&gt; args.Name == "customer" ? ((Order)args.Context!).Customer : null;
+        /// </code>
+        /// </example>
         public Func<TokenArgs, object?>? WithValueProvider { get; set; }
 
         /// <summary>
-        ///     Gets or sets the process template value provider.
+        /// Gets or sets the provider for <c>&lt;%PROCESS_TEMPLATE name%&gt;</c>. It returns the parsed tokens of the sub template, which are processed
+        /// in place with the current context. Null writes nothing. The default is null.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// var parts = new Dictionary&lt;string, List&lt;IToken&gt;&gt; { ["footer"] = parser.Parse("-- Sent by Toshal") };
+        /// processor.ProcessTemplateValueProvider = args =&gt; parts.GetValueOrDefault(args.Name);
+        /// </code>
+        /// </example>
         public Func<ProcessTemplateArgs, List<IToken>?>? ProcessTemplateValueProvider { get; set; }
 
-        #endregion
-
-        /// <summary>
-        ///     The handle condition token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool HandleConditionToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var conditionToken = token as ConditionToken;
@@ -131,21 +146,6 @@ namespace Toshal.Template
             return true;
         }
 
-        /// <summary>
-        ///     The handle for each token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool HandleForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var forEachToken = token as ForEachToken;
@@ -156,21 +156,6 @@ namespace Toshal.Template
             return this.ProcessForEach(output, context, args, forEachToken, customTokens);
         }
 
-        /// <summary>
-        ///     The handle named token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool HandleNamedToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var namedToken = token as NamedToken;
@@ -196,21 +181,6 @@ namespace Toshal.Template
             return true;
         }
 
-        /// <summary>
-        ///     The handle reuse for each token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool HandleReuseForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var reuseForEachToken = token as ReuseForEachToken;
@@ -221,18 +191,6 @@ namespace Toshal.Template
             return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken!, customTokens);
         }
 
-        /// <summary>
-        ///     The handle with token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
         private bool HandleWithToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             var withToken = token as WithToken;
@@ -253,21 +211,6 @@ namespace Toshal.Template
             return true;
         }
 
-        /// <summary>
-        ///     The handle SET token.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool HandleSetToken(IToken token, object? context, List<object?> parentContext, ref Dictionary<string, string> customTokens)
         {
             var setToken = token as SetToken;
@@ -347,18 +290,6 @@ namespace Toshal.Template
             return true;
         }
 
-        /// <summary>
-        ///     The process.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="tokenList">
-        ///     The token list.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
         private void Process(StringBuilder output, List<IToken> tokenList, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
         {
             foreach (var token in tokenList)
@@ -419,24 +350,6 @@ namespace Toshal.Template
             }
         }
 
-        /// <summary>
-        ///     The process for each.
-        /// </summary>
-        /// <param name="output">
-        ///     The output.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
-        /// <param name="args">
-        ///     The args.
-        /// </param>
-        /// <param name="forEachToken">
-        ///     The for each token.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
         private bool ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
         {
             var rowLevelShared = new Dictionary<string, string>(customTokens);
@@ -536,9 +449,7 @@ namespace Toshal.Template
             return true;
         }
 
-        /// <summary>
-        ///     Removes the last entry equal to the value. The parent context is a stack, so the entry a block added is the last one.
-        /// </summary>
+        // The parent context is a stack, so the entry a block added is the last one equal to it.
         private static void RemoveLast(List<object?> parentContext, object? value)
         {
             int index = parentContext.LastIndexOf(value);

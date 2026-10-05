@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TokenAttributeDictionary.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
@@ -27,10 +7,33 @@ namespace Toshal.Template.Tokens
     using System.Text.RegularExpressions;
 
     /// <summary>
-    ///     The token attribute dictionary.
+    /// The attributes of a tag, such as <c>format="0.00"</c> in <c>&lt;%=Total format="0.00"%&gt;</c>. Keys are the attribute names in lower case.
+    /// A quoted value may contain spaces.
     /// </summary>
+    /// <remarks>
+    /// <para><b>Warning:</b> it is a normal, case sensitive dictionary with lower case keys. Use <see cref="GetValue(string, string)"/>, or read it with
+    /// a lower case key: <c>attributes["format"]</c> works, <c>attributes["Format"]</c> throws KeyNotFoundException.</para>
+    /// <para><b>Known issue:</b> the same attribute twice in one tag makes the parser throw ArgumentException. See docs/known-issues.md.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var token = (NamedToken)new Parser().Parse("&lt;%=Total format=\"0.00\"%&gt;")[0];
+    /// string format = token.Attributes.GetValue("Format", "0");   // "0.00"
+    /// </code>
+    /// </example>
     public class TokenAttributeDictionary : Dictionary<string, string>
     {
+        /// <summary>
+        /// Gets an attribute value, or a default when the attribute is missing. The name is not case sensitive.
+        /// </summary>
+        /// <param name="attributeName">The attribute name. Must not be null.</param>
+        /// <param name="defaultValue">The value to return when the attribute is missing.</param>
+        /// <returns>The attribute value, or <paramref name="defaultValue"/>.</returns>
+        /// <example>
+        /// <code>
+        /// string format = attributes.GetValue("FORMAT", "0");
+        /// </code>
+        /// </example>
         public string GetValue(string attributeName, string defaultValue)
         {
             attributeName = attributeName.ToLower();
@@ -42,22 +45,13 @@ namespace Toshal.Template.Tokens
 
 
         /// <summary>
-        /// The get name and attributes.
+        /// Splits "name attr="value" ..." into the name and the attributes.
         /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <param name="nameString">
-        /// The name string.
-        /// </param>
-        /// <param name="attributes">
-        /// The attributes.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="InvalidTokenAttributeException">
-        /// </exception>
+        /// <param name="split">The tag, for the exception.</param>
+        /// <param name="nameString">The text after the tag keyword.</param>
+        /// <param name="attributes">The dictionary to fill.</param>
+        /// <returns>The name, trimmed and in lower case.</returns>
+        /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
         internal static string GetNameAndAttributes(
             Split split,
             string nameString,

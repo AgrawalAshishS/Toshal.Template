@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Toshal.Template</AssemblyName>
     <PackageId>Toshal.Template</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Description>A text template engine with ASP style tags such as &lt;%=Name%&gt;, IF, FOREACH, WITH and SET. It produces any text: emails, reports, source code, project files.</Description>
   </PropertyGroup>
 

@@ -1,42 +1,28 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ContentToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 using System;
 
 namespace Toshal.Template.Tokens
 {
     /// <summary>
-    ///     The content token.
+    /// Plain text of the template, outside any tag. The processor writes it as it is.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var text = (ContentToken)new Parser().Parse("Hello &lt;%=Name%&gt;")[0];   // text.Content == "Hello "
+    /// </code>
+    /// </example>
     public class ContentToken : Token
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ContentToken" /> class.
+        /// Creates the token from a piece of plain text. The parser calls it.
         /// </summary>
-        /// <param name="content">
-        ///     The content.
-        /// </param>
+        /// <param name="split">The text piece. Its content, line and column are copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = new ContentToken(new Split { Content = "Hello " });
+        /// </code>
+        /// </example>
         public ContentToken(Split split)
         {
             this.Content = split.Content;
@@ -44,15 +30,14 @@ namespace Toshal.Template.Tokens
             this.LineNumber = split.LineNumber;
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        ///     Gets the content.
+        /// Gets the text, including spaces and line breaks.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// Console.Write(token.Content);
+        /// </code>
+        /// </example>
         public string Content { get; private set; }
-
-        #endregion
     }
-}
+}

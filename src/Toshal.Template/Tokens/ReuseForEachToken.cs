@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ReuseForEachToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
@@ -27,30 +7,38 @@ namespace Toshal.Template.Tokens
     using Toshal.Template.Exceptions;
 
     /// <summary>
-    ///     The reuse for each token.
+    /// A parsed <c>&lt;%REUSE_FOREACH existing name%&gt;</c> tag. It runs the FOREACH block named <c>existing</c> again, at this place, under the new name.
+    /// The loop value provider is asked for the rows with the new name and the attributes of the existing FOREACH,
+    /// so the same layout can show a different list. The existing FOREACH must be in the same template; it can come before or after this tag.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// // Same table layout for two lists:
+    /// // &lt;%FOREACH open%&gt;- &lt;%=Title%&gt;&lt;%ENDFOR%&gt;  Done: &lt;%REUSE_FOREACH open done%&gt;
+    /// </code>
+    /// </example>
     public class ReuseForEachToken : Token
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ReuseForEachToken" /> class.
+        /// Reads the existing FOREACH name and the new name from the tag. The parser calls it and later sets <see cref="ExistingForEachToken"/>.
         /// </summary>
-        /// <param name="split">
-        ///     The split.
-        /// </param>
-        /// <exception cref="TokenMissingNameException">
-        /// </exception>
+        /// <param name="split">The tag.</param>
+        /// <exception cref="TokenMissingNameException">The tag does not have both names.</exception>
+        /// <example>
+        /// <code>
+        /// var token = new ReuseForEachToken(new Split { Content = "&lt;%REUSE_FOREACH open done%&gt;" });
+        /// </code>
+        /// </example>
         public ReuseForEachToken(Split split)
         {
             this.Name = string.Empty;
 
             const string reuseForEachTokenExpression = "<%REUSE_FOREACH\\s(?<ExistingForEachName>.+?)\\s(?<Name>.+?)%>";
+
             var m = Regex.Match(split.Content, reuseForEachTokenExpression);
 
             this.ExistingForEachName = m.Groups["ExistingForEachName"].Value.Trim().ToLower();
             this.Name = m.Groups["Name"].Value.Trim().ToLower();
-
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
 
@@ -60,25 +48,34 @@ namespace Toshal.Template.Tokens
             }
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        ///     Gets the existing for each name.
+        /// Gets the name of the FOREACH to reuse, in lower case.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string existing = token.ExistingForEachName;   // "open"
+        /// </code>
+        /// </example>
         public string ExistingForEachName { get; private set; }
 
         /// <summary>
-        ///     Gets or sets the existing for each token.
+        /// Gets or sets the FOREACH block to reuse. <see cref="Parser.Parse(string)"/> sets it before it returns; it is null only on a token made by hand.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// ForEachToken layout = token.ExistingForEachToken!;
+        /// </code>
+        /// </example>
         public ForEachToken? ExistingForEachToken { get; set; }
 
         /// <summary>
-        ///     Gets the name.
+        /// Gets the new name, in lower case. The loop value provider gets it as <see cref="ArgsBase.Name"/>.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string name = token.Name;   // "done"
+        /// </code>
+        /// </example>
         public string Name { get; }
-
-        #endregion
     }
-}
+}

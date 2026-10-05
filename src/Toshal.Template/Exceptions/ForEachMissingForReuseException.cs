@@ -1,40 +1,31 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ForEachMissingForReuseException.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Exceptions
 {
     /// <summary>
-    /// The for each missing for reuse exception.
+    /// Thrown by <see cref="Parser.Parse(string)"/> when <c>&lt;%REUSE_FOREACH existing name%&gt;</c> names a FOREACH that is not in the same template.
+    /// <see cref="ParserException.Split"/> is null for this exception; the line and column are those of the REUSE_FOREACH tag.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// try { new Parser().Parse("&lt;%REUSE_FOREACH lines copy%&gt;"); }
+    /// catch (ForEachMissingForReuseException ex) { Console.WriteLine(ex.ForEachName); }   // lines
+    /// </code>
+    /// </example>
     public class ForEachMissingForReuseException : ParserException
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="ForEachMissingForReuseException"/> class.
+        /// Creates the exception.
         /// </summary>
-        /// <param name="name">
-        /// The split.
-        /// </param>
+        /// <param name="reuseName">The new name given in the REUSE_FOREACH tag.</param>
+        /// <param name="forEachName">The FOREACH name that was not found.</param>
+        /// <param name="lineNumber">The 1 based line of the REUSE_FOREACH tag.</param>
+        /// <param name="startingPosition">The 1 based column of the REUSE_FOREACH tag.</param>
+        /// <example>
+        /// <code>
+        /// throw new ForEachMissingForReuseException("copy", "lines", 4, 1);
+        /// </code>
+        /// </example>
         public ForEachMissingForReuseException(string reuseName, string forEachName, int lineNumber, int startingPosition)
             : base(lineNumber, startingPosition, "FOREACH is missing with name " + forEachName + ", it is referenced in Reuse token named : " + reuseName)
         {
@@ -42,9 +33,24 @@ namespace Toshal.Template.Exceptions
             ForEachName = forEachName;
         }
 
+        /// <summary>
+        /// Gets or sets the new name given in the REUSE_FOREACH tag, in lower case.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// string reuse = ex.ReuseName;
+        /// </code>
+        /// </example>
         public string ReuseName { get; set; }
-        public string ForEachName { get; set; }
 
-        #endregion
+        /// <summary>
+        /// Gets or sets the FOREACH name that was not found, in lower case.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// string missing = ex.ForEachName;
+        /// </code>
+        /// </example>
+        public string ForEachName { get; set; }
     }
-}
+}

@@ -1,38 +1,40 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 using System.Text.RegularExpressions;
-using Toshal.Template.Exceptions;
 
+using Toshal.Template.Exceptions;
 
 namespace Toshal.Template.Tokens
 {
+    /// <summary>
+    /// A parsed <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> tag. The processor removes the last n characters written so far, or all of them when fewer were written.
+    /// It is useful to drop a trailing separator, such as the last comma of a list.
+    /// </summary>
+    /// <remarks>
+    /// <para><b>Known issue:</b> a negative n, such as <c>&lt;%REMOVE_PREVIOUS -1%&gt;</c>, is accepted by the parser and then makes the processor throw
+    /// ArgumentOutOfRangeException. See docs/known-issues.md.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // &lt;%FOREACH tags%&gt;&lt;%CONTEXT_AS_STRING%&gt;, &lt;%ENDFOR%&gt;&lt;%REMOVE_PREVIOUS 2%&gt;   writes   a, b
+    /// </code>
+    /// </example>
     public class RemovePreviousCharsToken : Token
     {
+        /// <summary>
+        /// Reads the number of characters from the tag. The parser calls it.
+        /// </summary>
+        /// <param name="split">The tag.</param>
+        /// <exception cref="ParserException">The number is missing or is not a whole number.</exception>
+        /// <example>
+        /// <code>
+        /// var token = new RemovePreviousCharsToken(new Split { Content = "&lt;%REMOVE_PREVIOUS 2%&gt;" });   // token.CharCount == 2
+        /// </code>
+        /// </example>
         public RemovePreviousCharsToken(Split split)
         {
             const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
             string tempString = Regex.Match(split.Content, tokenExpression).Groups["charcount"].Value.Trim();
-
             int charCount = 0;
             if(int.TryParse(tempString, out charCount) == false)
             {
@@ -44,6 +46,14 @@ namespace Toshal.Template.Tokens
             this.StartingPosition = split.StartingPosition;
         }
 
+        /// <summary>
+        /// Gets the number of characters to remove.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// int count = token.CharCount;
+        /// </code>
+        /// </example>
         public int CharCount { get; private set; }
     }
 }

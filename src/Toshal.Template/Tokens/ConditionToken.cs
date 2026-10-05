@@ -1,24 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConditionToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
@@ -27,20 +7,29 @@ namespace Toshal.Template.Tokens
     using Toshal.Template.Exceptions;
 
     /// <summary>
-    ///     The condition token.
+    /// A parsed <c>&lt;%IF name%&gt;</c> or <c>&lt;%ELSEIF name%&gt;</c> tag with the tokens of its true part.
+    /// The word <c>THEN</c> at the end is optional: <c>&lt;%IF paid THEN%&gt;</c> is the same as <c>&lt;%IF paid%&gt;</c>.
+    /// <c>&lt;%IF not paid%&gt;</c> is a negative condition.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var token = (ConditionToken)new Parser().Parse("&lt;%IF not Paid%&gt;Please pay&lt;%ELSE%&gt;Thanks&lt;%ENDIF%&gt;")[0];
+    /// // token.Name == "paid", token.IsPositive == false, token.FalsePart is an ElseToken
+    /// </code>
+    /// </example>
     public class ConditionToken : ContainerTokenBase
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ConditionToken" /> class.
+        /// Reads the name, the <c>not</c> and the attributes from an IF or ELSEIF tag. The parser calls it.
         /// </summary>
-        /// <param name="split">
-        ///     The split.
-        /// </param>
-        /// <exception cref="TokenMissingNameException">
-        /// </exception>
+        /// <param name="split">The tag. If its content starts with <c>&lt;%IF</c> it is read as IF, otherwise as ELSEIF.</param>
+        /// <exception cref="TokenMissingNameException">The tag has no name, for example <c>&lt;%IF %&gt;</c>.</exception>
+        /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
+        /// <example>
+        /// <code>
+        /// var token = new ConditionToken(new Split { Content = "&lt;%IF paid%&gt;" });
+        /// </code>
+        /// </example>
         public ConditionToken(Split split)
         {
             this.Name = string.Empty;
@@ -84,27 +73,49 @@ namespace Toshal.Template.Tokens
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, Name, this.Attributes);
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        ///     Gets or sets the false part.
+        /// Gets or sets what runs when the condition does not hold: a <see cref="ConditionToken"/> for ELSEIF, an <see cref="ElseToken"/> for ELSE,
+        /// or null when there is neither.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// if (token.FalsePart is ElseToken elseToken) { /* the ELSE part */ }
+        /// </code>
+        /// </example>
         public IContainerToken? FalsePart { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether the condition is positive. It is false for <c>&lt;%IF not name%&gt;</c>.
+        /// The processor runs the true part when the condition value provider returns this value.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// bool negative = !token.IsPositive;
+        /// </code>
+        /// </example>
         public bool IsPositive { get; set; }
 
         /// <summary>
-        ///     Gets the name.
+        /// Gets the condition name in lower case, without <c>not</c>, <c>THEN</c> and the attributes.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string name = token.Name;   // "paid" for &lt;%IF not Paid THEN%&gt;
+        /// </code>
+        /// </example>
         public string Name { get; }
 
         /// <summary>
-        /// Gets the attributes.
+        /// Gets the attributes of the tag. Keys are lower case.
         /// </summary>
+        /// <remarks>
+        /// <para><b>Known issue:</b> the values are lower cased too, so <c>unit="KG"</c> gives <c>kg</c>. See docs/known-issues.md.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// string min = token.Attributes.GetValue("min", "0");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; private set; } = new TokenAttributeDictionary();
-
-        #endregion
     }
-}
+}

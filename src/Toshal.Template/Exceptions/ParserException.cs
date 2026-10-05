@@ -1,36 +1,32 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ParserException.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Exceptions
 {
     using System;
 
     /// <summary>
-    /// The parser exception.
+    /// Thrown by <see cref="Parser.Parse(string)"/> when the template text is not valid. It is also the base class of the more specific parser exceptions.
+    /// It is thrown as this exact type for an unknown tag (for example <c>&lt;%FOO%&gt;</c>, or an <c>&lt;%ENDIF%&gt;</c> without IF),
+    /// an unknown block inside a FOREACH, and a <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> whose n is not a whole number.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// try { new Parser().Parse(text); }
+    /// catch (ParserException ex) { Console.WriteLine($"Line {ex.LineNumber}, column {ex.StartingPosition}: {ex.Message}"); }
+    /// </code>
+    /// </example>
     public class ParserException : Exception
     {
-        #region Constructors and Destructor
-
+        /// <summary>
+        /// Creates the exception for a piece of the template, with a message.
+        /// </summary>
+        /// <param name="split">The piece that failed. Its line and column are copied.</param>
+        /// <param name="message">The message.</param>
+        /// <example>
+        /// <code>
+        /// throw new ParserException(split, "Char count is missing or not integer");
+        /// </code>
+        /// </example>
         public ParserException(Split split, string message)
             : base(message)
         {
@@ -39,28 +35,67 @@ namespace Toshal.Template.Exceptions
             this.StartingPosition = split.StartingPosition;
         }
 
+        /// <summary>
+        /// Creates the exception for a piece of the template with the message "Token - (text) is wrong @(column) on line number (line)".
+        /// </summary>
+        /// <param name="split">The piece that failed. Its line and column are copied.</param>
+        /// <example>
+        /// <code>
+        /// throw new ParserException(split);
+        /// </code>
+        /// </example>
         public ParserException(Split split)
             : this(split, "Token - " + split.Content + " is wrong @" + split.StartingPosition + " on line number " + split.LineNumber)
         {
         }
 
+        /// <summary>
+        /// Creates the exception from a position and a message, without a piece. <see cref="Split"/> stays null.
+        /// </summary>
+        /// <param name="lineNumber">The 1 based line.</param>
+        /// <param name="startingPosition">The 1 based column.</param>
+        /// <param name="message">The message.</param>
+        /// <example>
+        /// <code>
+        /// throw new ParserException(3, 10, "Something is wrong here");
+        /// </code>
+        /// </example>
         public ParserException(int lineNumber, int startingPosition, string message)
             : base(message)
         {
             this.LineNumber = lineNumber;
             this.StartingPosition = startingPosition;
         }
-        
-        #endregion
 
-        #region Public Properties
-
+        /// <summary>
+        /// Gets or sets the piece of the template that failed. It is null when the exception was made from a position only,
+        /// as <see cref="ForEachMissingForReuseException"/> is.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// string badText = ex.Split?.Content ?? "";
+        /// </code>
+        /// </example>
         public Split? Split { get; set; }
 
+        /// <summary>
+        /// Gets the 1 based line where the failing piece starts.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// int line = ex.LineNumber;
+        /// </code>
+        /// </example>
         public int LineNumber { get; private set; }
 
+        /// <summary>
+        /// Gets the 1 based column where the failing piece starts.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// int column = ex.StartingPosition;
+        /// </code>
+        /// </example>
         public int StartingPosition { get; private set; }
-
-        #endregion
     }
-}
+}

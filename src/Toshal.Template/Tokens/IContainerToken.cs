@@ -1,41 +1,28 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IContainerToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
     using System.Collections.Generic;
 
     /// <summary>
-    ///     The ContainerToken interface.
+    /// A token that holds other tokens. <see cref="ConditionToken.FalsePart"/> has this type.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// IContainerToken? falsePart = conditionToken.FalsePart;
+    /// int count = falsePart?.InnerTokens.Count ?? 0;
+    /// </code>
+    /// </example>
     public interface IContainerToken : IToken
     {
-        #region Public Properties
-
         /// <summary>
-        ///     Gets the inner tokens.
+        /// Gets the tokens inside the block, in template order.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// foreach (IToken inner in block.InnerTokens) { /* ... */ }
+        /// </code>
+        /// </example>
         List<IToken> InnerTokens { get; }
-
-        #endregion
     }
-}
+}

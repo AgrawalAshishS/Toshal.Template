@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TokenArgs.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template
 {
@@ -26,21 +6,32 @@ namespace Toshal.Template
     using Template.Tokens;
 
     /// <summary>
-    /// The token args.
+    /// The arguments of <see cref="Processor.TokenValueProvider"/> for a <c>&lt;%=name%&gt;</c> tag, and of
+    /// <see cref="Processor.WithValueProvider"/> for a <c>&lt;%WITH name%&gt;</c> tag.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// processor.TokenValueProvider = args =&gt; args.Name switch
+    /// {
+    ///     "total" =&gt; ((Order)args.Context!).Total.ToString(args.GetAttribute("format", "0.00")),
+    ///     _ =&gt; null,
+    /// };
+    /// </code>
+    /// </example>
     public class TokenArgs : ArgsBase
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenArgs"/> class.
+        /// Creates the arguments for a value tag. The processor calls it; you need it only to test a provider on its own.
         /// </summary>
-        /// <param name="token">
-        /// The token.
-        /// </param>
-        /// <param name="context">
-        /// The context.
-        /// </param>
+        /// <param name="token">The parsed value tag. Its name and attributes are copied.</param>
+        /// <param name="context">The current context. It can be null.</param>
+        /// <param name="parentContext">The contexts around the tag, outermost first. It is stored as is, not copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = (NamedToken)new Parser().Parse("&lt;%=total%&gt;")[0];
+        /// string? text = myProvider(new TokenArgs(token, order, new List&lt;object?&gt; { order }));
+        /// </code>
+        /// </example>
         public TokenArgs(NamedToken token, object? context, List<object?> parentContext)
             : base(token.Name, context, parentContext)
         {
@@ -48,20 +39,35 @@ namespace Toshal.Template
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TokenArgs"/> class.
+        /// Creates the arguments for a WITH tag. The processor calls it; you need it only to test a provider on its own.
         /// </summary>
-        /// <param name="token">
-        /// The token.
-        /// </param>
-        /// <param name="context">
-        /// The context.
-        /// </param>
+        /// <param name="token">The parsed WITH tag. Its name and attributes are copied.</param>
+        /// <param name="context">The current context. It can be null.</param>
+        /// <param name="parentContext">The contexts around the tag, outermost first. It is stored as is, not copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = (WithToken)new Parser().Parse("&lt;%WITH customer%&gt;x&lt;%ENDWITH%&gt;")[0];
+        /// object? value = myProvider(new TokenArgs(token, order, new List&lt;object?&gt; { order }));
+        /// </code>
+        /// </example>
         public TokenArgs(WithToken token, object? context, List<object?> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
 
+        /// <summary>
+        /// Creates arguments for a child object: same name and attributes, a new context, and the old context added at the end of a copy of
+        /// the parent contexts. Use it when a provider hands part of the work to another provider.
+        /// </summary>
+        /// <param name="args">The arguments to copy. They are not changed.</param>
+        /// <param name="context">The new context. It can be null.</param>
+        /// <example>
+        /// <code>
+        /// // "customer.name": hand "name" to the customer provider with the customer as context.
+        /// string? name = customerProvider(new TokenArgs(args, order.Customer));
+        /// </code>
+        /// </example>
         public TokenArgs(TokenArgs args, object? context)
             : base(args.Name, context, new List<object?>(args.ParentContext))
         {
@@ -69,20 +75,32 @@ namespace Toshal.Template
             this.Attributes = args.Attributes;
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        /// Gets the attributes.
+        /// Gets the attributes written in the tag, for example <c>format</c> in <c>&lt;%=Total format="0.00"%&gt;</c>.
+        /// Keys are lower case, values are kept as written.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// bool hasFormat = args.Attributes.ContainsKey("format");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
 
-        #endregion
-
+        /// <summary>
+        /// Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.
+        /// </summary>
+        /// <param name="key">The attribute name. Must not be null.</param>
+        /// <param name="defaultValue">The value to return when the attribute is missing.</param>
+        /// <returns>The attribute value as written in the tag, or <paramref name="defaultValue"/>.</returns>
+        /// <example>
+        /// <code>
+        /// // &lt;%=Total format="0.00"%&gt;
+        /// string format = args.GetAttribute("Format", "0");   // "0.00"
+        /// </code>
+        /// </example>
         public string GetAttribute(string key, string defaultValue)
         {
             return Attributes.GetValue(key, defaultValue);
         }
     }
-}
+}

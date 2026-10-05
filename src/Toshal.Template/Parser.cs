@@ -1,24 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Parser.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template
 {
@@ -32,8 +12,19 @@ namespace Toshal.Template
     using Toshal.Template.Tokens;
 
     /// <summary>
-    ///     The parser.
+    /// Turns template text into a list of tokens. Parse a template once and give the tokens to <see cref="Processor.Process(ProcessorArgs)"/>
+    /// as often as you like.
     /// </summary>
+    /// <remarks>
+    /// <para>Tags are written as <c>&lt;%...%&gt;</c>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive.
+    /// Names are not case sensitive: the parser lower cases them.</para>
+    /// <para><b>Warning:</b> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// List&lt;IToken&gt; tokens = new Parser().Parse("Hello &lt;%=Name%&gt;!");
+    /// </code>
+    /// </example>
     public class Parser
     {
         #region Constants
@@ -48,16 +39,25 @@ namespace Toshal.Template
         #region Public Methods and Operators
 
         /// <summary>
-        ///     The parse.
+        /// Parses a template. Plain text becomes <see cref="ContentToken"/>, each tag becomes its token, and blocks such as IF and FOREACH
+        /// hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.
         /// </summary>
-        /// <param name="templateText">
-        ///     The template text.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="List" />.
-        /// </returns>
-        /// <exception cref="ParserException">
-        /// </exception>
+        /// <param name="templateText">The template. Must not be null. An empty string gives an empty list.</param>
+        /// <returns>The top level tokens, in template order.</returns>
+        /// <exception cref="TokenMissingNameException">A tag that needs a name has none, for example <c>&lt;%=%&gt;</c>.</exception>
+        /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
+        /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
+        /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is not in the template.</exception>
+        /// <exception cref="ParserException">An unknown tag, an end tag without its start, or a bad REMOVE_PREVIOUS count.
+        /// All the exceptions above derive from it.</exception>
+        /// <exception cref="ArgumentException">Known issue: REUSE_FOREACH names a FOREACH name that is used more than once, or a tag repeats an attribute.
+        /// See docs/known-issues.md.</exception>
+        /// <example>
+        /// <code>
+        /// var parser = new Parser();
+        /// List&lt;IToken&gt; tokens = parser.Parse("&lt;%IF vip%&gt;Dear &lt;%=Name%&gt;&lt;%ELSE%&gt;Hello&lt;%ENDIF%&gt;");
+        /// </code>
+        /// </example>
         public List<IToken> Parse(string templateText)
         {
             var retList = new List<IToken>();

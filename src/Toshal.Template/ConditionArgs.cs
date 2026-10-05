@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ConditionArgs.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template
 {
@@ -26,27 +6,47 @@ namespace Toshal.Template
     using Toshal.Template.Tokens;
 
     /// <summary>
-    ///     The condition args.
+    /// The arguments of <see cref="Processor.ConditionValueProvider"/> for an <c>&lt;%IF name%&gt;</c> or <c>&lt;%ELSEIF name%&gt;</c> tag.
     /// </summary>
+    /// <remarks>
+    /// <para>For <c>&lt;%IF not Paid%&gt;</c> the name is <c>paid</c>. Return whether <c>paid</c> is true; the processor applies the <c>not</c>.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// processor.ConditionValueProvider = args =&gt; args.Name == "paid" &amp;&amp; ((Invoice)args.Context!).Paid;
+    /// </code>
+    /// </example>
     public class ConditionArgs : ArgsBase
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ConditionArgs" /> class.
+        /// Creates the arguments for a condition tag. The processor calls it; you need it only to test a provider on its own.
         /// </summary>
-        /// <param name="token">
-        ///     The token.
-        /// </param>
-        /// <param name="context">
-        ///     The context.
-        /// </param>
+        /// <param name="token">The parsed condition tag. Its name and attributes are copied.</param>
+        /// <param name="context">The current context. It can be null.</param>
+        /// <param name="parentContext">The contexts around the tag, outermost first. It is stored as is, not copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = (ConditionToken)new Parser().Parse("&lt;%IF paid%&gt;x&lt;%ENDIF%&gt;")[0];
+        /// bool result = myProvider(new ConditionArgs(token, invoice, new List&lt;object?&gt; { invoice }));
+        /// </code>
+        /// </example>
         public ConditionArgs(ConditionToken token, object? context, List<object?> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
 
+        /// <summary>
+        /// Creates arguments for a child object: same name and attributes, a new context, and the old context added at the end of a copy of
+        /// the parent contexts. Use it when a provider hands part of the work to another provider.
+        /// </summary>
+        /// <param name="args">The arguments to copy. They are not changed.</param>
+        /// <param name="context">The new context. It can be null.</param>
+        /// <example>
+        /// <code>
+        /// var child = new ConditionArgs(args, customer.Address);   // child.ParentContext ends with customer
+        /// </code>
+        /// </example>
         public ConditionArgs(ConditionArgs args, object? context)
             : base(args.Name, context, new List<object?>(args.ParentContext))
         {
@@ -54,11 +54,17 @@ namespace Toshal.Template
             this.Attributes = args.Attributes;
         }
 
-        #endregion
-
         /// <summary>
-        /// Gets the attributes.
+        /// Gets the attributes written in the tag, for example <c>min</c> in <c>&lt;%IF total min="100"%&gt;</c>. Keys are lower case.
         /// </summary>
+        /// <remarks>
+        /// <para><b>Known issue:</b> in IF and ELSEIF tags the values are lower cased too, so <c>unit="KG"</c> gives <c>kg</c>. See docs/known-issues.md.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// string min = args.Attributes.GetValue("min", "0");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
     }
-}
+}

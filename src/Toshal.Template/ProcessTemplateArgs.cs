@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ProcessTemplateArgs.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template
 {
@@ -26,41 +6,58 @@ namespace Toshal.Template
     using Template.Tokens;
 
     /// <summary>
-    /// The token args.
+    /// The arguments of <see cref="Processor.ProcessTemplateValueProvider"/> for a <c>&lt;%PROCESS_TEMPLATE name%&gt;</c> tag.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// processor.ProcessTemplateValueProvider = args =&gt; parser.Parse(File.ReadAllText(args.Name + ".txt"));
+    /// </code>
+    /// </example>
     public class ProcessTemplateArgs : ArgsBase
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProcessTemplateArgs"/> class.
+        /// Creates the arguments for a PROCESS_TEMPLATE tag. The processor calls it; you need it only to test a provider on its own.
         /// </summary>
-        /// <param name="token">
-        /// The token.
-        /// </param>
-        /// <param name="context">
-        /// The context.
-        /// </param>
+        /// <param name="token">The parsed tag. Its name and attributes are copied.</param>
+        /// <param name="context">The current context. It can be null.</param>
+        /// <param name="parentContext">The contexts around the tag, outermost first. It is stored as is, not copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = (ProcessTemplateToken)new Parser().Parse("&lt;%PROCESS_TEMPLATE footer%&gt;")[0];
+        /// var tokens = myProvider(new ProcessTemplateArgs(token, null, new List&lt;object?&gt;()));
+        /// </code>
+        /// </example>
         public ProcessTemplateArgs(ProcessTemplateToken token, object? context, List<object?> parentContext)
             : base(token.Name, context, parentContext)
         {
             this.Attributes = token.Attributes;
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        /// Gets the attributes.
+        /// Gets the attributes written in the tag, for example <c>lang</c> in <c>&lt;%PROCESS_TEMPLATE footer lang="en"%&gt;</c>.
+        /// Keys are lower case, values are kept as written.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string lang = args.Attributes.GetValue("lang", "en");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
 
-        #endregion
-
+        /// <summary>
+        /// Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.
+        /// </summary>
+        /// <param name="key">The attribute name. Must not be null.</param>
+        /// <param name="defaultValue">The value to return when the attribute is missing.</param>
+        /// <returns>The attribute value as written in the tag, or <paramref name="defaultValue"/>.</returns>
+        /// <example>
+        /// <code>
+        /// string lang = args.GetAttribute("lang", "en");
+        /// </code>
+        /// </example>
         public string GetAttribute(string key, string defaultValue)
         {
             return Attributes.GetValue(key, defaultValue);
         }
     }
-}
+}

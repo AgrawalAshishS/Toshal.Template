@@ -1,29 +1,30 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RemovePreviousNewLine.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
+    /// <summary>
+    /// A parsed <c>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</c> tag. The processor removes a <c>\n</c> at the end of the text written so far,
+    /// and then a <c>\r</c> at the end. It lets you keep each tag on its own line in the template without empty lines in the output.
+    /// </summary>
+    /// <remarks>
+    /// <para><b>Warning:</b> it also removes a lone <c>\r</c> at the end, even when no <c>\n</c> came after it.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // "Hello\r\n&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;World"   writes   HelloWorld
+    /// </code>
+    /// </example>
     public class RemovePreviousNewLineToken : Token
     {
+        /// <summary>
+        /// Creates the token. The parser calls it.
+        /// </summary>
+        /// <param name="split">The tag. Its line and column are copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = new RemovePreviousNewLineToken(new Split { Content = "&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;" });
+        /// </code>
+        /// </example>
         public RemovePreviousNewLineToken(Split split)
         {
             this.LineNumber = split.LineNumber;

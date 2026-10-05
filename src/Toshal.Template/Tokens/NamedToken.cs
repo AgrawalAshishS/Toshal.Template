@@ -1,24 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="NamedToken.cs" company="Toshal Infotech">
-//   http://www.ToshalInfotech.com
-//   Copyright (c) 2014-2015
-//   by Toshal Infotech
-//   
-//   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-//   documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
-//   the rights to use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of the Software, and 
-//   to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//   
-//   The above copyright notice and this permission notice shall be included in all copies or substantial portions 
-//   of the Software.
-//   
-//   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED 
-//   TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-//   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-//   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-//   DEALINGS IN THE SOFTWARE.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
 namespace Toshal.Template.Tokens
 {
@@ -28,24 +8,33 @@ namespace Toshal.Template.Tokens
     using Toshal.Template.Exceptions;
 
     /// <summary>
-    /// The named token.
+    /// A parsed <c>&lt;%=name%&gt;</c> value tag, with optional attributes such as <c>&lt;%=Total format="0.00"%&gt;</c>.
+    /// The processor writes the value of a SET variable with this name, or else the text from <see cref="Processor.TokenValueProvider"/>.
     /// </summary>
+    /// <example>
+    /// <code>
+    /// var token = (NamedToken)new Parser().Parse("&lt;%=Total format=\"0.00\"%&gt;")[0];
+    /// // token.Name == "total", token.GetAttribute("format", "") == "0.00"
+    /// </code>
+    /// </example>
     public class NamedToken : Token
     {
-        #region Constructors and Destructor
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="NamedToken"/> class.
+        /// Reads the name and attributes of a value tag. The parser calls it.
         /// </summary>
-        /// <param name="split">
-        /// The split.
-        /// </param>
-        /// <exception cref="TokenMissingNameException">
-        /// </exception>
+        /// <param name="split">The tag.</param>
+        /// <exception cref="TokenMissingNameException">The tag has no name, for example <c>&lt;%=%&gt;</c>.</exception>
+        /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
+        /// <example>
+        /// <code>
+        /// var token = new NamedToken(new Split { Content = "&lt;%=Name%&gt;" });
+        /// </code>
+        /// </example>
         public NamedToken(Split split)
         {
             const string tokenExpression = "<%=(?<Name>.*?)%>";
             string tempString = Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim();
+
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, tempString, this.Attributes);
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
@@ -56,25 +45,40 @@ namespace Toshal.Template.Tokens
             }
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
-        /// Gets the attributes.
+        /// Gets the attributes of the tag. Keys are lower case, values are kept as written.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// bool hasFormat = token.Attributes.ContainsKey("format");
+        /// </code>
+        /// </example>
         public TokenAttributeDictionary Attributes { get; private set; } = new TokenAttributeDictionary();
 
         /// <summary>
-        /// Gets the name.
+        /// Gets the name in lower case, without the attributes.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// string name = token.Name;   // "firstname" for &lt;%=FirstName%&gt;
+        /// </code>
+        /// </example>
         public string Name { get; private set; }
 
-        #endregion
-
+        /// <summary>
+        /// Gets an attribute value, or a default when the tag does not have that attribute. The name is not case sensitive.
+        /// </summary>
+        /// <param name="attributeName">The attribute name. Must not be null.</param>
+        /// <param name="defaultValue">The value to return when the attribute is missing.</param>
+        /// <returns>The attribute value as written in the tag, or <paramref name="defaultValue"/>.</returns>
+        /// <example>
+        /// <code>
+        /// string format = token.GetAttribute("format", "0");
+        /// </code>
+        /// </example>
         public string GetAttribute(string attributeName, string defaultValue)
         {
             return Attributes.GetValue(attributeName, defaultValue);
         }
     }
-}
+}
