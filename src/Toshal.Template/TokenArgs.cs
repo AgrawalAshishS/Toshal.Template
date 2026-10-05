@@ -63,7 +63,7 @@ namespace Toshal.Template
         }
 
         public TokenArgs(TokenArgs args, object? context)
-            : base(args.Name, context, args.ParentContext)
+            : base(args.Name, context, new List<object?>(args.ParentContext))
         {
             ParentContext.Add(args.Context);
             this.Attributes = args.Attributes;
