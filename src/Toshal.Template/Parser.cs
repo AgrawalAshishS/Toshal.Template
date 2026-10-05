@@ -258,8 +258,8 @@ namespace Toshal.Template
             {
                 if (this._splits[this._splitIndex].Content == "<%ELSE%>")
                 {
-                    this._splitIndex++;
                     token.FalsePart = new ElseToken(this._splits[this._splitIndex]);
+                    this._splitIndex++;
                     if (this.ProcessSplitsTillEnd(((ElseToken)token.FalsePart).InnerTokens))
                     {
                         throw new TokenNotClosedException(split, token.Name);
