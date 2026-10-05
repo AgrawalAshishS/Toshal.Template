@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- DocsTests in the test project calls SiteBuilder directly. -->
+    <InternalsVisibleTo Include="Toshal.Template.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- The tool loads this assembly and its XML doc file to build the API pages. -->
     <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
   </ItemGroup>

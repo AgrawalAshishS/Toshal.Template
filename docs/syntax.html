@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template syntax - Toshal.Template</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html" class="active" aria-current="page">Template syntax</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Template syntax</h1>
+<p>Every tag is written as <code>&lt;%...%&gt;</code>. Keywords such as <code>IF</code> and <code>FOREACH</code> are upper case. Names are not case sensitive; the parser lower cases them. Text outside tags is written as it is, including spaces and line breaks.</p>
+<div class="table-wrap"><table>
+<tr><th>Tag</th><th>What it does</th><th>Provider</th></tr>
+<tr><td><code>&lt;%=Name%&gt;</code></td><td>Writes a value. A SET variable with that name wins over the provider. Null or empty writes nothing.</td><td><code>TokenValueProvider</code></td></tr>
+<tr><td><code>&lt;%=Name format=&quot;0.00&quot;%&gt;</code></td><td>A value with attributes. Values in quotes may contain spaces.</td><td><code>TokenValueProvider</code> reads <code>args.GetAttribute(&quot;format&quot;, &quot;&quot;)</code></td></tr>
+<tr><td><code>&lt;%IF Name%&gt;...&lt;%ENDIF%&gt;</code></td><td>Writes the inner part when the condition is true. <code>THEN</code> at the end is optional: <code>&lt;%IF Name THEN%&gt;</code>.</td><td><code>ConditionValueProvider</code></td></tr>
+<tr><td><code>&lt;%IF not Name%&gt;</code></td><td>A negative condition. The provider gets <code>name</code> and returns its value; the processor applies the <code>not</code>.</td><td><code>ConditionValueProvider</code></td></tr>
+<tr><td><code>&lt;%ELSEIF Name%&gt;</code>, <code>&lt;%ELSE%&gt;</code></td><td>Further branches of an IF.</td><td><code>ConditionValueProvider</code></td></tr>
+<tr><td><code>&lt;%FOREACH Name%&gt;...&lt;%ENDFOR%&gt;</code></td><td>Writes the inner part once per row.</td><td><code>LoopValueProvider</code> returns an <code>IList</code></td></tr>
+<tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the FOREACH named <code>Existing</code> again, for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
+<tr><td><code>&lt;%WITH Name%&gt;...&lt;%ENDWITH%&gt;</code></td><td>Makes an object the context of the inner part. Null skips the part.</td><td><code>WithValueProvider</code></td></tr>
+<tr><td><code>&lt;%SET Name%&gt;...&lt;%ENDSET%&gt;</code></td><td>Writes the inner part into a variable instead of the output.</td><td>none</td></tr>
+<tr><td><code>&lt;%PROCESS_TEMPLATE Name%&gt;</code></td><td>Runs a sub template in place, with the current context.</td><td><code>ProcessTemplateValueProvider</code> returns tokens</td></tr>
+<tr><td><code>&lt;%CONTEXT_AS_STRING%&gt;</code></td><td>Writes <code>ToString()</code> of the current context.</td><td>none</td></tr>
+<tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far.</td><td>none</td></tr>
+<tr><td><code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code></td><td>Removes a <code>\n</code> at the end of the output, then a <code>\r</code> at the end.</td><td>none</td></tr>
+</table></div>
+<h2>FOREACH parts</h2>
+<p>Inside a FOREACH you can write these parts, each at most once, each closed by its END tag (for example <code>&lt;%HEADER%&gt;...&lt;%ENDHEADER%&gt;</code>). Text outside every part belongs to ROW.</p>
+<div class="table-wrap"><table>
+<tr><th>Part</th><th>When it is written</th><th>Context</th></tr>
+<tr><td><code>NORECORD</code></td><td>Instead of everything else, when the list is null or empty.</td><td>The context around the loop</td></tr>
+<tr><td><code>HEADER</code>, <code>FOOTER</code></td><td>Once before and after the rows.</td><td>The list</td></tr>
+<tr><td><code>BEFOREROW</code>, <code>ROW</code>, <code>AFTERROW</code></td><td>For each row.</td><td>The row</td></tr>
+<tr><td><code>BEFOREALTROW</code>, <code>ALTROW</code>, <code>AFTERALTROW</code></td><td>Instead of the normal parts on the 2nd, 4th, ... row, when not empty.</td><td>The row</td></tr>
+<tr><td><code>BEFOREFIRSTROW</code>, <code>FIRSTROW</code>, <code>AFTERFIRSTROW</code></td><td>Instead of the normal parts on the first row, when the list has more than one row.</td><td>The row</td></tr>
+<tr><td><code>BEFORELASTROW</code>, <code>LASTROW</code>, <code>AFTERLASTROW</code></td><td>Instead of the normal parts on the last row. A list with one row uses these.</td><td>The row</td></tr>
+</table></div>
+<h2>Where SET variables are visible</h2>
+<ul>
+<li>A SET at the top, or inside IF, is visible to everything after it.</li>
+<li>A SET inside WITH, PROCESS_TEMPLATE, HEADER, FOOTER, NORECORD, BEFOREROW or AFTERROW stays inside that part.</li>
+<li>A SET inside a row part is visible to the rest of the row, to AFTERROW, and to the later rows of the same loop, but not after the loop.</li>
+</ul>
+<h2>Errors</h2>
+<p><code>Parser.Parse</code> throws a <code>ParserException</code>, or one of its subclasses, for a broken template. Each has <code>LineNumber</code> and <code>StartingPosition</code> (1 based). See <a href="examples/ParserErrorsExample.html">Parser errors</a>.</p>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

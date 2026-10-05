@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Helper: providers that read object properties - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Helper: providers that read object properties</h1>
+<p>The library never reads your objects by itself; providers decide what a name means. This helper builds a Processor whose providers read public properties by name, so plain C# objects can feed a template. The realistic examples use it.</p>
+<p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/Support/ObjectProviders.cs">examples/Toshal.Template.Examples/Support/ObjectProviders.cs</a></p>
+<pre><code class="lang-csharp">// Title: Helper: providers that read object properties
+// Summary: The library never reads your objects by itself; providers decide what a name means. This helper builds a Processor whose providers read public properties by name, so plain C# objects can feed a template. The realistic examples use it.
+
+using System.Collections;
+using System.Globalization;
+using System.Reflection;
+using Toshal.Template.Tokens;
+
+namespace Toshal.Template.Examples.Support;
+
+public static class ObjectProviders
+{
+    /// &lt;summary&gt;
+    /// A processor whose providers look a tag name up as a public property (not case sensitive): first on the current context,
+    /// then on the parent contexts from the inside out. So inside a FOREACH of order lines, &amp;lt;%=CustomerName%&amp;gt; still finds the order.
+    /// &lt;/summary&gt;
+    public static Processor Create(Func&lt;ProcessTemplateArgs, List&lt;IToken&gt;?&gt;? subTemplates = null)
+    {
+        return new Processor
+        {
+            // &lt;%=Total format=&quot;0.00&quot; pad=&quot;10&quot;%&gt;: the value, formatted with the optional format attribute,
+            // and padded to a width (positive: right aligned, negative: left aligned) for text tables.
+            TokenValueProvider = args =&gt; Pad(Format(Find(args.Context, args.ParentContext, args.Name), args.GetAttribute(&quot;format&quot;, &quot;&quot;)), args.GetAttribute(&quot;pad&quot;, &quot;0&quot;)),
+
+            // &lt;%IF HasDiscount%&gt;: a bool property, or &quot;has a value&quot; for anything else.
+            ConditionValueProvider = args =&gt; IsTrue(Find(args.Context, args.ParentContext, args.Name)),
+
+            // &lt;%FOREACH Lines%&gt;: a property that is a list.
+            LoopValueProvider = args =&gt; Find(args.Context, args.ParentContext, args.Name) as IList,
+
+            // &lt;%WITH Customer%&gt;: a property that becomes the new context.
+            WithValueProvider = args =&gt; Find(args.Context, args.ParentContext, args.Name),
+
+            ProcessTemplateValueProvider = subTemplates,
+        };
+    }
+
+    private static object? Find(object? context, List&lt;object?&gt; parents, string name)
+    {
+        // The current context first, then the parents from the inside out.
+        var places = new List&lt;object?&gt; { context };
+        for (int i = parents.Count - 1; i &gt;= 0; i--) places.Add(parents[i]);
+
+        foreach (var place in places)
+        {
+            if (place == null) continue;
+            var property = place.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (property != null &amp;&amp; property.GetIndexParameters().Length == 0) return property.GetValue(place);
+        }
+
+        return null;
+    }
+
+    private static string? Format(object? value, string format)
+    {
+        if (value is IFormattable formattable &amp;&amp; format.Length &gt; 0) return formattable.ToString(format, CultureInfo.InvariantCulture);
+        return Convert.ToString(value, CultureInfo.InvariantCulture);
+    }
+
+    private static string? Pad(string? text, string width)
+    {
+        int w = int.Parse(width, CultureInfo.InvariantCulture);
+        if (w == 0 || text == null) return text;
+        return w &gt; 0 ? text.PadLeft(w) : text.PadRight(-w);
+    }
+
+    private static bool IsTrue(object? value)
+    {
+        return value switch
+        {
+            null =&gt; false,
+            bool b =&gt; b,
+            string s =&gt; s.Length &gt; 0,
+            ICollection c =&gt; c.Count &gt; 0,
+            _ =&gt; true,
+        };
+    }
+}
+</code></pre>
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Known issues - Toshal.Template</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html" class="active" aria-current="page">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Known issues</h1>
+<p>This page is written by hand. Each row has a test in <code>tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs</code> or <code>tests/Toshal.Template.Tests/Fixes/</code>. A skipped test shows the wanted behavior; the other tests pin what the library does today.</p>
+<h2>Open</h2>
+<div class="table-wrap"><table>
+<tr><th>Issue</th><th>Today</th><th>Wanted</th><th>Test</th></tr>
+<tr><td>Attribute values of IF, ELSEIF and FOREACH tags are lower cased.</td><td><code>&lt;%IF Weight unit=&quot;KG&quot;%&gt;</code> gives the value <code>kg</code>. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case.</td><td>Keep the value as written, like the other tags. Waiting for a decision, because templates may rely on lower case values today.</td><td><code>IfAttributeValuesKeepTheirCase</code>, <code>ForEachAttributeValuesKeepTheirCase</code> (skipped)</td></tr>
+<tr><td>A negative count in <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> is accepted.</td><td>Parsing works, then <code>Processor.Process</code> throws <code>ArgumentOutOfRangeException</code>.</td><td>Proposal: <code>Parser.Parse</code> throws <code>ParserException</code>, like for a count that is not a whole number.</td><td><code>NegativeRemovePreviousIsAParserError</code> (skipped)</td></tr>
+</table></div>
+<h2>Open questions</h2>
+<p>These are not clearly bugs. The owner has to decide what the template language should do.</p>
+<div class="table-wrap"><table>
+<tr><th>Question</th><th>Today</th><th>Test</th></tr>
+<tr><td>A list with one row: FIRSTROW, LASTROW or both?</td><td>The LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) are used; the FIRST parts are not.</td><td><code>OneRowUsesTheLastRowPartToday</code></td></tr>
+<tr><td><code>&lt;%REUSE_FOREACH a b%&gt;</code> when two FOREACH blocks are named <code>a</code>.</td><td><code>Parser.Parse</code> throws <code>ArgumentException</code> (&quot;FOREACH name a is used more than once&quot;). Should it be a <code>ParserException</code>, or should the first or last block win?</td><td><code>ReuseOfADuplicateForEachNameFails</code></td></tr>
+<tr><td>The same attribute twice in one tag, such as <code>&lt;%=Name a=&quot;1&quot; a=&quot;2&quot;%&gt;</code>.</td><td><code>Parser.Parse</code> throws <code>ArgumentException</code>. Should it be an <code>InvalidTokenAttributeException</code>, or should the last one win?</td><td><code>RepeatedAttributeFails</code></td></tr>
+</table></div>
+<h2>Fixed in this version</h2>
+<div class="table-wrap"><table>
+<tr><th>Issue</th><th>Test</th></tr>
+<tr><td>A SET inside AFTERROW changed the variables around the loop, and AFTERROW did not see the variables set in ROW.</td><td><code>Fixes/AfterRowSetScopeTests</code></td></tr>
+<tr><td>An ELSEIF with no content skipped the following ELSEIF and ELSE.</td><td><code>Fixes/EmptyElseIfTests</code></td></tr>
+<tr><td>A template that ended with <code>&lt;%ELSE%&gt;</code> threw <code>ArgumentOutOfRangeException</code> instead of <code>TokenNotClosedException</code>, and <code>ElseToken</code> had the position of the text after the ELSE tag.</td><td><code>Fixes/ElseAtEndTests</code></td></tr>
+<tr><td>A <code>Parser</code> instance kept the FOREACH blocks of earlier templates, so a second <code>Parse</code> with REUSE_FOREACH failed or linked to an old block. Two FOREACH blocks with the same name broke every REUSE_FOREACH in the template.</td><td><code>Fixes/ParserReuseTests</code></td></tr>
+<tr><td>A <code>%&gt;</code> with no text before it (at the start, or right after a tag) was lost.</td><td><code>Fixes/StrayCloseTagTests</code></td></tr>
+<tr><td>Line and column numbers: the first text had 0 and 0, columns after a line break were 0 based, and text after a tag pointed to the <code>%&gt;</code>. All are 1 based now.</td><td><code>Fixes/TokenPositionTests</code></td></tr>
+<tr><td><code>new TokenArgs(args, context)</code>, <code>new ConditionArgs(args, context)</code> and <code>new LoopArgs(args, context)</code> added to the parent context list of the original args.</td><td><code>Fixes/ArgsCopyTests</code></td></tr>
+<tr><td>Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from <code>ParentContext</code>.</td><td><code>Fixes/ParentContextStackTests</code></td></tr>
+<tr><td>Attribute values with spaces, and attributes separated by more than one space, threw <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests</code></td></tr>
+</table></div>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

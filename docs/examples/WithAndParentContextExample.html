@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WITH, the context and the parent contexts - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>WITH, the context and the parent contexts</h1>
+<p>WITH switches the context to a child object. Providers see the current object in args.Context and the outer ones in args.ParentContext. The args copy constructors hand a part of the work to another provider.</p>
+<p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/WithAndParentContextExample.cs">examples/Toshal.Template.Examples/WithAndParentContextExample.cs</a></p>
+<pre><code class="lang-csharp">// Title: WITH, the context and the parent contexts
+// Summary: WITH switches the context to a child object. Providers see the current object in args.Context and the outer ones in args.ParentContext. The args copy constructors hand a part of the work to another provider.
+
+using Toshal.Template.Examples.Support;
+
+namespace Toshal.Template.Examples;
+
+public static class WithAndParentContextExample
+{
+    private record Address(string City);
+    private record Customer(string Name, Address? Address);
+    private record Order(int Id, Customer Customer);
+
+    public static void Run()
+    {
+        Console.WriteLine(&quot;== WITH and parent contexts ==&quot;);
+
+        const string template = &quot;Order &lt;%=Id%&gt;: &lt;%WITH Customer%&gt;&lt;%=Name%&gt;&lt;%WITH Address%&gt; from &lt;%=City%&gt; (order &lt;%=Id%&gt;)&lt;%ENDWITH%&gt;&lt;%ENDWITH%&gt;&quot;;
+        var tokens = new Parser().Parse(template);
+
+        var processor = new Processor
+        {
+            WithValueProvider = args =&gt; args.Context switch
+            {
+                Order o when args.Name == &quot;customer&quot; =&gt; o.Customer,
+                Customer c when args.Name == &quot;address&quot; =&gt; c.Address,   // null skips the WITH block
+                _ =&gt; null,
+            },
+            TokenValueProvider = args =&gt; args.Context switch
+            {
+                Order o =&gt; o.Id.ToString(),
+                Customer c =&gt; c.Name,
+                // Inside the address, &quot;id&quot; is not on the context: look in the parent contexts.
+                Address a when args.Name == &quot;city&quot; =&gt; a.City,
+                Address when args.Name == &quot;id&quot; =&gt; args.ParentContext.OfType&lt;Order&gt;().Last().Id.ToString(),
+                _ =&gt; null,
+            },
+        };
+
+        string Render(Order o) =&gt; processor.Process(new ProcessorArgs(tokens) { Context = o }).ToString();
+
+        var withAddress = new Order(7, new Customer(&quot;Asha&quot;, new Address(&quot;Surat&quot;)));
+        Console.WriteLine(Render(withAddress));
+        Verify.Equal(&quot;Order 7: Asha from Surat (order 7)&quot;, Render(withAddress), &quot;with&quot;);
+        Verify.Equal(&quot;Order 8: Ravi&quot;, Render(new Order(8, new Customer(&quot;Ravi&quot;, null))), &quot;null skips the block&quot;);
+
+        // CONTEXT_AS_STRING writes the current context without a provider.
+        var tags = new Parser().Parse(&quot;&lt;%FOREACH tags%&gt;#&lt;%CONTEXT_AS_STRING%&gt; &lt;%ENDFOR%&gt;&quot;);
+        Verify.Equal(&quot;#news #tech &quot;, new Processor { LoopValueProvider = a =&gt; new[] { &quot;news&quot;, &quot;tech&quot; } }.Process(new ProcessorArgs(tags)).ToString(), &quot;context as string&quot;);
+
+        // Copy constructors: the order provider hands &quot;customername&quot; to a provider that knows customers, with the customer as context.
+        Func&lt;TokenArgs, string?&gt; customerProvider = args =&gt; args.Context is Customer c &amp;&amp; args.ParentContext[^1] is Order ? c.Name : null;
+        var delegating = new Processor
+        {
+            TokenValueProvider = args =&gt;
+            {
+                if (args.Context is not Order order || args.Name != &quot;customername&quot;) return null;
+                return customerProvider(new TokenArgs(args, order.Customer));   // a copy: args.ParentContext is not changed
+            },
+        };
+        string delegated = delegating.Process(new ProcessorArgs(new Parser().Parse(&quot;&lt;%=CustomerName%&gt;&quot;)) { Context = withAddress }).ToString();
+        Verify.Equal(&quot;Asha&quot;, delegated, &quot;TokenArgs copy&quot;);
+
+        // The same copy constructors exist for conditions and loops. The child ends its ParentContext with the old context.
+        var conditionArgs = new ConditionArgs(new Tokens.ConditionToken(new Split { Content = &quot;&lt;%IF vip%&gt;&quot; }), withAddress, [withAddress]);
+        var childCondition = new ConditionArgs(conditionArgs, withAddress.Customer);
+        Verify.That(Equals(childCondition.Context, withAddress.Customer) &amp;&amp; childCondition.ParentContext.Count == 2 &amp;&amp; conditionArgs.ParentContext.Count == 1, &quot;ConditionArgs copy&quot;);
+
+        var loopArgs = new LoopArgs(&quot;lines&quot;, withAddress, [withAddress], new Tokens.TokenAttributeDictionary());
+        var childLoop = new LoopArgs(loopArgs, withAddress.Customer);
+        Verify.That(childLoop.Name == &quot;lines&quot; &amp;&amp; Equals(childLoop.ParentContext[^1], withAddress), &quot;LoopArgs copy&quot;);
+
+        Console.WriteLine(&quot;Copies leave the original ParentContext alone.&quot;);
+    }
+}
+</code></pre>
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>
