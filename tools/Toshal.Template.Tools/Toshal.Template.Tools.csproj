@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The tool loads this assembly and its XML doc file to build the API pages. -->
+    <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
+  </ItemGroup>
+
+</Project>
