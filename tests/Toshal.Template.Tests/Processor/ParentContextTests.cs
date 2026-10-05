@@ -21,7 +21,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.TokenValueProvider = (args) => {
-                Assert.Equal(0, args.ParentContext.Count);
+                Assert.Empty(args.ParentContext);
                 called = true;
                 return "abc";
             };
@@ -41,7 +41,7 @@ namespace Toshal.Template.Tests
 
             var processor = new Processor();
             processor.TokenValueProvider = (args) => {
-                Assert.Equal(1, args.ParentContext.Count);
+                Assert.Single(args.ParentContext);
                 called = true;
                 return "abc";
             };
@@ -65,7 +65,7 @@ namespace Toshal.Template.Tests
             var processor = new Processor();
             processor.LoopValueProvider = (args) =>
             {
-                Assert.Equal(1, args.ParentContext.Count);
+                Assert.Single(args.ParentContext);
                 calledLoop = true;
                 return new List<int>() { 1, 2 };
             };
@@ -95,7 +95,7 @@ namespace Toshal.Template.Tests
             var processor = new Processor();
             processor.WithValueProvider = (args) =>
             {
-                Assert.Equal(1, args.ParentContext.Count);
+                Assert.Single(args.ParentContext);
                 calledWith = true;
                 return "xyz";
             };

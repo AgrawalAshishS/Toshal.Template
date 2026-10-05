@@ -18,7 +18,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<ContextAsStringToken>(result[0]);
         }
 

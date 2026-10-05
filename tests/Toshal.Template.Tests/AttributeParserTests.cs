@@ -18,7 +18,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             var token = (NamedToken)result[0];
             Assert.Equal("token", token.Name);
             Assert.Equal(2, token.Attributes.Count);
@@ -101,7 +101,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             var token = (WithToken)result[0];
             Assert.Equal("withname", token.Name);
             Assert.Equal(2, token.Attributes.Count);
@@ -124,8 +124,8 @@ namespace Toshal.Template.Tests
 
             List<IToken> result = parser.Parse(templateText);
             Assert.Equal("conditionname", ((ConditionToken)result[0]).Name);
-            Assert.Equal(true, ((ConditionToken)result[0]).IsPositive);
-            Assert.Equal(1, ((ConditionToken)result[0]).Attributes.Count);
+            Assert.True(((ConditionToken)result[0]).IsPositive);
+            Assert.Single(((ConditionToken)result[0]).Attributes);
         }
 
         [Fact]
@@ -143,8 +143,8 @@ namespace Toshal.Template.Tests
 
             List<IToken> result = parser.Parse(templateText);
             Assert.Equal("conditionname", ((ConditionToken)result[0]).Name);
-            Assert.Equal(false, ((ConditionToken)result[0]).IsPositive);
-            Assert.Equal(1, ((ConditionToken)result[0]).Attributes.Count);
+            Assert.False(((ConditionToken)result[0]).IsPositive);
+            Assert.Single(((ConditionToken)result[0]).Attributes);
         }
 
         [Fact]
@@ -157,12 +157,12 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             var token = (ForEachToken)result[0];
             Assert.Equal("name", token.Name);
-            Assert.Equal(1, token.Attributes.Count);
+            Assert.Single(token.Attributes);
             Assert.Equal("xyz", token.Attributes.GetValue("abc", "pqr"));
-            Assert.Equal(1, token.RowTokens.Count);
+            Assert.Single(token.RowTokens);
 
             var content = (ContentToken)token.RowTokens[0];
             Assert.Equal("Content within for", content.Content);

@@ -33,7 +33,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             var forToken = (ForEachToken)result[0];
             var token = (ReuseForEachToken)forToken.RowTokens[0];
             Assert.Equal("newloopname", token.Name);

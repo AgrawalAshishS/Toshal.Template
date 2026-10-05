@@ -84,11 +84,11 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
 
             var token = (ConditionToken)result[0];
             Assert.Equal(part2.ToLower(), token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal(part4, content.Content);
@@ -170,11 +170,11 @@ namespace Toshal.Template.Tests
 
             var token = (ConditionToken)result[0];
             Assert.Equal(part2.ToLower(), token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             var nestedIf = (ConditionToken)token.InnerTokens[0];
             Assert.Equal(part5.ToLower(), nestedIf.Name);
-            Assert.Equal(1, nestedIf.InnerTokens.Count);
+            Assert.Single(nestedIf.InnerTokens);
 
             var content = (ContentToken)nestedIf.InnerTokens[0];
             Assert.Equal(part7, content.Content);
@@ -226,15 +226,15 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
 
             var token = (ConditionToken)result[0];
             Assert.Equal(part2.ToLower(), token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal(part4, content.Content);
-            Assert.Equal(1, token.FalsePart!.InnerTokens.Count);
+            Assert.Single(token.FalsePart!.InnerTokens);
 
             content = (ContentToken)token.FalsePart!.InnerTokens[0];
             Assert.Equal(part6, content.Content);
@@ -256,15 +256,15 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
 
             var token = (ConditionToken)result[0];
             Assert.Equal(part2.ToLower(), token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal(part4, content.Content);
-            Assert.Equal(1, token.FalsePart!.InnerTokens.Count);
+            Assert.Single(token.FalsePart!.InnerTokens);
 
             content = (ContentToken)token.FalsePart!.InnerTokens[0];
             Assert.Equal(part6, content.Content);
@@ -288,32 +288,32 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
 
             var token = (ConditionToken)result[0];
             Assert.Equal("conditionname", token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             var content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("Content within IF", content.Content);
 
             token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif1", token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("1st content", content.Content);
 
             token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif2", token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("2nd content", content.Content);
 
             token = (ConditionToken)token.FalsePart!;
             Assert.Equal("elseif3", token.Name);
-            Assert.Equal(1, token.InnerTokens.Count);
+            Assert.Single(token.InnerTokens);
 
             content = (ContentToken)token.InnerTokens[0];
             Assert.Equal("3rd content", content.Content);
@@ -400,7 +400,7 @@ namespace Toshal.Template.Tests
 
             List<IToken> result = parser.Parse(templateText);
             Assert.Equal(part2.ToLower(), ((ConditionToken)result[0]).Name);
-            Assert.Equal(false, ((ConditionToken)result[0]).IsPositive);
+            Assert.False(((ConditionToken)result[0]).IsPositive);
         }
 
         

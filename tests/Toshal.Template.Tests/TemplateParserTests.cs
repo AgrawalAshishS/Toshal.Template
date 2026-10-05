@@ -18,7 +18,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<ContentToken>(result[0]);
             Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
@@ -49,7 +49,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<NamedToken>(result[0]);
         }
 
@@ -59,7 +59,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.Equal("name", ((NamedToken)result[0]).Name);
         }
 
@@ -112,7 +112,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<ContentToken>(result[0]);
             Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
@@ -124,7 +124,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<ContentToken>(result[0]);
             Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
@@ -136,7 +136,7 @@ namespace Toshal.Template.Tests
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            Assert.Equal(1, result.Count);
+            Assert.Single(result);
             Assert.IsAssignableFrom<ContentToken>(result[0]);
             Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
