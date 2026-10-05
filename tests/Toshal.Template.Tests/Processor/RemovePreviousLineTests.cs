@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using NUnit.Framework.Legacy;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 using Toshal.Template;
 using Toshal.Template.Tokens;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    [TestFixture]
     public class RemovePreviousLineTests
     {
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode1()
         {
             string part1 = @"My basic text 
@@ -27,11 +25,11 @@ namespace Test.Template
 
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"My basic text 
+            Assert.Equal(@"My basic text 
 ", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode2()
         {
             string part1 = @"My basic text 
@@ -44,10 +42,10 @@ namespace Test.Template
 
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"My basic text ", result.ToString());
+            Assert.Equal(@"My basic text ", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode3()
         {
             string part1 = @"<%REMOVE_PREVIOUS_NEW_LINE%>";
@@ -58,10 +56,10 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"", result.ToString());
+            Assert.Equal(@"", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode4()
         {
             string part1 = @"My basic text <%REMOVE_PREVIOUS_NEW_LINE%>";
@@ -72,10 +70,10 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"My basic text ", result.ToString());
+            Assert.Equal(@"My basic text ", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode5()
         {
             string part1 = @"
@@ -87,11 +85,11 @@ My basic text <%REMOVE_PREVIOUS_NEW_LINE%>";
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"
+            Assert.Equal(@"
 My basic text ", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void TestingNewLineRemovalCode6()
         {
             string part1 = @"My basic text
@@ -104,7 +102,7 @@ My basic text ", result.ToString());
             var processor = new Processor();
             processor.ConditionValueProvider = (arg) => false;
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(@"My basic text", result.ToString());
+            Assert.Equal(@"My basic text", result.ToString());
         }
     }
 }

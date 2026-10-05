@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
-        [Test]
+        [Fact]
         public void BasicTextContentOnlyTemplate()
         {
             string templateText = "basic text";
@@ -21,10 +19,10 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual(templateText, result.ToString());
+            Assert.Equal(templateText, result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNamedTokenTemplate()
         {
             string templateText = "<%=Token%>";
@@ -32,10 +30,10 @@ namespace Test.Template
             List<IToken> tokens = parser.Parse(templateText);
             var processor = new Processor();
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNamedTokenTemplateWithValueReplacement()
         {
             string templateText = "<%=Token%>";
@@ -46,10 +44,10 @@ namespace Test.Template
             processor.TokenValueProvider = (TokenArgs arg) => "some";
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual("some", result.ToString());
+            Assert.Equal("some", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNamedTokenTemplateWithAttributes()
         {
             string templateText = "<%=Token attr=\"Name\"%>";
@@ -60,10 +58,10 @@ namespace Test.Template
             processor.TokenValueProvider = (TokenArgs args) => args.Attributes["attr"];
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual("Name", result.ToString());
+            Assert.Equal("Name", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNamedTokenTemplateWithMultipleTokens()
         {
             string templateText = "<%=Token1%>, <%=Token2%>";
@@ -84,8 +82,8 @@ namespace Test.Template
             };
 
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
-            ClassicAssert.AreEqual("First Value, Second Value", result.ToString());
+            Assert.Equal("First Value, Second Value", result.ToString());
         }
         
     }
-}
+}

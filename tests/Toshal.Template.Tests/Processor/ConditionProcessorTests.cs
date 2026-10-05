@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         /*
@@ -26,7 +24,7 @@ namespace Test.Template
 		 * if else if else with false false
 		 */
 
-        [Test]
+        [Fact]
         public void BasicConditionToken()
         {
             string templateText = "<%IF ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -36,10 +34,10 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicConditionTokenWithProviderAndFalseValue()
         {
             string templateText = "<%IF ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -50,10 +48,10 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => false;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicConditionTokenWithProviderAndTrueValue()
         {
             string templateText = "<%IF ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -64,10 +62,10 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => true;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Inner Content", result.ToString());
+            Assert.Equal("Inner Content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicConditionTokenWithProviderReturnBasedOnContext()
         {
             string templateText = "<%IF ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -83,17 +81,17 @@ namespace Test.Template
             process.Context = user;
 
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
 
             user = new TestUser { Name = "ConditionName" };
             process = new ProcessorArgs(tokens);
             process.Context = user;
 
             result = processor.Process(process);
-            ClassicAssert.AreEqual("Inner Content", result.ToString());
+            Assert.Equal("Inner Content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseConditionTokenAndTrueValue()
         {
             string part1 = "<%IF ";
@@ -116,10 +114,10 @@ namespace Test.Template
 
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("Content within IF", result.ToString());
+            Assert.Equal("Content within IF", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseConditionTokenAndFalseValue()
         {
             string part1 = "<%IF ";
@@ -142,10 +140,10 @@ namespace Test.Template
 
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("More content", result.ToString());
+            Assert.Equal("More content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseIfConditionTokenAndFirstConditionTrueValue()
         {
             string part1 = "<%IF ";
@@ -167,10 +165,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("Content within IF", result.ToString());
+            Assert.Equal("Content within IF", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseIfConditionTokenAndFirstIsFalseSecondIsTrueValue()
         {
             string part1 = "<%IF ";
@@ -202,10 +200,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("More content", result.ToString());
+            Assert.Equal("More content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseIfElseConditionTokenForLastElseCheck()
         {
             string part1 = "<%IF ";
@@ -229,10 +227,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("Else Content", result.ToString());
+            Assert.Equal("Else Content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseIfConditionTokenWithAllFalse()
         {
             string part1 = "<%IF ";
@@ -255,10 +253,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
 
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNegativeConditionTokenWithProviderAndFalseValue()
         {
             string templateText = "<%IF NOT ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -269,10 +267,10 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => false;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Inner Content", result.ToString());
+            Assert.Equal("Inner Content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicNegativeConditionTokenWithProviderAndTrueValue()
         {
             string templateText = "<%IF NOT ConditionName THEN%>Inner Content<%ENDIF%>";
@@ -283,7 +281,7 @@ namespace Test.Template
             processor.ConditionValueProvider = (ConditionArgs args) => true;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
     }
-}
+}

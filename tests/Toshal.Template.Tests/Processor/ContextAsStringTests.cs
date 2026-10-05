@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
+using Xunit;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using System.Text;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         //string value
         //object value
         //null value / no context
 
-        [Test]
+        [Fact]
         public void ContextAsStringWithNoContextReturnEmpty()
         {
             const string templateText = "<%CONTEXT_AS_STRING%>";
@@ -28,10 +26,10 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ContextAsStringWithNullContextReturnEmpty()
         {
             const string templateText = "<%CONTEXT_AS_STRING%>";
@@ -42,10 +40,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = null;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ContextAsStringWithStringContextReturnStringAsIs()
         {
             const string templateText = "<%CONTEXT_AS_STRING%>";
@@ -56,10 +54,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = "testing";
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("testing", result.ToString());
+            Assert.Equal("testing", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ContextAsStringWithObjectContextReturnObjectToStringResult()
         {
             const string templateText = "<%CONTEXT_AS_STRING%>";
@@ -70,7 +68,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = parser;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Toshal.Template.Parser", result.ToString());
+            Assert.Equal("Toshal.Template.Parser", result.ToString());
         }
     }
-}
+}

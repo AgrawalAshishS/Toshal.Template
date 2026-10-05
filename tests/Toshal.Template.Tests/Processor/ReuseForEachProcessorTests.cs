@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         /*
@@ -18,7 +16,7 @@ namespace Test.Template
 		 * reuse outside loop
 		 */
 
-        [Test]
+        [Fact]
         public void ReUseForEachWithinLoop()
         {
             string templateText = "<%FOREACH Users%><%=Name%> K:<%REUSE_FOREACH Users Related%><%ENDFOR%>";
@@ -51,10 +49,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1 K:2 K:3 K:4 K:", result.ToString());
+            Assert.Equal("1 K:2 K:3 K:4 K:", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ReUseForEachOutsideLoop()
         {
             string templateText = "<%FOREACH Users%><%=Name%><%ENDFOR%><%REUSE_FOREACH Users Related%>";
@@ -85,7 +83,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1234", result.ToString());
+            Assert.Equal("1234", result.ToString());
         }
     }
-}
+}

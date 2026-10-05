@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class ProcessTemplateProcessorTests
     {
-        [Test]
+        [Fact]
         public void ItShouldBeAbleToProcessSubTemplate()
         {
             const string mainTemplateText = "This is <%PROCESS_TEMPLATE Sample context=\"abc\"%>";
@@ -22,12 +20,12 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> tokens = parser.Parse(mainTemplateText);
 
-            ClassicAssert.AreEqual(2, tokens.Count);
-            ClassicAssert.IsInstanceOf<ContentToken>(tokens[0]);
-            ClassicAssert.IsInstanceOf<ProcessTemplateToken>(tokens[1]);
-            ClassicAssert.AreEqual("This is ", ((ContentToken)tokens[0]).Content);
-            ClassicAssert.AreEqual("sample", ((ProcessTemplateToken)tokens[1]).Name);
-            ClassicAssert.AreEqual("abc", ((ProcessTemplateToken)tokens[1]).GetAttribute("context", "xyz"));
+            Assert.Equal(2, tokens.Count);
+            Assert.IsAssignableFrom<ContentToken>(tokens[0]);
+            Assert.IsAssignableFrom<ProcessTemplateToken>(tokens[1]);
+            Assert.Equal("This is ", ((ContentToken)tokens[0]).Content);
+            Assert.Equal("sample", ((ProcessTemplateToken)tokens[1]).Name);
+            Assert.Equal("abc", ((ProcessTemplateToken)tokens[1]).GetAttribute("context", "xyz"));
 
             var processor = new Processor();
             processor.ProcessTemplateValueProvider = (args) => {
@@ -35,8 +33,8 @@ namespace Test.Template
             };
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
 
-            ClassicAssert.AreEqual("This is sample.", result.ToString());
+            Assert.Equal("This is sample.", result.ToString());
         }
         
     }
-}
+}

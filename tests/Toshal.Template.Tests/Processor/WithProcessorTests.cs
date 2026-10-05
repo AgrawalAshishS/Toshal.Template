@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         
@@ -73,7 +71,7 @@ namespace Test.Template
             return null;
         }
 
-        [Test]
+        [Fact]
         public void WithTokenNoProvider()
         {
             string templateText = "Name:<%=Name%><%WITH Profile%>, Address: <%=Address%><%ENDWITH%>";
@@ -93,10 +91,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Name:My User", result.ToString());
+            Assert.Equal("Name:My User", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void WithTokenProviderButNullReturn()
         {
             string templateText = "Name:<%=Name%><%WITH Profile%>, Address: <%=Address%><%ENDWITH%>";
@@ -117,10 +115,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Name:My User", result.ToString());
+            Assert.Equal("Name:My User", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void WithTokenValueOverrideDefaultContextNamedToken()
         {
             string templateText = "Name:<%=Name%><%WITH Profile%>, Address: <%=Address%><%ENDWITH%>";
@@ -141,10 +139,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            Assert.Equal("Name:My User, Address: abcd", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void WithTokenValueOverrideDefaultContextConditionToken()
         {
             string templateText =
@@ -174,10 +172,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            Assert.Equal("Name:My User, Address: abcd", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void WithTokenValueOverrideDefaultContextForEachToken()
         {
             string templateText =
@@ -208,7 +206,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Name:My User, Address: abcd", result.ToString());
+            Assert.Equal("Name:My User, Address: abcd", result.ToString());
         }
     }
-}
+}

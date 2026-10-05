@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         /*
@@ -49,7 +47,7 @@ namespace Test.Template
 		 * for last row and before-after + alternate row + row template with 2 elements -- before-after fallback
 		 */
 
-        [Test]
+        [Fact]
         public void BasicForEachToken()
         {
             string templateText = "<%FOREACH LoopName%>Inner Content<%ENDFOR%>";
@@ -59,10 +57,10 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicForEachTokenWithProviderAndNoValue()
         {
             string templateText = "<%FOREACH LoopName%>Inner Content<%ENDFOR%>";
@@ -73,10 +71,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicForEachTokenWithProviderAndOneValue()
         {
             string templateText = "<%FOREACH LoopName%><%=Value%><%ENDFOR%>";
@@ -89,10 +87,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1", result.ToString());
+            Assert.Equal("1", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicForEachTokenWithProviderAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%><%=Value%><%ENDFOR%>";
@@ -105,10 +103,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("123", result.ToString());
+            Assert.Equal("123", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithNoRecordAndNoValue()
         {
             string templateText = "<%FOREACH LoopName%><%NORECORD%>Some<%ENDNORECORD%><%ENDFOR%>";
@@ -119,10 +117,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Some", result.ToString());
+            Assert.Equal("Some", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithNoRecordAndOneValue()
         {
             string templateText = "<%FOREACH LoopName%><%NORECORD%>Some<%ENDNORECORD%><%ROW%>row content<%ENDROW%><%ENDFOR%>";
@@ -133,10 +131,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("row content", result.ToString());
+            Assert.Equal("row content", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithNoRecordHeaderFooterAndNoValue()
         {
             string templateText =
@@ -148,10 +146,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Nothing", result.ToString());
+            Assert.Equal("Nothing", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithHeaderFooterAndNoValue()
         {
             string templateText = "<%FOREACH LoopName%><%HEADER%>Head<%ENDHEADER%><%FOOTER%>Foot<%ENDFOOTER%><%ENDFOR%>";
@@ -162,10 +160,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => null;
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithHeaderFooterAndOneValue()
         {
             string templateText = "<%FOREACH LoopName%><%HEADER%>Head<%ENDHEADER%><%FOOTER%>Foot<%ENDFOOTER%><%ENDFOR%>";
@@ -176,10 +174,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("HeadFoot", result.ToString());
+            Assert.Equal("HeadFoot", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithHeaderFooterAndMultipleValue()
         {
             string templateText = "<%FOREACH LoopName%><%HEADER%>Head<%ENDHEADER%><%FOOTER%>Foot<%ENDFOOTER%><%ENDFOR%>";
@@ -190,10 +188,10 @@ namespace Test.Template
             processor.LoopValueProvider = (LoopArgs args) => new List<int> { 1, 2, 3 };
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("HeadFoot", result.ToString());
+            Assert.Equal("HeadFoot", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%><%ROW%><%=Value%><%ENDROW%><%ENDFOR%>";
@@ -206,10 +204,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("123", result.ToString());
+            Assert.Equal("123", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowBeforeAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%><%BEFOREROW%>A<%ENDBEFOREROW%><%ROW%><%=Value%><%ENDROW%><%ENDFOR%>";
@@ -222,10 +220,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("A1A2A3", result.ToString());
+            Assert.Equal("A1A2A3", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowAfterAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%><%ROW%><%=Value%><%ENDROW%><%AFTERROW%>B<%ENDAFTERROW%><%ENDFOR%>";
@@ -238,10 +236,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1B2B3B", result.ToString());
+            Assert.Equal("1B2B3B", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowBeforeAfterAndMultipleValues()
         {
             string templateText =
@@ -255,10 +253,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("A1BA2BA3B", result.ToString());
+            Assert.Equal("A1BA2BA3B", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowAlternateAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%><%ROW%><%=Value%>A<%ENDROW%><%ALTROW%><%=Value%>B<%ENDALTROW%><%ENDFOR%>";
@@ -271,10 +269,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1A2B3A", result.ToString());
+            Assert.Equal("1A2B3A", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowAlternateBeforeAndAfterForBothAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -295,10 +293,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1A=+2B!-3A=", result.ToString());
+            Assert.Equal("-1A=+2B!-3A=", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowAlternateBeforeAndAfterForRowOnlyAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -317,10 +315,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1A=-2B=-3A=", result.ToString());
+            Assert.Equal("-1A=-2B=-3A=", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithRowNoAlternateAndBeforeAndAfterForBothAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -340,10 +338,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1A=+2A!-3A=", result.ToString());
+            Assert.Equal("-1A=+2A!-3A=", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithFirstLastAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -360,10 +358,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1=3", result.ToString());
+            Assert.Equal("-1=3", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithFirstLastAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -381,10 +379,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1+2=3", result.ToString());
+            Assert.Equal("-1+2=3", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithFirstLastAndAltRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -402,10 +400,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1+2A=3", result.ToString());
+            Assert.Equal("-1+2A=3", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterFirstAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -423,10 +421,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1=23", result.ToString());
+            Assert.Equal("-1=23", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterRowFirstAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -445,10 +443,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1F!-2!-3!", result.ToString());
+            Assert.Equal("-1F!-2!-3!", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterLastAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -466,10 +464,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("12-3=", result.ToString());
+            Assert.Equal("12-3=", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterRowLastAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -488,10 +486,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1!-2!-3L!", result.ToString());
+            Assert.Equal("-1!-2!-3L!", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterLastAndAltRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -509,10 +507,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-2=", result.ToString());
+            Assert.Equal("-2=", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterRowLastAndAltRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -531,10 +529,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("1-2L!", result.ToString());
+            Assert.Equal("1-2L!", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ForEachWithBeforeAfterFirstLastAndRowAndMultipleValues()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -554,11 +552,11 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("-1=2+3!", result.ToString());
+            Assert.Equal("-1=2+3!", result.ToString());
         }
 
 
-        [Test]
+        [Fact]
         public void ForEachParentContextMaintained()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -575,11 +573,11 @@ namespace Test.Template
             {
                 if (args.Name == "my_count")
                 {
-                    ClassicAssert.AreEqual(2, args.ParentContext.Count);
-                    ClassicAssert.IsInstanceOf<List<int>>(args.Context);
+                    Assert.Equal(2, args.ParentContext.Count);
+                    Assert.IsAssignableFrom<List<int>>(args.Context);
                     return ((List<int>)args.Context).Count.ToString();
                 }
-                ClassicAssert.AreEqual(3, args.ParentContext.Count);
+                Assert.Equal(3, args.ParentContext.Count);
                 return args.Context.ToString();
             };
 
@@ -587,7 +585,7 @@ namespace Test.Template
             process.Context = "ParentContext";
 
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("3123", result.ToString());
+            Assert.Equal("3123", result.ToString());
         }
     }
-}
+}

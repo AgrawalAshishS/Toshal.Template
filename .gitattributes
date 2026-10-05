@@ -61,3 +61,7 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Tests use verbatim strings with CRLF line breaks. Keep C# files CRLF on every OS.
+*.cs text eol=crlf
+*.cmd text eol=crlf

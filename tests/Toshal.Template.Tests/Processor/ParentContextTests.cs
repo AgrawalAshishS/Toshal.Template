@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
+﻿using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +7,11 @@ using System.Threading.Tasks;
 using Toshal.Template;
 using Toshal.Template.Tokens;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    [TestFixture]
     public class ParentContextTests
     {
-        [Test]
+        [Fact]
         public void NoProcessorLevelContext()
         {
             string templateText = "<%=simple%>";
@@ -23,17 +21,17 @@ namespace Test.Template
 
             var processor = new Processor();
             processor.TokenValueProvider = (args) => {
-                ClassicAssert.AreEqual(0, args.ParentContext.Count);
+                Assert.Equal(0, args.ParentContext.Count);
                 called = true;
                 return "abc";
             };
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
 
-            ClassicAssert.AreEqual("abc", result.ToString());
-            ClassicAssert.IsTrue(called);
+            Assert.Equal("abc", result.ToString());
+            Assert.True(called);
         }
 
-        [Test]
+        [Fact]
         public void WithProcessorLevelContext()
         {
             string templateText = "<%=simple%>";
@@ -43,7 +41,7 @@ namespace Test.Template
 
             var processor = new Processor();
             processor.TokenValueProvider = (args) => {
-                ClassicAssert.AreEqual(1, args.ParentContext.Count);
+                Assert.Equal(1, args.ParentContext.Count);
                 called = true;
                 return "abc";
             };
@@ -52,11 +50,11 @@ namespace Test.Template
             processArgs.Context = "yes";
             StringBuilder result = processor.Process(processArgs);
 
-            ClassicAssert.AreEqual("abc", result.ToString());
-            ClassicAssert.IsTrue(called);
+            Assert.Equal("abc", result.ToString());
+            Assert.True(called);
         }
 
-        [Test]
+        [Fact]
         public void ProcessorLevelContextInForLoop()
         {
             string templateText = "<%FOREACH abc%><%=simple%><%ENDFOR%>";
@@ -67,12 +65,12 @@ namespace Test.Template
             var processor = new Processor();
             processor.LoopValueProvider = (args) =>
             {
-                ClassicAssert.AreEqual(1, args.ParentContext.Count);
+                Assert.Equal(1, args.ParentContext.Count);
                 calledLoop = true;
                 return new List<int>() { 1, 2 };
             };
             processor.TokenValueProvider = (args) => {
-                ClassicAssert.AreEqual(3, args.ParentContext.Count);
+                Assert.Equal(3, args.ParentContext.Count);
                 calledToken = true;
                 return "abc";
             };
@@ -81,12 +79,12 @@ namespace Test.Template
             processArgs.Context = "yes";
             StringBuilder result = processor.Process(processArgs);
 
-            ClassicAssert.AreEqual("abcabc", result.ToString());
-            ClassicAssert.IsTrue(calledToken);
-            ClassicAssert.IsTrue(calledLoop);
+            Assert.Equal("abcabc", result.ToString());
+            Assert.True(calledToken);
+            Assert.True(calledLoop);
         }
 
-        [Test]
+        [Fact]
         public void ProcessorLevelContextInWithToken()
         {
             string templateText = "<%WITH abc%><%=simple%><%ENDWITH%>";
@@ -97,12 +95,12 @@ namespace Test.Template
             var processor = new Processor();
             processor.WithValueProvider = (args) =>
             {
-                ClassicAssert.AreEqual(1, args.ParentContext.Count);
+                Assert.Equal(1, args.ParentContext.Count);
                 calledWith = true;
                 return "xyz";
             };
             processor.TokenValueProvider = (args) => {
-                ClassicAssert.AreEqual(2, args.ParentContext.Count);
+                Assert.Equal(2, args.ParentContext.Count);
                 calledToken = true;
                 return "abc";
             };
@@ -111,9 +109,9 @@ namespace Test.Template
             processArgs.Context = "yes";
             StringBuilder result = processor.Process(processArgs);
 
-            ClassicAssert.AreEqual("abc", result.ToString());
-            ClassicAssert.IsTrue(calledToken);
-            ClassicAssert.IsTrue(calledWith);
+            Assert.Equal("abc", result.ToString());
+            Assert.True(calledToken);
+            Assert.True(calledWith);
         }
     }
 }

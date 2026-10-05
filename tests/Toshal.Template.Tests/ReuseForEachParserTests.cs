@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
+using Xunit;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public class ReuseForEachParserTests
     {
-        [Test]
+        [Fact]
         public void ItShouldHandleBasicReuseForEachToken()
         {
             const string templateText =
@@ -21,13 +19,13 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(2, result.Count);
+            Assert.Equal(2, result.Count);
             var token = (ReuseForEachToken)result[1];
-            ClassicAssert.AreEqual("newloopname", token.Name);
-            ClassicAssert.AreEqual("existingforeachname", token.ExistingForEachName);
+            Assert.Equal("newloopname", token.Name);
+            Assert.Equal("existingforeachname", token.ExistingForEachName);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleBasicReuseWithInForEachToken()
         {
             const string templateText =
@@ -35,14 +33,14 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
             var forToken = (ForEachToken)result[0];
             var token = (ReuseForEachToken)forToken.RowTokens[0];
-            ClassicAssert.AreEqual("newloopname", token.Name);
-            ClassicAssert.AreEqual("existingforeachname", token.ExistingForEachName);
+            Assert.Equal("newloopname", token.Name);
+            Assert.Equal("existingforeachname", token.ExistingForEachName);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionForMissingNameForReuseForEach()
         {
             const string templateText = "<%REUSE_FOREACH ExistingForEachName %>";
@@ -54,7 +52,7 @@ namespace Test.Template
             
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionForMissingLoopNameForReuseForEach()
         {
             const string templateText = "<%REUSE_FOREACH %>";
@@ -65,7 +63,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse()
         {
             const string templateText = "<%REUSE_FOREACH ExistingForEachName NewLoopName %>";
@@ -76,7 +74,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfGivenForEachNameDoesntPreeceedReuse2()
         {
             const string templateText = "<%FOREACH SomeName%><%ENDFOR%><%REUSE_FOREACH ExistingForEachName NewLoopName %>";
@@ -87,4 +85,4 @@ namespace Test.Template
             });
         }
     }
-}
+}

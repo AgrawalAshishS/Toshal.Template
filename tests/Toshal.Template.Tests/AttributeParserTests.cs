@@ -1,34 +1,32 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using System.Text;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public class AttributeParserTests
     {
-        [Test]
+        [Fact]
         public void ItShouldAbleToTakeBasicAttribute()
         {
             const string templateText = "<%=Token name=\"Value\" name2=\"value2\"%>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
             var token = (NamedToken)result[0];
-            ClassicAssert.AreEqual("token", token.Name);
-            ClassicAssert.AreEqual(2, token.Attributes.Count);
-            ClassicAssert.AreEqual("Value", token.Attributes["name"]);
-            ClassicAssert.AreEqual("value2", token.Attributes["name2"]);
+            Assert.Equal("token", token.Name);
+            Assert.Equal(2, token.Attributes.Count);
+            Assert.Equal("Value", token.Attributes["name"]);
+            Assert.Equal("value2", token.Attributes["name2"]);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect1()
         {
             const string templateText = "<%=Token name=Value%>";
@@ -40,7 +38,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect2()
         {
             const string templateText = "<%=Token name=\"Value%>";
@@ -51,7 +49,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect3()
         {
             const string templateText = "<%=Token name=Value\"%>";
@@ -62,7 +60,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect4()
         {
             const string templateText = "<%=Token name=%>";
@@ -74,7 +72,7 @@ namespace Test.Template
 
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect5()
         {
             const string templateText = "<%=Token =\"value\"%>";
@@ -85,7 +83,7 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowExceptionIfAttributeNotCorrect6()
         {
             const string templateText = "<%=Token name = \"value\"%>";
@@ -96,22 +94,22 @@ namespace Test.Template
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldAbleToTakeBasicAttributeForWithToken()
         {
             const string templateText = "<%WITH WithName name=\"Value\" name2=\"value2\"%> some content <%ENDWITH%>";
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
             var token = (WithToken)result[0];
-            ClassicAssert.AreEqual("withname", token.Name);
-            ClassicAssert.AreEqual(2, token.Attributes.Count);
-            ClassicAssert.AreEqual("Value", token.Attributes["name"]);
-            ClassicAssert.AreEqual("value2", token.Attributes["name2"]);
+            Assert.Equal("withname", token.Name);
+            Assert.Equal(2, token.Attributes.Count);
+            Assert.Equal("Value", token.Attributes["name"]);
+            Assert.Equal("value2", token.Attributes["name2"]);
         }
 
-        [Test]
+        [Fact]
         public void AttributesShouldBeAvailbalePositive()
         {
             string part1 = "<%IF ";
@@ -125,12 +123,12 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
-            ClassicAssert.AreEqual(true, ((ConditionToken)result[0]).IsPositive);
-            ClassicAssert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
+            Assert.Equal("conditionname", ((ConditionToken)result[0]).Name);
+            Assert.Equal(true, ((ConditionToken)result[0]).IsPositive);
+            Assert.Equal(1, ((ConditionToken)result[0]).Attributes.Count);
         }
 
-        [Test]
+        [Fact]
         public void AttributesShouldBeAvailbaleNegative()
         {
             string part1 = "<%IF NOT ";
@@ -144,12 +142,12 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual("conditionname", ((ConditionToken)result[0]).Name);
-            ClassicAssert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
-            ClassicAssert.AreEqual(1, ((ConditionToken)result[0]).Attributes.Count);
+            Assert.Equal("conditionname", ((ConditionToken)result[0]).Name);
+            Assert.Equal(false, ((ConditionToken)result[0]).IsPositive);
+            Assert.Equal(1, ((ConditionToken)result[0]).Attributes.Count);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleBasicForEach()
         {
             string templateText = "<%FOREACH Name abc=\"xyz\"%>";
@@ -159,15 +157,15 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
             var token = (ForEachToken)result[0];
-            ClassicAssert.AreEqual("name", token.Name);
-            ClassicAssert.AreEqual(1, token.Attributes.Count);
-            ClassicAssert.AreEqual("xyz", token.Attributes.GetValue("abc", "pqr"));
-            ClassicAssert.AreEqual(1, token.RowTokens.Count);
+            Assert.Equal("name", token.Name);
+            Assert.Equal(1, token.Attributes.Count);
+            Assert.Equal("xyz", token.Attributes.GetValue("abc", "pqr"));
+            Assert.Equal(1, token.RowTokens.Count);
 
             var content = (ContentToken)token.RowTokens[0];
-            ClassicAssert.AreEqual("Content within for", content.Content);
+            Assert.Equal("Content within for", content.Content);
         }
     }
-}
+}

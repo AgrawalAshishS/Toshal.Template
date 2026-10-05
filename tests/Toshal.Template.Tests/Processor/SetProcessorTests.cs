@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class SetProcessorTests
     {
-        [Test]
+        [Fact]
         public void ItShouldRecognizeSet()
         {
             const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%=MyTokenName%>";
@@ -23,10 +21,10 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("MyValue", result.ToString());
+            Assert.Equal("MyValue", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void EmptyValueShouldNotThrowError()
         {
             const string templateText = "<%SET MyTokenName %><%ENDSET%>";
@@ -36,10 +34,10 @@ namespace Test.Template
             var processor = new Processor();
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void SetValueAppearInForEach()
         {
             const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%FOREACH A%><%=MyTokenName%><%ENDFOR%>";
@@ -51,10 +49,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("MyValue", result.ToString());
+            Assert.Equal("MyValue", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void SetValueChangeForContextOnlyInForEach()
         {
             const string templateText = "<%SET MyTokenName %>Out<%ENDSET%><%=MyTokenName%> <%FOREACH A%><%=MyTokenName%> <%SET MyTokenName %>In<%ENDSET%> <%=MyTokenName%><%ENDFOR%> <%=MyTokenName%>";
@@ -66,10 +64,10 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Out Out  In Out", result.ToString());
+            Assert.Equal("Out Out  In Out", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void SetProcessTokens()
         {
             const string templateText = "<%SET MyTokenName %>MyValue<%ENDSET%><%SET OtherToken %><%=MyTokenName%>Abc<%ENDSET%><%=OtherToken%>";
@@ -80,7 +78,7 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
 
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("MyValueAbc", result.ToString());
+            Assert.Equal("MyValueAbc", result.ToString());
         }
     }
-}
+}

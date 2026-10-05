@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using NUnit.Framework;
+using Xunit;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public class IfParserTests
     {
-        [Test]
+        [Fact]
         public void ItShouldHandleConditionToken()
         {
             string part1 = "<%IF ";
@@ -26,10 +24,10 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
+            Assert.Equal(part2.ToLower(), ((ConditionToken)result[0]).Name);
         }
 
-        [Test]
+        [Fact]
         public void IfConditionWithoutThenIsAlsoOk()
         {
             string part1 = "<%IF ";
@@ -43,10 +41,10 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
+            Assert.Equal(part2.ToLower(), ((ConditionToken)result[0]).Name);
         }
 
-        [Test]
+        [Fact]
         public void IfWithoutConditionNameShouldThrowException()
         {
             string part1 = "<%IF ";
@@ -66,13 +64,13 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    ClassicAssert.AreEqual("<%IF  %>", ex.Split.Content);
+                    Assert.Equal("<%IF  %>", ex.Split.Content);
                     throw;
                 }
             });
         }
 
-        [Test]
+        [Fact]
         public void AllContentBetweenIfToEndIfShouldNotBeInTopResultItShouldBeChildOfIfToken()
         {
             string part1 = "<%IF ";
@@ -86,17 +84,17 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
 
             var token = (ConditionToken)result[0];
-            ClassicAssert.AreEqual(part2.ToLower(), token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal(part2.ToLower(), token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             var content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual(part4, content.Content);
+            Assert.Equal(part4, content.Content);
         }
 
-        [Test]
+        [Fact]
         public void IfWithoutEndIfShouldThrowException()
         {
             string part1 = "<%IF ";
@@ -116,14 +114,14 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    ClassicAssert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void IfWithoutEndIfShouldThrowException2()
         {
             string part1 = "<%IF ";
@@ -142,14 +140,14 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    ClassicAssert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void VerifyNestedIfConditionWorksCorrectly()
         {
             string part1 = "<%IF ";
@@ -168,21 +166,21 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(2, result.Count);
+            Assert.Equal(2, result.Count);
 
             var token = (ConditionToken)result[0];
-            ClassicAssert.AreEqual(part2.ToLower(), token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal(part2.ToLower(), token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             var nestedIf = (ConditionToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual(part5.ToLower(), nestedIf.Name);
-            ClassicAssert.AreEqual(1, nestedIf.InnerTokens.Count);
+            Assert.Equal(part5.ToLower(), nestedIf.Name);
+            Assert.Equal(1, nestedIf.InnerTokens.Count);
 
             var content = (ContentToken)nestedIf.InnerTokens[0];
-            ClassicAssert.AreEqual(part7, content.Content);
+            Assert.Equal(part7, content.Content);
         }
 
-        [Test]
+        [Fact]
         public void VerifyNestedIfConditionWithNotClosingBreaketThrowErrorForParentIf()
         {
             string part1 = "<%IF ";
@@ -205,14 +203,14 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    ClassicAssert.AreEqual(part2.ToLower(), ex.TokenName);
+                    Assert.Equal(part2.ToLower(), ex.TokenName);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleIfElseConditionToken()
         {
             string part1 = "<%IF ";
@@ -228,21 +226,21 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
 
             var token = (ConditionToken)result[0];
-            ClassicAssert.AreEqual(part2.ToLower(), token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal(part2.ToLower(), token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             var content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual(part4, content.Content);
-            ClassicAssert.AreEqual(1, token.FalsePart.InnerTokens.Count);
+            Assert.Equal(part4, content.Content);
+            Assert.Equal(1, token.FalsePart.InnerTokens.Count);
 
             content = (ContentToken)token.FalsePart.InnerTokens[0];
-            ClassicAssert.AreEqual(part6, content.Content);
+            Assert.Equal(part6, content.Content);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleIfElseIfConditionToken()
         {
             string part1 = "<%IF ";
@@ -258,21 +256,21 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
 
             var token = (ConditionToken)result[0];
-            ClassicAssert.AreEqual(part2.ToLower(), token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal(part2.ToLower(), token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             var content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual(part4, content.Content);
-            ClassicAssert.AreEqual(1, token.FalsePart.InnerTokens.Count);
+            Assert.Equal(part4, content.Content);
+            Assert.Equal(1, token.FalsePart.InnerTokens.Count);
 
             content = (ContentToken)token.FalsePart.InnerTokens[0];
-            ClassicAssert.AreEqual(part6, content.Content);
+            Assert.Equal(part6, content.Content);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleIfElseIfElseConditionToken()
         {
             string templateText = "<%IF ConditionName THEN%>";
@@ -290,46 +288,46 @@ namespace Test.Template
             var parser = new Parser();
             List<IToken> result = parser.Parse(templateText);
 
-            ClassicAssert.AreEqual(1, result.Count);
+            Assert.Equal(1, result.Count);
 
             var token = (ConditionToken)result[0];
-            ClassicAssert.AreEqual("conditionname", token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal("conditionname", token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             var content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual("Content within IF", content.Content);
+            Assert.Equal("Content within IF", content.Content);
 
             token = (ConditionToken)token.FalsePart;
-            ClassicAssert.AreEqual("elseif1", token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal("elseif1", token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual("1st content", content.Content);
+            Assert.Equal("1st content", content.Content);
 
             token = (ConditionToken)token.FalsePart;
-            ClassicAssert.AreEqual("elseif2", token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal("elseif2", token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual("2nd content", content.Content);
+            Assert.Equal("2nd content", content.Content);
 
             token = (ConditionToken)token.FalsePart;
-            ClassicAssert.AreEqual("elseif3", token.Name);
-            ClassicAssert.AreEqual(1, token.InnerTokens.Count);
+            Assert.Equal("elseif3", token.Name);
+            Assert.Equal(1, token.InnerTokens.Count);
 
             content = (ContentToken)token.InnerTokens[0];
-            ClassicAssert.AreEqual("3rd content", content.Content);
+            Assert.Equal("3rd content", content.Content);
 
             var elseToken = (ElseToken)token.FalsePart;
-            ClassicAssert.AreEqual(2, elseToken.InnerTokens.Count);
+            Assert.Equal(2, elseToken.InnerTokens.Count);
 
             content = (ContentToken)elseToken.InnerTokens[0];
-            ClassicAssert.AreEqual("else content ", content.Content);
+            Assert.Equal("else content ", content.Content);
 
-            ClassicAssert.AreEqual("something", ((NamedToken)elseToken.InnerTokens[1]).Name);
+            Assert.Equal("something", ((NamedToken)elseToken.InnerTokens[1]).Name);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowErrorElseIfWithoutEndIf()
         {
             string part1 = "<%IF ";
@@ -350,15 +348,15 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    ClassicAssert.AreEqual("othercondition", ex.TokenName);
-                    ClassicAssert.AreEqual("<%ELSEIF OtherCondition THEN%>", ex.Split.Content);
+                    Assert.Equal("othercondition", ex.TokenName);
+                    Assert.Equal("<%ELSEIF OtherCondition THEN%>", ex.Split.Content);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowErrorElseWithoutEndIf()
         {
             string part1 = "<%IF ";
@@ -379,15 +377,15 @@ namespace Test.Template
                 }
                 catch (TokenNotClosedException ex)
                 {
-                    ClassicAssert.AreEqual("conditionname", ex.TokenName);
-                    ClassicAssert.AreEqual("<%IF ConditionName THEN%>", ex.Split.Content);
+                    Assert.Equal("conditionname", ex.TokenName);
+                    Assert.Equal("<%IF ConditionName THEN%>", ex.Split.Content);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleNegativeConditionToken()
         {
             string part1 = "<%IF NOT ";
@@ -401,10 +399,10 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(part2.ToLower(), ((ConditionToken)result[0]).Name);
-            ClassicAssert.AreEqual(false, ((ConditionToken)result[0]).IsPositive);
+            Assert.Equal(part2.ToLower(), ((ConditionToken)result[0]).Name);
+            Assert.Equal(false, ((ConditionToken)result[0]).IsPositive);
         }
 
         
     }
-}
+}

@@ -1,22 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-using NUnit.Framework;
-using Test.Template.SupportClass;
+using Xunit;
+using Toshal.Template.Tests.SupportClass;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public partial class TemplateProcessorTests
     {
         
         /*context based tests*/
 
-        [Test]
+        [Fact]
         public void BasicNamedTokenTemplateWithValuePickedFromContext()
         {
             string templateText = "<%=Name%>";
@@ -38,10 +36,10 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("My User", result.ToString());
+            Assert.Equal("My User", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicIfElseIfConditionTokenWithProviderAndFalseValueReturnBasedOnContext()
         {
             string part1 = "<%IF ";
@@ -65,10 +63,10 @@ namespace Test.Template
             process.Context = new { Name = "Wrong User" };
 
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("", result.ToString());
+            Assert.Equal("", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void BasicForEachTokenWithProviderReturnBasedOnContext()
         {
             string templateText = "<%FOREACH LoopName%><%=Name%><%ENDFOR%>";
@@ -92,16 +90,16 @@ namespace Test.Template
             var process = new ProcessorArgs(tokens);
             process.Context = user1;
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("Last Name", result.ToString());
+            Assert.Equal("Last Name", result.ToString());
 
             process = new ProcessorArgs(tokens);
             process.Context = user2;
 
             result = processor.Process(process);
-            ClassicAssert.AreEqual("First Name", result.ToString());
+            Assert.Equal("First Name", result.ToString());
         }
 
-        [Test]
+        [Fact]
         public void ItShouldProcessLastRowTokenWhenThereIsOnlyOneRowForLoop()
         {
             string templateText = "<%FOREACH LoopName%>";
@@ -121,7 +119,7 @@ namespace Test.Template
 
             var process = new ProcessorArgs(tokens);
             StringBuilder result = processor.Process(process);
-            ClassicAssert.AreEqual("+1!", result.ToString());
+            Assert.Equal("+1!", result.ToString());
         }
     }
-}
+}

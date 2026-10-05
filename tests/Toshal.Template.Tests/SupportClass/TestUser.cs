@@ -1,8 +1,8 @@
-﻿namespace Test.Template.SupportClass
+﻿namespace Toshal.Template.Tests.SupportClass
 {
 	public class TestUser
 	{
 		public string Name { get; set; }
 		public TestUserProfile Profile { get; set; }
 	}
-}
+}

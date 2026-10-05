@@ -1,31 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using NUnit.Framework;
+using Xunit;
 
-namespace Test.Template
+namespace Toshal.Template.Tests
 {
-    using NUnit.Framework.Legacy;
     using Toshal.Template;
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
 
-    [TestFixture]
     public class TemplateParserTests
     {
-        [Test]
+        [Fact]
         public void ItShouldHandleSimpleText()
         {
             const string templateText = "Simple text";
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
-            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            Assert.Equal(1, result.Count);
+            Assert.IsAssignableFrom<ContentToken>(result[0]);
+            Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
 
-        [Test]
+        [Fact]
         public void ItShouldThrowErrorOnUnKnownTag()
         {
             const string templateText = "Simple text<%%>";
@@ -39,33 +37,33 @@ namespace Test.Template
                 }
                 catch (ParserException ex)
                 {
-                    ClassicAssert.AreEqual("<%%>", ex.Split.Content);
+                    Assert.Equal("<%%>", ex.Split.Content);
                     throw;
                 }
             });
         }
 
-        [Test]
+        [Fact]
         public void ItShouldHandleBasicToken()
         {
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.IsInstanceOf<NamedToken>(result[0]);
+            Assert.Equal(1, result.Count);
+            Assert.IsAssignableFrom<NamedToken>(result[0]);
         }
 
-        [Test]
+        [Fact]
         public void TokenNameShouldBeLowerCase()
         {
             var parser = new Parser();
 
             List<IToken> result = parser.Parse("<%=Name%>");
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.AreEqual("name", ((NamedToken)result[0]).Name);
+            Assert.Equal(1, result.Count);
+            Assert.Equal("name", ((NamedToken)result[0]).Name);
         }
 
-        [Test]
+        [Fact]
         public void TokenNameRequired()
         {
             var parser = new Parser();
@@ -77,14 +75,14 @@ namespace Test.Template
                 }
                 catch (TokenMissingNameException ex)
                 {
-                    ClassicAssert.AreEqual("<%=%>", ex.Split.Content);
+                    Assert.Equal("<%=%>", ex.Split.Content);
                     throw;
                 }
             });
 
         }
 
-        [Test]
+        [Fact]
         public void BasicCombinationOfStringAndToken()
         {
             string part1 = "My basic text ";
@@ -100,47 +98,47 @@ namespace Test.Template
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(4, result.Count);
-            ClassicAssert.AreEqual(part1, ((ContentToken)result[0]).Content);
-            ClassicAssert.AreEqual(part3.ToLower(), ((NamedToken)result[1]).Name);
-            ClassicAssert.AreEqual(part5, ((ContentToken)result[2]).Content);
-            ClassicAssert.AreEqual(part7.ToLower(), ((NamedToken)result[3]).Name);
+            Assert.Equal(4, result.Count);
+            Assert.Equal(part1, ((ContentToken)result[0]).Content);
+            Assert.Equal(part3.ToLower(), ((NamedToken)result[1]).Name);
+            Assert.Equal(part5, ((ContentToken)result[2]).Content);
+            Assert.Equal(part7.ToLower(), ((NamedToken)result[3]).Name);
         }
 
-        [Test]
+        [Fact]
         public void ItSouldRespectRegularAngularBreackts()
         {
             const string templateText = "Simple text< %";
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
-            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            Assert.Equal(1, result.Count);
+            Assert.IsAssignableFrom<ContentToken>(result[0]);
+            Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
 
-        [Test]
+        [Fact]
         public void ItSouldRespectRegularAngularBreackts2()
         {
             const string templateText = "Simple text<T>";
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
-            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            Assert.Equal(1, result.Count);
+            Assert.IsAssignableFrom<ContentToken>(result[0]);
+            Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
 
-        [Test]
+        [Fact]
         public void ItSouldRespectRegularAngularBreackts3()
         {
             const string templateText = "Simple text%%%%%";
             var parser = new Parser();
 
             List<IToken> result = parser.Parse(templateText);
-            ClassicAssert.AreEqual(1, result.Count);
-            ClassicAssert.IsInstanceOf<ContentToken>(result[0]);
-            ClassicAssert.AreEqual(templateText, ((ContentToken)result[0]).Content);
+            Assert.Equal(1, result.Count);
+            Assert.IsAssignableFrom<ContentToken>(result[0]);
+            Assert.Equal(templateText, ((ContentToken)result[0]).Content);
         }
     }
-}
+}
