@@ -10,7 +10,7 @@
 <header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html" class="active" aria-current="page">Template syntax</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Template syntax</h1>
-<p>Every tag is written as <code>&lt;%...%&gt;</code>. Keywords such as <code>IF</code> and <code>FOREACH</code> are upper case. Names are not case sensitive; the parser lower cases them. Text outside tags is written as it is, including spaces and line breaks.</p>
+<p>Every tag is written as <code>&lt;%...%&gt;</code>. Keywords such as <code>IF</code> and <code>FOREACH</code> are upper case. Names are not case sensitive; the parser lower cases them. Text outside tags is written as it is, including spaces and line breaks, with one exception: a line that holds only control tags writes nothing (see <a href="#lines-with-only-control-tags">Lines with only control tags</a>).</p>
 <div class="table-wrap"><table>
 <tr><th>Tag</th><th>What it does</th><th>Provider</th></tr>
 <tr><td><code>&lt;%=Name%&gt;</code></td><td>Writes a value. A SET variable with that name wins over the provider. Null or empty writes nothing.</td><td><code>TokenValueProvider</code></td></tr>
@@ -27,6 +27,22 @@
 <tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far.</td><td>none</td></tr>
 <tr><td><code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code></td><td>Removes a <code>\n</code> at the end of the output, then a <code>\r</code> at the end.</td><td>none</td></tr>
 </table></div>
+<h2>Lines with only control tags</h2>
+<p>A line that holds only control tags and spaces or tabs writes nothing: not its indent, not the spaces between the tags, not its line break. So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.</p>
+<p>Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET and ENDSET. A line with any text, or with a tag that writes something (<code>&lt;%=Name%&gt;</code>, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both <code> </code> and <code> </code> line breaks work.</p>
+<pre><code class="lang-text">public class &lt;%=Name%&gt;
+{
+    &lt;%FOREACH Columns%&gt;
+    public &lt;%=Type%&gt; &lt;%=Name%&gt; { get; set; }
+    &lt;%ENDFOR%&gt;
+}</code></pre>
+<p>writes</p>
+<pre><code class="lang-text">public class Customer
+{
+    public int Id { get; set; }
+    public string Email { get; set; }
+}</code></pre>
+<p>The parser does this once, when it parses the template, so it costs nothing while processing.</p>
 <h2>FOREACH names and REUSE_FOREACH</h2>
 <p>A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. Two FOREACH blocks with the same name at the same level are a <code>ParserException</code>; the same name at a deeper level, or in the IF and the ELSE part, is fine.</p>
 <p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).</p>

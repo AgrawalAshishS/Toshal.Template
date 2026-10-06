@@ -10,10 +10,10 @@
 <header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Whitespace control</h1>
-<p>Keep the template readable with one tag per line, and remove the extra line breaks and separators from the output with REMOVE_PREVIOUS_NEW_LINE and REMOVE_PREVIOUS n.</p>
+<p>Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing, not even its line break. REMOVE_PREVIOUS n still removes a last separator.</p>
 <p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/WhitespaceExample.cs">examples/Toshal.Template.Examples/WhitespaceExample.cs</a></p>
 <pre><code class="lang-csharp">// Title: Whitespace control
-// Summary: Keep the template readable with one tag per line, and remove the extra line breaks and separators from the output with REMOVE_PREVIOUS_NEW_LINE and REMOVE_PREVIOUS n.
+// Summary: Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing, not even its line break. REMOVE_PREVIOUS n still removes a last separator.
 
 using Toshal.Template.Examples.Support;
 
@@ -25,23 +25,32 @@ public static class WhitespaceExample
     {
         Console.WriteLine(&quot;== Whitespace ==&quot;);
 
-        // Without control, every tag line leaves a line break behind.
+        // The FOREACH and ENDFOR lines hold only control tags, so they write nothing: no indent, no line break.
+        // The lines with text keep their indent and their line break.
         const string template =
-            &quot;Items:\n&quot; +
-            &quot;&lt;%FOREACH items%&gt;\n&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;&quot; +
-            &quot;- &lt;%CONTEXT_AS_STRING%&gt;\n&quot; +
-            &quot;&lt;%ENDFOR%&gt;\n&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;&quot; +
-            &quot;End&quot;;
-        var processor = new Processor { LoopValueProvider = args =&gt; new[] { &quot;one&quot;, &quot;two&quot; } };
+            &quot;public enum Color\n&quot; +
+            &quot;{\n&quot; +
+            &quot;    &lt;%FOREACH items%&gt;\n&quot; +
+            &quot;    &lt;%CONTEXT_AS_STRING%&gt;,\n&quot; +
+            &quot;    &lt;%ENDFOR%&gt;\n&quot; +
+            &quot;}\n&quot;;
+        var processor = new Processor { LoopValueProvider = args =&gt; new[] { &quot;Red&quot;, &quot;Green&quot; } };
         string text = processor.Process(new ProcessorArgs(new Parser().Parse(template))).ToString();
         Console.WriteLine(text);
-        Verify.Equal(&quot;Items:\n- one\n- two\nEnd&quot;, text, &quot;remove previous new line&quot;);
+        Verify.Equal(&quot;public enum Color\n{\n    Red,\n    Green,\n}\n&quot;, text, &quot;tag lines&quot;);
+
+        // A line with text or a value keeps everything. Here the IF is inside a text line, so only the tags go.
+        const string inline = &quot;Status: &lt;%IF items%&gt;has items&lt;%ENDIF%&gt;\n&quot;;
+        var inlineProcessor = new Processor { ConditionValueProvider = args =&gt; true };
+        string status = inlineProcessor.Process(new ProcessorArgs(new Parser().Parse(inline))).ToString();
+        Console.WriteLine(status);
+        Verify.Equal(&quot;Status: has items\n&quot;, status, &quot;tags inside a text line&quot;);
 
         // Remove the last separator of a list.
         const string csv = &quot;&lt;%FOREACH items%&gt;&lt;%CONTEXT_AS_STRING%&gt;, &lt;%ENDFOR%&gt;&lt;%REMOVE_PREVIOUS 2%&gt;.&quot;;
         string line = processor.Process(new ProcessorArgs(new Parser().Parse(csv))).ToString();
         Console.WriteLine(line);
-        Verify.Equal(&quot;one, two.&quot;, line, &quot;remove previous 2&quot;);
+        Verify.Equal(&quot;Red, Green.&quot;, line, &quot;remove previous 2&quot;);
     }
 }
 </code></pre>

@@ -317,11 +317,9 @@ ParserException @1:1 "Token - <%FOREACH\u0009rows%> is wrong @1 on line number 1
 ### 111 "<%FOREACH rows%>\u000D\u000A  <%ROW%>\u000D\u000A    <%=name%>\u000D\u000A  <%ENDROW%>\u000D\u000A<%ENDFOR%>"
 FOREACH @1:1 "rows"
   [ROW]
-    TEXT @1:17 "\u000D\u000A  "
-    TEXT @2:10 "\u000D\u000A    "
+    TEXT @3:1 "    "
     VALUE @3:5 "name"
-    TEXT @3:14 "\u000D\u000A  "
-    TEXT @4:13 "\u000D\u000A"
+    TEXT @3:14 "\u000D\u000A"
 ### 112 "<%FOREACH rows%><%HEADER%><%FOREACH inner%><%ROW%>i<%ENDROW%><%ENDFOR%><%ENDHEADER%><%ENDFOR%>"
 FOREACH @1:1 "rows"
   [HEADER]

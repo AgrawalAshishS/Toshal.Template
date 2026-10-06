@@ -6,4 +6,5 @@ Sales report for <%=Month format="MMMM yyyy"%>
 -----------  ------  -----------
 Total        <%=TotalOrders pad="6"%>  <%=TotalAmount format="N2" pad="11"%><%ENDFOOTER%><%NORECORD%>No sales this month.<%ENDNORECORD%><%ENDFOR%>
 <%IF Best%>
+
 Best region: <%=Best%><%ENDIF%>

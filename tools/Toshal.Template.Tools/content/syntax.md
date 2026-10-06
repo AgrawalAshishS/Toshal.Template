@@ -1,7 +1,8 @@
 # Template syntax
 
 Every tag is written as `<%...%>`. Keywords such as `IF` and `FOREACH` are upper case. Names are not case sensitive; the parser lower cases them.
-Text outside tags is written as it is, including spaces and line breaks.
+Text outside tags is written as it is, including spaces and line breaks, with one exception: a line that holds only control tags writes nothing
+(see [Lines with only control tags](#lines-with-only-control-tags)).
 
 | Tag | What it does | Provider |
 |---|---|---|
@@ -18,6 +19,38 @@ Text outside tags is written as it is, including spaces and line breaks.
 | `<%CONTEXT_AS_STRING%>` | Writes `ToString()` of the current context. | none |
 | `<%REMOVE_PREVIOUS n%>` | Removes the last n characters written so far. | none |
 | `<%REMOVE_PREVIOUS_NEW_LINE%>` | Removes a `\n` at the end of the output, then a `\r` at the end. | none |
+
+## Lines with only control tags
+
+A line that holds only control tags and spaces or tabs writes nothing: not its indent, not the spaces between the tags, not its line break.
+So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.
+
+Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET and ENDSET.
+A line with any text, or with a tag that writes something (`<%=Name%>`, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with
+REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both `
+` and `
+` line breaks work.
+
+```text
+public class <%=Name%>
+{
+    <%FOREACH Columns%>
+    public <%=Type%> <%=Name%> { get; set; }
+    <%ENDFOR%>
+}
+```
+
+writes
+
+```text
+public class Customer
+{
+    public int Id { get; set; }
+    public string Email { get; set; }
+}
+```
+
+The parser does this once, when it parses the template, so it costs nothing while processing.
 
 ## FOREACH names and REUSE_FOREACH
 

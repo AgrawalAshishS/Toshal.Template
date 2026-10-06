@@ -36,6 +36,11 @@ namespace Toshal.Template
         /// Parses a template. Plain text becomes <see cref="ContentToken"/>, each tag becomes its token, and blocks such as IF and FOREACH
         /// hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.
         /// </summary>
+        /// <remarks>
+        /// <para>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET) and spaces
+        /// or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that
+        /// writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</para>
+        /// </remarks>
         /// <param name="templateText">The template. An empty string gives an empty list.</param>
         /// <returns>The top level tokens, in template order.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="templateText"/> is null.</exception>
@@ -64,6 +69,7 @@ namespace Toshal.Template
             this._levels.Clear();
 
             this._splits = SplitTemplateByTokens(templateText);
+            RemoveTagLines(this._splits);
 
             this._splitIndex = 0;
 
@@ -221,6 +227,217 @@ namespace Toshal.Template
             13 => token.AfterLastRowTokens,
             _ => token.FooterTokens,
         };
+
+        // A line that holds only control tags and spaces or tabs writes nothing: its indent, the spaces between its tags and its line break go.
+        // Tags that write something (values, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH) and REMOVE_PREVIOUS keep their line.
+        // Every line is judged on the original text first, then all cuts are made, so two tag lines next to each other do not affect each other.
+        private static void RemoveTagLines(List<Split> splits)
+        {
+            int count = splits.Count;
+
+            // Each split is classified once: text, control tag, or another tag.
+            var kinds = new SplitKind[count];
+            bool anyControl = false;
+            for (int k = 0; k < count; k++)
+            {
+                kinds[k] = Classify(splits[k].Content);
+                anyControl |= kinds[k] == SplitKind.Control;
+            }
+
+            if (!anyControl)
+            {
+                return;
+            }
+
+            int[]? cutStart = null;   // characters to cut from the start of a text split
+            int[]? cutEnd = null;     // characters to cut from the end of a text split
+
+            for (int i = 0; i < count; i++)
+            {
+                if (kinds[i] != SplitKind.Control)
+                {
+                    continue;
+                }
+
+                // Find the start of the line: go left over control tags and blank text until a line break or the start of the template.
+                int first = i;          // first split of the line that is cut entirely or partly
+                int left = i - 1;
+                bool standalone = true;
+                while (left >= 0)
+                {
+                    string content = splits[left].Content;
+                    if (kinds[left] != SplitKind.Text)
+                    {
+                        if (kinds[left] != SplitKind.Control) { standalone = false; break; }
+                        first = left;
+                        left--;
+                        continue;
+                    }
+
+                    int lastNewLine = content.LastIndexOf('\n');
+                    if (!IsBlank(content, lastNewLine + 1, content.Length)) { standalone = false; break; }
+                    first = left;
+                    if (lastNewLine >= 0) break;
+                    left--;
+                }
+
+                if (!standalone)
+                {
+                    continue;
+                }
+
+                // Find the end of the line: go right the same way until a line break or the end of the template.
+                int last = i;
+                int right = i + 1;
+                while (right < count)
+                {
+                    string content = splits[right].Content;
+                    if (kinds[right] != SplitKind.Text)
+                    {
+                        if (kinds[right] != SplitKind.Control) { standalone = false; break; }
+                        last = right;
+                        right++;
+                        continue;
+                    }
+
+                    int newLine = content.IndexOf('\n');
+                    int end = newLine < 0 ? content.Length : newLine;
+                    if (!IsBlank(content, 0, end, allowCarriageReturnAtEnd: newLine >= 0)) { standalone = false; break; }
+                    last = right;
+                    if (newLine >= 0) break;
+                    right++;
+                }
+
+                if (!standalone)
+                {
+                    continue;
+                }
+
+                // Cut: the indent after the last line break of the first split, all blank text in between, and the first line break of the last split.
+                cutStart ??= new int[count];
+                cutEnd ??= new int[count];
+                for (int k = first; k <= last; k++)
+                {
+                    string content = splits[k].Content;
+                    if (kinds[k] != SplitKind.Text)
+                    {
+                        continue;
+                    }
+
+                    if (k == first)
+                    {
+                        int lastNewLine = content.LastIndexOf('\n');
+                        if (lastNewLine >= 0)
+                        {
+                            cutEnd[k] = content.Length - lastNewLine - 1;
+                            continue;
+                        }
+                    }
+
+                    if (k == last)
+                    {
+                        int newLine = content.IndexOf('\n');
+                        if (newLine >= 0)
+                        {
+                            cutStart[k] = newLine + 1;
+                            continue;
+                        }
+                    }
+
+                    cutStart[k] = content.Length;
+                }
+
+                i = last;
+            }
+
+            if (cutStart == null || cutEnd == null)
+            {
+                return;
+            }
+
+            // Apply the cuts. A text split that becomes empty is dropped; one that loses its first line starts on the next line, column 1.
+            int write = 0;
+            for (int k = 0; k < count; k++)
+            {
+                var split = splits[k];
+                if (cutStart[k] > 0 || cutEnd[k] > 0)
+                {
+                    int start = cutStart[k];
+                    int length = split.Content.Length - start - cutEnd[k];
+                    if (length <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (start > 0)
+                    {
+                        split.LineNumber++;
+                        split.StartingPosition = 1;
+                    }
+
+                    split.Content = split.Content.Substring(start, length);
+                }
+
+                splits[write++] = split;
+            }
+
+            splits.RemoveRange(write, count - write);
+        }
+
+        private static bool IsBlank(string content, int start, int end, bool allowCarriageReturnAtEnd = false)
+        {
+            if (allowCarriageReturnAtEnd && end > start && content[end - 1] == '\r')
+            {
+                end--;
+            }
+
+            for (int k = start; k < end; k++)
+            {
+                if (content[k] != ' ' && content[k] != '\t') return false;
+            }
+
+            return true;
+        }
+
+        private enum SplitKind : byte
+        {
+            Text,
+            Control,
+            OtherTag,
+        }
+
+        // Control tags only steer the output: blocks, their parts and their ends. The third character picks the few checks to make.
+        private static SplitKind Classify(string content)
+        {
+            if (content.Length < 2 || content[0] != '<' || content[1] != '%')
+            {
+                return SplitKind.Text;
+            }
+
+            if (content.Length < 5 || content[^2] != '%' || content[^1] != '>')
+            {
+                return SplitKind.OtherTag;
+            }
+
+            bool control = content[2] switch
+            {
+                'I' => content.StartsWith("<%IF ", StringComparison.Ordinal),
+                'F' => content.StartsWith("<%FOREACH ", StringComparison.Ordinal) || ControlTags.Contains(content),
+                'W' => content.StartsWith("<%WITH ", StringComparison.Ordinal),
+                'S' => content.StartsWith("<%SET ", StringComparison.Ordinal),
+                'E' => content.StartsWith("<%ELSEIF ", StringComparison.Ordinal) || ControlTags.Contains(content),
+                'N' or 'H' or 'B' or 'R' or 'A' or 'L' => ControlTags.Contains(content),
+                _ => false,
+            };
+
+            return control ? SplitKind.Control : SplitKind.OtherTag;
+        }
+
+        private static readonly HashSet<string> ControlTags = new HashSet<string>(
+            SectionTags.Select(tag => "<%" + tag + "%>")
+                .Concat(SectionTags.Select(tag => "<%END" + tag + "%>"))
+                .Concat(new[] { "<%ELSE%>", "<%ENDIF%>", "<%ENDFOR%>", "<%ENDWITH%>", "<%ENDSET%>" }),
+            StringComparer.Ordinal);
 
         // Parses one part of a FOREACH, from its open tag (the current split) to its end tag.
         private void ParseSection(Split split, string name, int section, List<IToken> tokenList)
