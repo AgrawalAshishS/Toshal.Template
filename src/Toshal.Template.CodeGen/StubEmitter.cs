@@ -10,7 +10,7 @@ namespace Toshal.Template.CodeGen
 
     // Writes the other half of the class: the partial methods the template needs, with a case for every name it uses.
     // It is written once, next to the template, and then it belongs to the user; it is never written again.
-    // The text is in Templates/Stub.txt and Templates/StubBody.txt; this class only gives the values.
+    // The text is in Templates/Stub.rtt and Templates/StubBody.rtt; this class only gives the values.
     public static class StubEmitter
     {
         // The order of the methods in the stub.
@@ -19,8 +19,8 @@ namespace Toshal.Template.CodeGen
             ProviderKinds.TokenValue, ProviderKinds.WriteToken, ProviderKinds.Condition, ProviderKinds.Loop, ProviderKinds.With, ProviderKinds.SubTemplate,
         };
 
-        private static readonly List<IToken> Stub = EmbeddedTemplates.Parse("Stub.txt");
-        private static readonly List<IToken> Body = EmbeddedTemplates.Parse("StubBody.txt");
+        private static readonly List<IToken> Stub = EmbeddedTemplates.Parse("Stub.rtt");
+        private static readonly List<IToken> Body = EmbeddedTemplates.Parse("StubBody.rtt");
 
         public static string Emit(TemplateSource source, TemplateCode code)
         {

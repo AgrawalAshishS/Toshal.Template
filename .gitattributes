@@ -76,4 +76,4 @@ benchmarks/**/*.ctt text eol=crlf
 tests/**/Golden/*.txt text eol=crlf
 
 # The templates the code generator writes its files with. Their line breaks are the line breaks of those files.
-src/Toshal.Template.CodeGen/Templates/*.txt text eol=crlf
+src/Toshal.Template.CodeGen/Templates/*.rtt text eol=crlf

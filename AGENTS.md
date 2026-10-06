@@ -12,7 +12,7 @@ src/Toshal.Template.Compiled/         run time of compiled .ctt templates: Compi
                                       Uses internals of Toshal.Template (Processing/ProcessRun, TemplateVariables), so both write the same text
 src/Toshal.Template.CodeGen/          netstandard2.0: parser and Processor sources of Toshal.Template linked in (CodeGenSources.props) +
                                       emitters that turn a template into C#. Not packed alone. The fixed text of the files they write
-                                      (stub, frame of the generated file) is in Templates/*.txt, embedded and run through Processor
+                                      (stub, frame of the generated file) is in Templates/*.rtt (run time templates), embedded and run through Processor
 src/Toshal.Template.Generator/        Roslyn source generator + MSBuild stub task, compiles the CodeGen sources in (NuGet Toshal.Template.Generator);
                                       build/ holds the .props/.targets of the package
 src/Toshal.Template.Cli/              the toshal-template dotnet tool: writes Name.g.cs and the stub Name.cs to disk (NuGet Toshal.Template.Cli)

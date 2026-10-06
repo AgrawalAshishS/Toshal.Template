@@ -8,7 +8,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Processing\*.cs" Link="Linked\Processing\%(Filename).cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Tokens\*.cs" Link="Linked\Tokens\%(Filename).cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Exceptions\*.cs" Link="Linked\Exceptions\%(Filename).cs" />
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Templates\*.txt" LogicalName="Toshal.Template.CodeGen.Templates.%(Filename)%(Extension)" Link="Templates\%(Filename)%(Extension)" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Templates\*.rtt" LogicalName="Toshal.Template.CodeGen.Templates.%(Filename)%(Extension)" Link="Templates\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'Toshal.Template.CodeGen'">

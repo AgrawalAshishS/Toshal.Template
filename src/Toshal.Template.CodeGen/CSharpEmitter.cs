@@ -18,8 +18,8 @@ namespace Toshal.Template.CodeGen
         private const string Scope = "global::Toshal.Template.Compiled.TemplateScope";
         private const string Attrs = "global::Toshal.Template.Tokens.TokenAttributeDictionary";
 
-        private static readonly List<IToken> Generated = EmbeddedTemplates.Parse("Generated.txt");
-        private static readonly List<IToken> GeneratedClass = EmbeddedTemplates.Parse("GeneratedClass.txt");
+        private static readonly List<IToken> Generated = EmbeddedTemplates.Parse("Generated.rtt");
+        private static readonly List<IToken> GeneratedClass = EmbeddedTemplates.Parse("GeneratedClass.rtt");
 
         // Parses the template and writes the generated half. Throws the ParserException of the parser for a wrong template.
         public static TemplateCode Emit(TemplateSource source)
@@ -71,7 +71,7 @@ namespace Toshal.Template.CodeGen
                 return new TemplateCode(code, this.kinds, namesByKind);
             }
 
-            // The file around the body: the text is in Templates/Generated.txt and Templates/GeneratedClass.txt. Inside a namespace,
+            // The file around the body: the text is in Templates/Generated.rtt and Templates/GeneratedClass.rtt. Inside a namespace,
             // Processor indents the class with the line of its PROCESS_TEMPLATE tag.
             private string Assemble()
             {
