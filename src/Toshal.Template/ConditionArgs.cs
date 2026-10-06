@@ -58,7 +58,7 @@ namespace Toshal.Template
         /// Gets the attributes written in the tag, for example <c>min</c> in <c>&lt;%IF total min="100"%&gt;</c>. Keys are lower case.
         /// </summary>
         /// <remarks>
-        /// <para><b>Warning:</b> in IF and ELSEIF tags the values are lower cased too (by design), so <c>unit="KG"</c> gives <c>kg</c>. Other tags keep the case of attribute values.</para>
+        /// <para>Attribute names are lower case; values keep the case the template author wrote. For a lower case copy of the values use <see cref="TokenAttributeDictionary.LowerCaseValues"/>.</para>
         /// </remarks>
         /// <example>
         /// <code>

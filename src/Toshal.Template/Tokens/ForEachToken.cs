@@ -66,7 +66,7 @@ namespace Toshal.Template.Tokens
 
             const string forEachTokenExpression = "<%FOREACH\\s(?<Name>.*?)%>";
 
-            this.Name = Regex.Match(split.Content, forEachTokenExpression).Groups["Name"].Value.Trim().ToLower();
+            this.Name = Regex.Match(split.Content, forEachTokenExpression).Groups["Name"].Value.Trim();
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);
@@ -82,7 +82,7 @@ namespace Toshal.Template.Tokens
         /// Gets the attributes of the FOREACH tag. Keys are lower case.
         /// </summary>
         /// <remarks>
-        /// <para><b>Warning:</b> the values are lower cased too (by design), so <c>sort="Name"</c> gives <c>name</c>. Other tags keep the case of attribute values.</para>
+        /// <para>Attribute names are lower case; values keep the case the template author wrote. For a lower case copy of the values use <see cref="TokenAttributeDictionary.LowerCaseValues"/>.</para>
         /// </remarks>
         /// <example>
         /// <code>

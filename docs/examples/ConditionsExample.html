@@ -44,7 +44,7 @@ public static class ConditionsExample
                 {
                     &quot;locked&quot; =&gt; account.Locked,
                     &quot;negative&quot; =&gt; account.Balance &lt; 0,
-                    // Attributes work on conditions too. Note: IF attribute values are lower cased (known issue), numbers are not affected.
+                    // Attributes work on conditions too. Values keep their case; LowerCaseValues has a lower case copy.
                     &quot;low&quot; =&gt; account.Balance &lt; decimal.Parse(args.Attributes.GetValue(&quot;limit&quot;, &quot;0&quot;)),
                     _ =&gt; false,
                 };

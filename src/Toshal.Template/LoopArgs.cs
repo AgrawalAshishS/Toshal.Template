@@ -75,7 +75,7 @@ namespace Toshal.Template
         /// For REUSE_FOREACH these are the attributes of the reused FOREACH.
         /// </summary>
         /// <remarks>
-        /// <para><b>Warning:</b> in FOREACH tags the values are lower cased too (by design), so <c>sort="Name"</c> gives <c>name</c>. Other tags keep the case of attribute values.</para>
+        /// <para>Attribute names are lower case; values keep the case the template author wrote. For a lower case copy of the values use <see cref="TokenAttributeDictionary.LowerCaseValues"/>.</para>
         /// </remarks>
         /// <example>
         /// <code>

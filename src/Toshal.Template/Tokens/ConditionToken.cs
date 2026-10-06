@@ -40,21 +40,21 @@ namespace Toshal.Template.Tokens
             if (split.Content.StartsWith("<%IF"))
             {
                 const string ifWithThenTokenExpression = "<%IF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim();
                 if (string.IsNullOrEmpty(this.Name))
                 {
                     const string ifWithoutThenTokenExpression = "<%IF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim();
                 }
             }
             else
             {
                 const string ifWithThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim();
                 if (string.IsNullOrEmpty(this.Name))
                 {
                     const string ifWithoutThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim().ToLower();
+                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim();
                 }
             }
 
@@ -64,7 +64,9 @@ namespace Toshal.Template.Tokens
             }
 
 
-            if (Name.StartsWith("not "))
+            // "not" is a keyword, so it is found in any case. The name and the attribute names are lower cased by GetNameAndAttributes;
+            // attribute values keep their case.
+            if (Name.StartsWith("not ", StringComparison.OrdinalIgnoreCase))
             {
                 this.IsPositive = false;
                 Name = Name.Substring(4);
@@ -109,7 +111,7 @@ namespace Toshal.Template.Tokens
         /// Gets the attributes of the tag. Keys are lower case.
         /// </summary>
         /// <remarks>
-        /// <para><b>Warning:</b> the values are lower cased too (by design), so <c>unit="KG"</c> gives <c>kg</c>. Other tags keep the case of attribute values.</para>
+        /// <para>Attribute names are lower case; values keep the case the template author wrote. For a lower case copy of the values use <see cref="TokenAttributeDictionary.LowerCaseValues"/>.</para>
         /// </remarks>
         /// <example>
         /// <code>

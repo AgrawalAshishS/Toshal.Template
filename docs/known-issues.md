@@ -12,7 +12,6 @@ None at the moment.
 | Behavior | Test |
 |---|---|
 | A list with one row uses the LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) and never the FIRST parts: the last row template wins. | `KnownIssues/KnownIssueTests.OneRowUsesTheLastRowPart` |
-| IF, ELSEIF and FOREACH tags lower case their attribute values: `<%IF Weight unit="KG"%>` gives `kg`. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case. | `KnownIssues/KnownIssueTests.IfAndForEachAttributeValuesAreLowerCased` |
 
 ## Open questions
 
@@ -38,3 +37,4 @@ These are not clearly bugs. The owner has to decide what the template language s
 | A negative count in `<%REMOVE_PREVIOUS n%>` was accepted by the parser, and the processor then threw `ArgumentOutOfRangeException`. The parser now throws `ParserException`. | `Fixes/NegativeRemovePreviousTests` |
 | The same attribute twice in one tag, such as `<%=Name a="1" a="2"%>`, threw `ArgumentException`. It now throws `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid` |
 | `Parser.Parse(null)`, `Processor.Process(null)`, `new ProcessorArgs(null)` and `GetValue(null, ...)` threw `NullReferenceException`. They now throw `ArgumentNullException`. Processing a REUSE_FOREACH token made by hand that is not linked throws `InvalidOperationException`. | `Fixes/NullArgumentTests` |
+| IF, ELSEIF and FOREACH lower cased their attribute values (`unit="KG"` gave `kg`), the other tags did not. Now every tag keeps the value case, and `TokenAttributeDictionary.LowerCaseValues` has a lower case copy made by the parser. | `Fixes/AttributeCaseTests` |

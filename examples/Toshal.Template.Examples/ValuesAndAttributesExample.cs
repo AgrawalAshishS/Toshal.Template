@@ -42,5 +42,10 @@ public static class ValuesAndAttributesExample
 
         // Warning: the dictionary itself is case sensitive with lower case keys.
         Verify.That(totalToken.Attributes.ContainsKey("format") && !totalToken.Attributes.ContainsKey("Format"), "keys are lower case");
+
+        // Values keep the case the author wrote. For comparisons without case, the parser also keeps a lower case copy.
+        var weight = (Tokens.ConditionToken)new Parser().Parse("<%IF Heavy Unit=\"KG\"%>x<%ENDIF%>")[0];
+        Console.WriteLine($"unit as written: {weight.Attributes["unit"]}, lower case copy: {weight.Attributes.LowerCaseValues["unit"]}");
+        Verify.That(weight.Attributes.GetValue("unit", "") == "KG" && weight.Attributes.GetLowerCaseValue("UNIT", "") == "kg", "value case and lower case copy");
     }
 }

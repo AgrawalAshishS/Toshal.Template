@@ -122,6 +122,15 @@ namespace Toshal.Template.Tests
         }
 
         [Fact]
+        public void OnlyTheParserFillsLowerCaseValues()
+        {
+            var attributes = new TokenAttributeDictionary { ["format"] = "N2" };
+
+            Assert.Empty(attributes.LowerCaseValues);
+            Assert.Equal("x", attributes.GetLowerCaseValue("format", "x"));
+        }
+
+        [Fact]
         public void ArgsGetAttributeReadsTheTagAttributes()
         {
             string? seen = null;
