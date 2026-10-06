@@ -11,25 +11,9 @@ namespace Toshal.Template.Tests.KnownIssues
     // Remove the Skip when the issue is fixed. The other tests pin today's behavior of an open question.
     public class KnownIssueTests
     {
-        private const string Waiting = "Known issue, see docs/known-issues.md. Waiting for the owner's decision.";
-
-        [Fact(Skip = Waiting)]
-        public void IfAttributeValuesKeepTheirCase()
-        {
-            var token = (ConditionToken)new Parser().Parse("<%IF Weight unit=\"KG\"%>x<%ENDIF%>")[0];
-            Assert.Equal("KG", token.Attributes["unit"]);
-        }
-
-        [Fact(Skip = Waiting)]
-        public void ForEachAttributeValuesKeepTheirCase()
-        {
-            var token = (ForEachToken)new Parser().Parse("<%FOREACH Lines sort=\"Name\"%>x<%ENDFOR%>")[0];
-            Assert.Equal("Name", token.Attributes["sort"]);
-        }
-
-        // Today: lower cased. This pins it so a change is noticed.
+        // By design (owner decision): IF, ELSEIF and FOREACH lower case their attribute values. Other tags keep the case.
         [Fact]
-        public void IfAndForEachAttributeValuesAreLowerCasedToday()
+        public void IfAndForEachAttributeValuesAreLowerCased()
         {
             var condition = (ConditionToken)new Parser().Parse("<%IF Weight unit=\"KG\"%>x<%ENDIF%>")[0];
             var loop = (ForEachToken)new Parser().Parse("<%FOREACH Lines sort=\"Name\"%>x<%ENDFOR%>")[0];

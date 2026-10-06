@@ -12,9 +12,11 @@
 <h1>Known issues</h1>
 <p>This page is written by hand. Each row has a test in <code>tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs</code> or <code>tests/Toshal.Template.Tests/Fixes/</code>. A skipped test shows the wanted behavior; the other tests pin what the library does today.</p>
 <h2>Open</h2>
+<p>None at the moment.</p>
+<h2>By design</h2>
 <div class="table-wrap"><table>
-<tr><th>Issue</th><th>Today</th><th>Wanted</th><th>Test</th></tr>
-<tr><td>Attribute values of IF, ELSEIF and FOREACH tags are lower cased.</td><td><code>&lt;%IF Weight unit=&quot;KG&quot;%&gt;</code> gives the value <code>kg</code>. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case.</td><td>Keep the value as written, like the other tags. Waiting for a decision, because templates may rely on lower case values today.</td><td><code>IfAttributeValuesKeepTheirCase</code>, <code>ForEachAttributeValuesKeepTheirCase</code> (skipped)</td></tr>
+<tr><th>Behavior</th><th>Test</th></tr>
+<tr><td>IF, ELSEIF and FOREACH tags lower case their attribute values: <code>&lt;%IF Weight unit=&quot;KG&quot;%&gt;</code> gives <code>kg</code>. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case.</td><td><code>KnownIssues/KnownIssueTests.IfAndForEachAttributeValuesAreLowerCased</code></td></tr>
 </table></div>
 <h2>Open questions</h2>
 <p>These are not clearly bugs. The owner has to decide what the template language should do.</p>

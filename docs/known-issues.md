@@ -5,9 +5,13 @@ or `tests/Toshal.Template.Tests/Fixes/`. A skipped test shows the wanted behavio
 
 ## Open
 
-| Issue | Today | Wanted | Test |
-|---|---|---|---|
-| Attribute values of IF, ELSEIF and FOREACH tags are lower cased. | `<%IF Weight unit="KG"%>` gives the value `kg`. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case. | Keep the value as written, like the other tags. Waiting for a decision, because templates may rely on lower case values today. | `IfAttributeValuesKeepTheirCase`, `ForEachAttributeValuesKeepTheirCase` (skipped) |
+None at the moment.
+
+## By design
+
+| Behavior | Test |
+|---|---|
+| IF, ELSEIF and FOREACH tags lower case their attribute values: `<%IF Weight unit="KG"%>` gives `kg`. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case. | `KnownIssues/KnownIssueTests.IfAndForEachAttributeValuesAreLowerCased` |
 
 ## Open questions
 

@@ -109,7 +109,7 @@ namespace Toshal.Template.Tokens
         /// Gets the attributes of the tag. Keys are lower case.
         /// </summary>
         /// <remarks>
-        /// <para><b>Known issue:</b> the values are lower cased too, so <c>unit="KG"</c> gives <c>kg</c>. See docs/known-issues.md.</para>
+        /// <para><b>Warning:</b> the values are lower cased too (by design), so <c>unit="KG"</c> gives <c>kg</c>. Other tags keep the case of attribute values.</para>
         /// </remarks>
         /// <example>
         /// <code>

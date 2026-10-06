@@ -6,7 +6,7 @@ Text outside tags is written as it is, including spaces and line breaks.
 | Tag | What it does | Provider |
 |---|---|---|
 | `<%=Name%>` | Writes a value. A SET variable with that name wins over the provider. Null or empty writes nothing. | `TokenValueProvider` |
-| `<%=Name format="0.00"%>` | A value with attributes. Values in quotes may contain spaces. | `TokenValueProvider` reads `args.GetAttribute("format", "")` |
+| `<%=Name format="0.00"%>` | A value with attributes. Values in quotes may contain spaces. Attribute values keep their case, except in IF, ELSEIF and FOREACH tags, where they are lower cased. | `TokenValueProvider` reads `args.GetAttribute("format", "")` |
 | `<%IF Name%>...<%ENDIF%>` | Writes the inner part when the condition is true. `THEN` at the end is optional: `<%IF Name THEN%>`. | `ConditionValueProvider` |
 | `<%IF not Name%>` | A negative condition. The provider gets `name` and returns its value; the processor applies the `not`. | `ConditionValueProvider` |
 | `<%ELSEIF Name%>`, `<%ELSE%>` | Further branches of an IF. | `ConditionValueProvider` |
