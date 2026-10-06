@@ -49,8 +49,8 @@ namespace Toshal.Template.CodeGen
                     "namespace" => source.Namespace.Length > 0,
                     "hasany" => code.Kinds != ProviderKinds.None,
                     "systemusings" => Has(ProviderKinds.Loop) || Has(ProviderKinds.WriteToken),
-                    _ when args.Name.StartsWith("has", StringComparison.Ordinal) => Has(Kind(args.Name.Substring(3))),
-                    _ => args.Context is ProviderKinds row && row == Kind(args.Name),
+                    _ when args.Name.StartsWith("has", StringComparison.Ordinal) => Has(ProviderKindNames.Parse(args.Name.Substring(3))),
+                    _ => args.Context is ProviderKinds row && row == ProviderKindNames.Parse(args.Name),
                 },
                 LoopValueProvider = args => args.Name switch
                 {
@@ -63,8 +63,5 @@ namespace Toshal.Template.CodeGen
 
             return processor.Process(new ProcessorArgs(Stub)).ToString();
         }
-
-        private static ProviderKinds Kind(string name) =>
-            Enum.TryParse<ProviderKinds>(name, ignoreCase: true, out var kind) ? kind : throw new InvalidOperationException("No kind named " + name + ".");
     }
 }

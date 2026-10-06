@@ -17,6 +17,13 @@ namespace Toshal.Template.CodeGen
         SubTemplate = 32,
     }
 
+    // The kind a name in the templates of the emitters stands for: <%IF loop%> is ProviderKinds.Loop.
+    internal static class ProviderKindNames
+    {
+        public static ProviderKinds Parse(string name) =>
+            Enum.TryParse<ProviderKinds>(name, ignoreCase: true, out var kind) ? kind : throw new InvalidOperationException("No kind named " + name + ".");
+    }
+
     // What the emitter made from one template: the generated half of the class, and the names each partial method gets, for the stub.
     public sealed class TemplateCode
     {

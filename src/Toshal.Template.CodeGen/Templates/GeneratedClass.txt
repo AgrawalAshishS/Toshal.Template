@@ -1,0 +1,31 @@
+partial class <%=classname%> : global::Toshal.Template.Compiled.CompiledTemplate
+{
+    <%FOREACH attributes%>
+    <%CONTEXT_AS_STRING%>
+    <%FOOTER%>
+
+    <%ENDFOOTER%>
+    <%ENDFOR%>
+    <%IF tokenvalue%>
+    private partial string? TokenValue(global::Toshal.Template.TokenArgs args);
+    <%ENDIF%>
+    <%IF writetoken%>
+    private partial void WriteToken(global::Toshal.Template.TokenArgs args, global::System.Text.StringBuilder output);
+    <%ENDIF%>
+    <%IF condition%>
+    private partial bool Condition(global::Toshal.Template.ConditionArgs args);
+    <%ENDIF%>
+    <%IF loop%>
+    private partial global::System.Collections.IList? Loop(global::Toshal.Template.LoopArgs args);
+    <%ENDIF%>
+    <%IF with%>
+    private partial object? With(global::Toshal.Template.TokenArgs args);
+    <%ENDIF%>
+    <%IF subtemplate%>
+    private partial global::Toshal.Template.Compiled.CompiledTemplate? SubTemplate(global::Toshal.Template.ProcessTemplateArgs args);
+    <%ENDIF%>
+    <%IF hasany%>
+
+    <%ENDIF%>
+<%=body%>
+}
