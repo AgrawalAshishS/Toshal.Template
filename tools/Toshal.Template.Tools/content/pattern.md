@@ -36,4 +36,5 @@ The template:
 ## Running it
 
 - `test.cmd` runs the fake mode every time (`ExamplesTests.PatternWithFakes`).
-- The database mode (`ExamplesTests.PatternWithDatabase`) runs only when the environment variable `ConnectionStrings__testdb` points to an empty PostgreSQL database. It creates two tables named `sample_orders` and `sample_order_lines`, and drops them at the end.
+- In GitHub Actions a Linux job runs both modes against a PostgreSQL service container.
+- Locally, the database mode (`ExamplesTests.PatternWithDatabase`) runs only when the environment variable `ConnectionStrings__testdb` points to an empty PostgreSQL database. It creates two tables named `sample_orders` and `sample_order_lines`, and drops them at the end.

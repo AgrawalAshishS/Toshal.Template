@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build, test, coverage, docs, pack
+    # Windows, like the local .cmd scripts.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build (warnings fail the build)
+        run: dotnet build Toshal.Template.sln -c Release --nologo -warnaserror
+
+      - name: Test with coverage
+        # Includes DocsTests, which fails when docs/ is out of date.
+        run: dotnet test Toshal.Template.sln -c Release --no-build --nologo --logger "console;verbosity=minimal" --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory coverage
+
+      - name: Coverage report (fails below 90 percent)
+        run: dotnet run --project tools/Toshal.Template.Tools -c Release --no-build -- coverage 90
+
+      - name: Docs are up to date
+        run: dotnet run --project tools/Toshal.Template.Tools -c Release --no-build -- docs check
+
+      - name: Pack
+        run: dotnet pack src/Toshal.Template -c Release --no-build --nologo -o artifacts
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/index.html
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: artifacts/*.nupkg
+
+  database:
+    name: Pattern example against PostgreSQL
+    # Service containers need Linux.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ConnectionStrings__testdb: Host=localhost;Port=5432;Database=testdb;Username=postgres;Password=postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Fake and database modes of the pattern example
+        run: dotnet test tests/Toshal.Template.Tests -c Release --nologo --logger "console;verbosity=normal" --filter "FullyQualifiedName~ExamplesTests.Pattern"

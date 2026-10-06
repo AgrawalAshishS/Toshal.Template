@@ -21,6 +21,8 @@ tools/Toshal.Template.Tools/          C# tool: website generator and coverage re
 tools/VisualEditor/                   old browser based template editor (JavaScript). Not built, not maintained yet
 docs/                                 GitHub Pages site. known-issues.md is hand written, everything else is generated
 coverlet.runsettings                  coverage settings
+.github/workflows/ci.yml              GitHub Actions: build (warnings fail), tests, coverage >= 90%, docs check, pack;
+                                      a Linux job runs the pattern example against a PostgreSQL service
 ```
 
 ## Commands (Windows, from the repository root)

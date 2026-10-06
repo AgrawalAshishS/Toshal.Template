@@ -12,6 +12,7 @@
 <h1>Contributing</h1>
 <p>Thank you for helping. Please read <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/AGENTS.md">AGENTS.md</a> first: it has the layout, the commands and the rules for everyone, people and AI agents alike.</p>
 <h2>Before you open a pull request</h2>
+<p>GitHub Actions (<code>.github/workflows/ci.yml</code>) runs the same checks on every pull request to <code>main</code>. Run them locally first:</p>
 <ol>
 <li>Run <code>build</code>, <code>test</code> and <code>coverage</code> from the repository root. All must pass, with no compiler warnings and line coverage of at least 90%.</li>
 <li>If you changed XML comments, examples or the pages in <code>tools/Toshal.Template.Tools/content</code>, run <code>docs</code> and commit the files it changes in <code>docs/</code>. A test fails when <code>docs/</code> is out of date.</li>

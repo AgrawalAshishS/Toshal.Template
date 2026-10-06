@@ -295,7 +295,8 @@ public static class FakeOrRealTestPatternExample
 <h2>Running it</h2>
 <ul>
 <li><code>test.cmd</code> runs the fake mode every time (<code>ExamplesTests.PatternWithFakes</code>).</li>
-<li>The database mode (<code>ExamplesTests.PatternWithDatabase</code>) runs only when the environment variable <code>ConnectionStrings__testdb</code> points to an empty PostgreSQL database. It creates two tables named <code>sample_orders</code> and <code>sample_order_lines</code>, and drops them at the end.</li>
+<li>In GitHub Actions a Linux job runs both modes against a PostgreSQL service container.</li>
+<li>Locally, the database mode (<code>ExamplesTests.PatternWithDatabase</code>) runs only when the environment variable <code>ConnectionStrings__testdb</code> points to an empty PostgreSQL database. It creates two tables named <code>sample_orders</code> and <code>sample_order_lines</code>, and drops them at the end.</li>
 </ul>
 
 </main>

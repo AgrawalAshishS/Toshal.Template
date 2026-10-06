@@ -1,5 +1,7 @@
 # Toshal.Template
 
+[![CI](https://github.com/AgrawalAshishS/Toshal.Template/actions/workflows/ci.yml/badge.svg)](https://github.com/AgrawalAshishS/Toshal.Template/actions/workflows/ci.yml)
+
 A text template engine for .NET 10 with ASP style tags. It produces any text: emails, reports, source code, SQL scripts, project files.
 
 ```text
