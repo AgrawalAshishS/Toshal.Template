@@ -10,10 +10,10 @@
 <header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Helper: templates as embedded files</h1>
-<p>Keep each template in its own .txt file, compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.txt&quot; /&gt;.</p>
+<p>Keep each template in its own .rtt file (a run time template), compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.rtt&quot; /&gt;.</p>
 <p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/Support/EmbeddedTemplates.cs">examples/Toshal.Template.Examples/Support/EmbeddedTemplates.cs</a></p>
 <pre><code class="lang-csharp">// Title: Helper: templates as embedded files
-// Summary: Keep each template in its own .txt file, compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.txt&quot; /&gt;.
+// Summary: Keep each template in its own .rtt file (a run time template), compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.rtt&quot; /&gt;.
 
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -28,10 +28,10 @@ public static class EmbeddedTemplates
     // Parsed tokens do not change while they are processed, so one parse per template is enough.
     private static readonly ConcurrentDictionary&lt;string, List&lt;IToken&gt;&gt; Cache = new();
 
-    /// &lt;summary&gt;The text of Templates/{path}. Use / between folders, for example &quot;Project/Readme.txt&quot;.&lt;/summary&gt;
+    /// &lt;summary&gt;The text of Templates/{path}. Use / between folders, for example &quot;Project/Readme.rtt&quot;.&lt;/summary&gt;
     public static string Text(string path)
     {
-        // The resource name is the default namespace plus the folder path with dots: Toshal.Template.Examples.Templates.Project.Readme.txt
+        // The resource name is the default namespace plus the folder path with dots: Toshal.Template.Examples.Templates.Project.Readme.rtt
         string name = &quot;Toshal.Template.Examples.Templates.&quot; + path.Replace(&#39;/&#39;, &#39;.&#39;);
         using var stream = Assembly.GetManifestResourceStream(name) ?? throw new FileNotFoundException(&quot;Embedded template not found: &quot; + name);
         using var reader = new StreamReader(stream);

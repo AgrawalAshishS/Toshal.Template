@@ -62,8 +62,8 @@ public static class CodeGenerationExample
             new Column(&quot;email&quot;, &quot;text&quot;, Nullable: true),
         ]);
 
-        string cs = Generate(&quot;Entity.txt&quot;, customer);
-        string sql = Generate(&quot;CreateTable.txt&quot;, customer);
+        string cs = Generate(&quot;Entity.rtt&quot;, customer);
+        string sql = Generate(&quot;CreateTable.rtt&quot;, customer);
         Console.WriteLine(cs);
         Console.WriteLine(sql);
 

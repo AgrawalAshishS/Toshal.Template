@@ -20,8 +20,8 @@ public static class EmailExample
     public static string Render(Signup signup)
     {
         // The signature is a separate template file, shared by all emails.
-        var processor = ObjectProviders.Create(subTemplates: args => EmbeddedTemplates.Tokens("Signature.txt"));
-        return processor.Process(new ProcessorArgs(EmbeddedTemplates.Tokens("WelcomeEmail.txt")) { Context = signup }).ToString();
+        var processor = ObjectProviders.Create(subTemplates: args => EmbeddedTemplates.Tokens("Signature.rtt"));
+        return processor.Process(new ProcessorArgs(EmbeddedTemplates.Tokens("WelcomeEmail.rtt")) { Context = signup }).ToString();
     }
 
     public static void Run()

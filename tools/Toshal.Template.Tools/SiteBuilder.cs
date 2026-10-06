@@ -128,7 +128,7 @@ internal static class SiteBuilder
         // Examples, then one page with all template files.
         var exIndex = new StringBuilder("<h1>Examples</h1>\n<p>Each page is one file of the runnable project <code>examples/Toshal.Template.Examples</code>. Every example checks its own output, and the tests run them all. Run them with <code>dotnet run --project examples/Toshal.Template.Examples</code>.</p>\n<ul>\n");
         foreach (var e in examples) exIndex.AppendLine($"<li><a href=\"{e.Slug}.html\">{Enc(e.Title)}</a>: {Enc(e.Summary)}</li>");
-        exIndex.AppendLine("<li><a href=\"templates.html\">Template files</a>: the .txt templates that the realistic examples embed.</li>");
+        exIndex.AppendLine("<li><a href=\"templates.html\">Template files</a>: the .rtt templates (run time templates) that the realistic examples embed.</li>");
         exIndex.AppendLine("</ul>");
         Write(docs, "examples/index.html", Page("Examples", "../", "examples", exIndex.ToString()));
         foreach (var e in examples)
@@ -172,7 +172,7 @@ internal static class SiteBuilder
     {
         string dir = Path.Combine(root, "examples", "Toshal.Template.Examples", "Templates");
         var sb = new StringBuilder("<h1>Template files</h1>\n<p>The realistic examples keep their templates in <code>examples/Toshal.Template.Examples/Templates</code> and compile them in as embedded resources.</p>\n");
-        foreach (var file in Directory.GetFiles(dir, "*.txt", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
+        foreach (var file in Directory.GetFiles(dir, "*.rtt", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
         {
             string rel = Path.GetRelativePath(root, file).Replace('\\', '/');
             sb.AppendLine($"<h2>{Enc(Path.GetRelativePath(dir, file).Replace('\\', '/'))}</h2>");

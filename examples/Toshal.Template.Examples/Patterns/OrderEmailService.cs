@@ -1,5 +1,5 @@
 // Title: Pattern 2 of 4: the code under test (production code)
-// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.txt template. Nothing in it knows about tests.
+// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.
 
 using System.Data.Common;
 using Npgsql;
@@ -34,7 +34,7 @@ public sealed class OrderEmailService
         Order? order = await LoadAsync(orderId, cancellationToken);
         if (order == null) return null;
 
-        var args = new ProcessorArgs(EmbeddedTemplates.Tokens("OrderConfirmation.txt")) { Context = order };
+        var args = new ProcessorArgs(EmbeddedTemplates.Tokens("OrderConfirmation.rtt")) { Context = order };
         return ObjectProviders.Create().Process(args).ToString();
     }
 

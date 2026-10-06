@@ -48,8 +48,8 @@ public static class CodeGenerationExample
             new Column("email", "text", Nullable: true),
         ]);
 
-        string cs = Generate("Entity.txt", customer);
-        string sql = Generate("CreateTable.txt", customer);
+        string cs = Generate("Entity.rtt", customer);
+        string sql = Generate("CreateTable.rtt", customer);
         Console.WriteLine(cs);
         Console.WriteLine(sql);
 

@@ -19,13 +19,13 @@ public static class CompiledTemplatesExample
             new CodeGenerationExample.Column("email", "text", Nullable: true),
         ]);
 
-        // CompiledTemplates/Entity.ctt is the same text as Templates/Entity.txt. The class Entity was made from it when the project was built.
+        // CompiledTemplates/Entity.ctt is the same text as Templates/Entity.rtt. The class Entity was made from it when the project was built.
         // One instance can be used again and again, also from many threads.
         var entity = new Entity();
         string compiled = entity.Process(customer).ToString();
         Console.WriteLine(compiled);
 
         // The same template through the parser and the processor gives the same text.
-        Verify.Equal(CodeGenerationExample.Generate("Entity.txt", customer), compiled, "compiled template");
+        Verify.Equal(CodeGenerationExample.Generate("Entity.rtt", customer), compiled, "compiled template");
     }
 }

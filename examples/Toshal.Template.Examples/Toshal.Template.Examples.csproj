@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <!-- The template files are compiled into the assembly, so the examples need no files next to the exe. -->
-    <EmbeddedResource Include="Templates\**\*.txt" />
+    <EmbeddedResource Include="Templates\**\*.rtt" />
   </ItemGroup>
 
   <PropertyGroup>

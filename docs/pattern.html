@@ -45,7 +45,7 @@ public static class OrderScopes
 <h2>2. The code under test</h2>
 <p>A normal service: it reads an order and its lines through <code>IDatabase</code>, then fills an embedded template.</p>
 <pre><code class="lang-csharp">// Title: Pattern 2 of 4: the code under test (production code)
-// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.txt template. Nothing in it knows about tests.
+// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.
 
 using System.Data.Common;
 using Npgsql;
@@ -80,7 +80,7 @@ public sealed class OrderEmailService
         Order? order = await LoadAsync(orderId, cancellationToken);
         if (order == null) return null;
 
-        var args = new ProcessorArgs(EmbeddedTemplates.Tokens(&quot;OrderConfirmation.txt&quot;)) { Context = order };
+        var args = new ProcessorArgs(EmbeddedTemplates.Tokens(&quot;OrderConfirmation.rtt&quot;)) { Context = order };
         return ObjectProviders.Create().Process(args).ToString();
     }
 

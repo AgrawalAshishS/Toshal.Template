@@ -21,7 +21,7 @@ public static class ReportExample
 
     public static string Render(SalesReport report)
     {
-        return ObjectProviders.Create().Process(new ProcessorArgs(EmbeddedTemplates.Tokens("SalesReport.txt")) { Context = report }).ToString();
+        return ObjectProviders.Create().Process(new ProcessorArgs(EmbeddedTemplates.Tokens("SalesReport.rtt")) { Context = report }).ToString();
     }
 
     public static void Run()

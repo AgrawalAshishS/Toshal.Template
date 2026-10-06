@@ -23,14 +23,14 @@ public static class ProjectStructureExample
         // Sub templates are looked up by name in the Project folder. Names arrive in lower case, file names are not, so compare without case.
         var processor = ObjectProviders.Create(subTemplates: args =>
         {
-            string? file = EmbeddedTemplates.List("Project/").FirstOrDefault(f => f.Equals(args.Name + ".txt", StringComparison.OrdinalIgnoreCase));
+            string? file = EmbeddedTemplates.List("Project/").FirstOrDefault(f => f.Equals(args.Name + ".rtt", StringComparison.OrdinalIgnoreCase));
             return file == null ? null : EmbeddedTemplates.Tokens("Project/" + file);
         });
 
         string Render(string template) => processor.Process(new ProcessorArgs(EmbeddedTemplates.Tokens("Project/" + template)) { Context = options }).ToString();
 
         // 1. The manifest: one "path|template" line per file.
-        var plan = Render("Manifest.txt").Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('|')).ToList();
+        var plan = Render("Manifest.rtt").Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('|')).ToList();
         options.Files.Clear();
         options.Files.AddRange(plan.Select(p => new FileEntry(p[0])));
 

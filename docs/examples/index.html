@@ -33,12 +33,12 @@
 <li><a href="ProjectStructureExample.html">Realistic: generate a project structure</a>: A manifest template decides which files to create (the test project only when asked), and one template per file writes each of them into a folder. Shared parts come from a sub template.</li>
 <li><a href="Entity.html">Compiled template: the values of Entity.ctt</a>: The other half of the class made from CompiledTemplates/Entity.ctt. The build made it once with a case for every name; here it is filled in with typed code.</li>
 <li><a href="ObjectProviders.html">Helper: providers that read object properties</a>: The library never reads your objects by itself; providers decide what a name means. This helper builds a Processor whose providers read public properties by name, so plain C# objects can feed a template. The realistic examples use it.</li>
-<li><a href="EmbeddedTemplates.html">Helper: templates as embedded files</a>: Keep each template in its own .txt file, compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.txt&quot; /&gt;.</li>
+<li><a href="EmbeddedTemplates.html">Helper: templates as embedded files</a>: Keep each template in its own .rtt file (a run time template), compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.rtt&quot; /&gt;.</li>
 <li><a href="OrderQueries.html">Pattern 1 of 4: the queries (production code)</a>: The SQL lives in one place as constants. The production code and the fake setup both use these constants, so a changed query cannot drift away from its test setup.</li>
-<li><a href="OrderEmailService.html">Pattern 2 of 4: the code under test (production code)</a>: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.txt template. Nothing in it knows about tests.</li>
+<li><a href="OrderEmailService.html">Pattern 2 of 4: the code under test (production code)</a>: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.</li>
 <li><a href="OrderQueryFakes.html">Pattern 3 of 4: one setup helper per query (test code)</a>: A small static helper returns the fake rule for one query, and another builds an empty result with the right columns. Every test starts from them and adds only what is special.</li>
 <li><a href="FakeOrRealTestPatternExample.html">Pattern 4 of 4: one scenario, fake or real database (test code)</a>: The complete pattern. The same scenario runs against fakes (unit test, no server) or against PostgreSQL (integration test). Only the arrange and verify steps differ; the act and the checks on the email text are shared, which proves the fake behaves like the database.</li>
-<li><a href="templates.html">Template files</a>: the .txt templates that the realistic examples embed.</li>
+<li><a href="templates.html">Template files</a>: the .rtt templates (run time templates) that the realistic examples embed.</li>
 </ul>
 
 </main>

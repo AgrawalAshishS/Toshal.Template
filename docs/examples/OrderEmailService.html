@@ -10,10 +10,10 @@
 <header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Pattern 2 of 4: the code under test (production code)</h1>
-<p>A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.txt template. Nothing in it knows about tests.</p>
+<p>A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.</p>
 <p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/Patterns/OrderEmailService.cs">examples/Toshal.Template.Examples/Patterns/OrderEmailService.cs</a></p>
 <pre><code class="lang-csharp">// Title: Pattern 2 of 4: the code under test (production code)
-// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.txt template. Nothing in it knows about tests.
+// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.
 
 using System.Data.Common;
 using Npgsql;
@@ -48,7 +48,7 @@ public sealed class OrderEmailService
         Order? order = await LoadAsync(orderId, cancellationToken);
         if (order == null) return null;
 
-        var args = new ProcessorArgs(EmbeddedTemplates.Tokens(&quot;OrderConfirmation.txt&quot;)) { Context = order };
+        var args = new ProcessorArgs(EmbeddedTemplates.Tokens(&quot;OrderConfirmation.rtt&quot;)) { Context = order };
         return ObjectProviders.Create().Process(args).ToString();
     }
 

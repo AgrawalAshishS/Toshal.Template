@@ -23,7 +23,7 @@ A normal service: it reads an order and its lines through `IDatabase`, then fill
 
 The template:
 
-{{include:examples/Toshal.Template.Examples/Templates/OrderConfirmation.txt}}
+{{include:examples/Toshal.Template.Examples/Templates/OrderConfirmation.rtt}}
 
 ## 3. One setup helper per query
 

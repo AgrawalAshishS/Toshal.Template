@@ -1,5 +1,5 @@
 // Title: Helper: templates as embedded files
-// Summary: Keep each template in its own .txt file, compile the files into the assembly as embedded resources, and parse each one once. The csproj line is <EmbeddedResource Include="Templates\**\*.txt" />.
+// Summary: Keep each template in its own .rtt file (a run time template), compile the files into the assembly as embedded resources, and parse each one once. The csproj line is <EmbeddedResource Include="Templates\**\*.rtt" />.
 
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -14,10 +14,10 @@ public static class EmbeddedTemplates
     // Parsed tokens do not change while they are processed, so one parse per template is enough.
     private static readonly ConcurrentDictionary<string, List<IToken>> Cache = new();
 
-    /// <summary>The text of Templates/{path}. Use / between folders, for example "Project/Readme.txt".</summary>
+    /// <summary>The text of Templates/{path}. Use / between folders, for example "Project/Readme.rtt".</summary>
     public static string Text(string path)
     {
-        // The resource name is the default namespace plus the folder path with dots: Toshal.Template.Examples.Templates.Project.Readme.txt
+        // The resource name is the default namespace plus the folder path with dots: Toshal.Template.Examples.Templates.Project.Readme.rtt
         string name = "Toshal.Template.Examples.Templates." + path.Replace('/', '.');
         using var stream = Assembly.GetManifestResourceStream(name) ?? throw new FileNotFoundException("Embedded template not found: " + name);
         using var reader = new StreamReader(stream);

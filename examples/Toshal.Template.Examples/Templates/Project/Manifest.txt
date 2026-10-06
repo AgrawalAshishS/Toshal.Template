@@ -1,5 +1,0 @@
-src/<%=Name%>/<%=Name%>.csproj|Csproj.txt
-src/<%=Name%>/Program.cs|Program.txt
-README.md|Readme.txt<%IF WithTests%>
-tests/<%=Name%>.Tests/<%=Name%>.Tests.csproj|TestCsproj.txt
-tests/<%=Name%>.Tests/SmokeTests.cs|Tests.txt<%ENDIF%>

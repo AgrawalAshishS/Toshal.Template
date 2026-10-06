@@ -26,7 +26,7 @@ tests/Toshal.Template.Tests/          xUnit tests, offline
 tests/Toshal.Template.Compiled.Tests/ compiled templates: every template runs through Processor and through its Roslyn-compiled class and
                                       the texts must be equal; generator, stub task and tool tests
   Golden/                             the output of the emitters byte for byte; TOSHAL_UPDATE_GOLDEN=1 rewrites it after a wanted change
-examples/Toshal.Template.Examples/    console app, one file per topic; Templates/ holds embedded .txt templates; CompiledTemplates/ holds .ctt
+examples/Toshal.Template.Examples/    console app, one file per topic; Templates/ holds embedded .rtt templates; CompiledTemplates/ holds .ctt
                                       templates and their filled-in stubs (made by the generator of this repository);
                                       Patterns/ + FakeOrRealTestPatternExample.cs: the fake or real database pattern (NpgsqlCommon)
 tools/Toshal.Template.Tools/          C# tool: website generator and coverage report. content/ holds the hand written page texts
