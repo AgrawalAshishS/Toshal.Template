@@ -163,19 +163,31 @@ namespace Toshal.Template.CodeGen
             }
 
             // Writes the steps for one list of tokens. output, context and scope are the names of the C# variables to use.
+            // Template text is held back until a tag that writes or reads the output comes, so that REMOVE_PREVIOUS and REMOVE_PREVIOUS_NEW_LINE
+            // can remove it at build time and the generated code writes the shorter text.
             private void Block(List<IToken> tokens, string output, string context, string scope)
             {
                 var w = this.body;
+                var text = new StringBuilder();
+
+                void Flush()
+                {
+                    if (text.Length == 0) return;
+                    w.Line(output + ".Append(" + CodeWriter.Literal(text.ToString()) + ");");
+                    text.Clear();
+                }
+
                 foreach (var token in tokens)
                 {
+                    if (token is not ContentToken && token is not RemovePreviousCharsToken && token is not RemovePreviousNewLineToken)
+                    {
+                        Flush();
+                    }
+
                     switch (token)
                     {
                         case ContentToken contentToken:
-                            if (contentToken.Content.Length > 0)
-                            {
-                                w.Line(output + ".Append(" + CodeWriter.Literal(contentToken.Content) + ");");
-                            }
-
+                            text.Append(contentToken.Content);
                             break;
 
                         case NamedToken namedToken:
@@ -205,11 +217,25 @@ namespace Toshal.Template.CodeGen
                             break;
 
                         case RemovePreviousNewLineToken:
-                            w.Line("run.RemovePreviousNewLine(" + output + ");");
+                            if (!RemoveNewLine(text))
+                            {
+                                Flush();
+                                w.Line("run.RemovePreviousNewLine(" + output + ");");
+                            }
+
                             break;
 
                         case RemovePreviousCharsToken removeToken:
-                            w.Line("run.RemovePrevious(" + output + ", " + removeToken.CharCount.ToString(System.Globalization.CultureInfo.InvariantCulture) + ");");
+                            // The held back text goes first; only what is left must be removed from text written at run time.
+                            int fromText = Math.Min(removeToken.CharCount, text.Length);
+                            text.Length -= fromText;
+                            int rest = removeToken.CharCount - fromText;
+                            if (rest > 0)
+                            {
+                                Flush();
+                                w.Line("run.RemovePrevious(" + output + ", " + rest.ToString(System.Globalization.CultureInfo.InvariantCulture) + ");");
+                            }
+
                             break;
 
                         case ProcessTemplateToken processTemplateToken:
@@ -249,6 +275,27 @@ namespace Toshal.Template.CodeGen
                             throw new NotSupportedException("The token " + token.GetType().Name + " is not supported by compiled templates.");
                     }
                 }
+
+                Flush();
+            }
+
+            // Does REMOVE_PREVIOUS_NEW_LINE on held back template text: a '\n' at the end is removed, then a '\r' at the end. Returns false when
+            // the result depends on text written at run time (the text is empty, or it is only "\n" and a '\r' written before it would go too);
+            // then the text is not changed and the run time does it.
+            private static bool RemoveNewLine(StringBuilder text)
+            {
+                if (text.Length == 0) return false;
+
+                int end = text.Length;
+                if (text[end - 1] == '\n')
+                {
+                    if (end == 1) return false;
+                    end--;
+                }
+
+                if (text[end - 1] == '\r') end--;
+                text.Length = end;
+                return true;
             }
 
             private void Named(NamedToken token, string output, string context, string scope)

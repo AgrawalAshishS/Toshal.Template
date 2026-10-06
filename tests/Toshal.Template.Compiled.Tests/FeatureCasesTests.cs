@@ -31,6 +31,10 @@ namespace Toshal.Template.Compiled.Tests
             "line\r\n<%REMOVE_PREVIOUS_NEW_LINE%>end",
             "line\n<%REMOVE_PREVIOUS_NEW_LINE%><%REMOVE_PREVIOUS_NEW_LINE%>end",
             "<%FOREACH rows%><%=name%>, <%ENDFOR%><%REMOVE_PREVIOUS 2%>",
+            "<%=name%>xy<%REMOVE_PREVIOUS 5%>|ab<%REMOVE_PREVIOUS 0%>",
+            "<%SET v%>x\r<%ENDSET%><%=v%>\n<%REMOVE_PREVIOUS_NEW_LINE%>|<%=v%><%REMOVE_PREVIOUS_NEW_LINE%>|",
+            "a\r\n\r\n<%REMOVE_PREVIOUS_NEW_LINE%><%REMOVE_PREVIOUS_NEW_LINE%><%REMOVE_PREVIOUS_NEW_LINE%>b\r<%REMOVE_PREVIOUS_NEW_LINE%>c",
+            "\n<%REMOVE_PREVIOUS_NEW_LINE%>start<%IF a%>x\r\n<%ENDIF%><%REMOVE_PREVIOUS_NEW_LINE%>end",
 
             // FOREACH parts
             "<%FOREACH rows%><%HEADER%>[<%CONTEXT_AS_STRING%>]<%ENDHEADER%><%FIRSTROW%>F<%=name%><%ENDFIRSTROW%><%ROW%>R<%=name%><%ENDROW%><%ALTROW%>A<%=name%><%ENDALTROW%><%LASTROW%>L<%=name%><%ENDLASTROW%><%FOOTER%>(<%=name%>)<%ENDFOOTER%><%NORECORD%>none<%ENDNORECORD%><%ENDFOR%>",
