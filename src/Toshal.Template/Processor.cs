@@ -57,13 +57,46 @@ namespace Toshal.Template
             ArgumentNullException.ThrowIfNull(args);
 
             var retVal = new StringBuilder();
+            this.Process(args, retVal);
+            return retVal;
+        }
+
+        /// <summary>
+        /// Processes the tokens with the given top context and appends the text to a builder you give. Reuse one builder (call
+        /// <see cref="StringBuilder.Clear"/> between runs) to avoid a new builder, its growth and the copy of <c>ToString()</c> for every run.
+        /// </summary>
+        /// <param name="args">The tokens and the top context.</param>
+        /// <param name="output">The builder to append to. Text already in it stays.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> or <paramref name="output"/> is null.</exception>
+        /// <exception cref="InvalidOperationException">The tokens hold a <see cref="ReuseForEachToken"/> made by hand that is not linked to a FOREACH.
+        /// Tokens from <see cref="Parser.Parse(string)"/> are always linked.</exception>
+        /// <remarks>
+        /// <para><c>&lt;%REMOVE_PREVIOUS n%&gt;</c> and <c>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</c> remove only text that this call wrote, never text
+        /// that was in <paramref name="output"/> before the call.</para>
+        /// <para>Exceptions thrown by your providers are not caught; they reach the caller. The text written before the exception stays in
+        /// <paramref name="output"/>.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var output = new StringBuilder();
+        /// foreach (var order in orders)
+        /// {
+        ///     output.Clear();
+        ///     processor.Process(new ProcessorArgs(tokens) { Context = order }, output);
+        ///     writer.Write(output);   // TextWriter.Write(StringBuilder) copies no string
+        /// }
+        /// </code>
+        /// </example>
+        public void Process(ProcessorArgs args, StringBuilder output)
+        {
+            ArgumentNullException.ThrowIfNull(args);
+            ArgumentNullException.ThrowIfNull(output);
+
             var parentContext = new List<object?>();
             if (args.Context != null) { parentContext.Add(args.Context); }
 
             var vars = default(Variables);
-            this.Process(retVal, args.TokenList, args.Context, new Run(parentContext), ref vars);
-
-            return retVal;
+            this.Process(output, args.TokenList, args.Context, new Run(parentContext, output), ref vars);
         }
 
         /// <summary>
@@ -170,12 +203,13 @@ namespace Toshal.Template
                         break;
 
                     case RemovePreviousNewLineToken:
-                        RemovePreviousNewLine(output);
+                        RemovePreviousNewLine(output, run.StartOf(output));
                         break;
 
                     case RemovePreviousCharsToken removeToken:
                         var count = removeToken.CharCount;
-                        if (output.Length < count) count = output.Length;
+                        var written = output.Length - run.StartOf(output);
+                        if (written < count) count = written;
                         output.Remove(output.Length - count, count);
                         break;
 
@@ -274,14 +308,15 @@ namespace Toshal.Template
             }
         }
 
-        private static void RemovePreviousNewLine(StringBuilder output)
+        // start: where the text written by this call begins; nothing before it is removed.
+        private static void RemovePreviousNewLine(StringBuilder output, int start)
         {
-            if (output.Length == 0) return;
+            if (output.Length <= start) return;
 
             if (output[output.Length - 1] == '\n')
                 output.Remove(output.Length - 1, 1);
 
-            if (output.Length > 0 && output[output.Length - 1] == '\r')
+            if (output.Length > start && output[output.Length - 1] == '\r')
                 output.Remove(output.Length - 1, 1);
         }
 
@@ -416,10 +451,18 @@ namespace Toshal.Template
             private StringBuilder[] builders = Array.Empty<StringBuilder>();
             private int buildersInUse;
 
-            public Run(List<object?> parentContext)
+            private readonly StringBuilder output;
+            private readonly int outputStart;
+
+            public Run(List<object?> parentContext, StringBuilder output)
             {
                 this.ParentContext = parentContext;
+                this.output = output;
+                this.outputStart = output.Length;
             }
+
+            // Where the text of this call starts in a builder: after the text the caller had in the main output, at 0 in a SET value.
+            public int StartOf(StringBuilder builder) => ReferenceEquals(builder, this.output) ? this.outputStart : 0;
 
             public List<object?> ParentContext { get; }
 

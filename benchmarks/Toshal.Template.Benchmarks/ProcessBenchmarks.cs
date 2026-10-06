@@ -68,4 +68,23 @@ public class ProcessBenchmarks
 
     [Benchmark]
     public string Floor() => this.floor.Process(new ProcessorArgs(this.tokens) { Context = this.root }).ToString();
+
+    // The same, writing into one builder that is reused: no new builder, no growth, no ToString copy.
+    private readonly System.Text.StringBuilder output = new();
+
+    [Benchmark]
+    public int RegistryIntoBuilder()
+    {
+        this.output.Clear();
+        this.registry.Process(new ProcessorArgs(this.tokens) { Context = this.root }, this.output);
+        return this.output.Length;
+    }
+
+    [Benchmark]
+    public int FloorIntoBuilder()
+    {
+        this.output.Clear();
+        this.floor.Process(new ProcessorArgs(this.tokens) { Context = this.root }, this.output);
+        return this.output.Length;
+    }
 }
