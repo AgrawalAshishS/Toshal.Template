@@ -23,7 +23,7 @@ Use one of the two in a project, not both: both would make the same class. Both 
 
 ## Write a template
 
-Give the file the extension `.ctt`. The syntax is the same as for the processor; see [Template syntax](syntax.html).
+Give the file the extension `.ctt` (compiled Toshal template). The syntax is the same as for the processor; see [Template syntax](syntax.html). A template that Processor reads at run time gets the extension `.rtt` (run time Toshal template), so the generator does not pick it up.
 
 ```text
 The <%=Product abc="xyz"%> team

@@ -23,7 +23,7 @@ The library targets .NET 10 and has no dependencies.
 - Names are lower cased by the parser. `<%=FirstName%>` arrives as `firstname`.
 - A provider that is not set makes its tags disappear silently. For example, without a condition provider every IF block is skipped, ELSE included.
 - A value provider that returns null or an empty string writes nothing.
-- Keep templates in files. The examples embed them in the assembly; see [Helper: templates as embedded files](examples/EmbeddedTemplates.html).
+- Keep templates in files with the extension `.rtt` (run time Toshal template). The examples embed them in the assembly; see [Helper: templates as embedded files](examples/EmbeddedTemplates.html).
 
 ## Next
 

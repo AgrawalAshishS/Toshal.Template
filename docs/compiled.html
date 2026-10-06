@@ -19,7 +19,7 @@
 toshal-template generate Templates</code></pre>
 <p>Use one of the two in a project, not both: both would make the same class. Both bring the run time package <code>Toshal.Template.Compiled</code>.</p>
 <h2>Write a template</h2>
-<p>Give the file the extension <code>.ctt</code>. The syntax is the same as for the processor; see <a href="syntax.html">Template syntax</a>.</p>
+<p>Give the file the extension <code>.ctt</code> (compiled Toshal template). The syntax is the same as for the processor; see <a href="syntax.html">Template syntax</a>. A template that Processor reads at run time gets the extension <code>.rtt</code> (run time Toshal template), so the generator does not pick it up.</p>
 <pre><code class="lang-text">The &lt;%=Product abc=&quot;xyz&quot;%&gt; team</code></pre>
 <p>The class name is the file name. The namespace is the root namespace of the project and the folders, the way .resx files get theirs: <code>Templates/Email/OrderConfirm.ctt</code> in the project <code>MyApp</code> is the class <code>MyApp.Templates.Email.OrderConfirm</code>.</p>
 <p>With the generator every <code>.ctt</code> file of the project folder and its sub folders is used. To list them yourself, set the property <code>ToshalTemplateAutoInclude</code> to <code>false</code> and add <code>&lt;AdditionalFiles Include=&quot;Templates\**\*.ctt&quot; /&gt;</code>. The item metadata <code>ClassName</code> and <code>Namespace</code> change the names:</p>
