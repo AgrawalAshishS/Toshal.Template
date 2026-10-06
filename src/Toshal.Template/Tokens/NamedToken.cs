@@ -3,7 +3,6 @@
 namespace Toshal.Template.Tokens
 {
     using System;
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -32,8 +31,7 @@ namespace Toshal.Template.Tokens
         /// </example>
         public NamedToken(Split split)
         {
-            const string tokenExpression = "<%=(?<Name>.*?)%>";
-            string tempString = Regex.Match(split.Content, tokenExpression).Groups["Name"].Value.Trim();
+            string tempString = TagText.Name(split.Content, "<%=", space: false, minLength: 0).Trim();
 
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, tempString, this.Attributes);
             this.LineNumber = split.LineNumber;

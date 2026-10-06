@@ -3,7 +3,6 @@
 namespace Toshal.Template.Tokens
 {
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -33,8 +32,7 @@ namespace Toshal.Template.Tokens
         /// </example>
         public ProcessTemplateToken(Split split)
         {
-            const string processTokenExpression = "<%PROCESS_TEMPLATE\\s(?<Name>.*?)%>";
-            string tempString = Regex.Match(split.Content, processTokenExpression).Groups["Name"].Value.Trim();
+            string tempString = TagText.Name(split.Content, "<%PROCESS_TEMPLATE", space: true, minLength: 0).Trim();
 
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(split, tempString, this.Attributes);
             this.LineNumber = split.LineNumber;

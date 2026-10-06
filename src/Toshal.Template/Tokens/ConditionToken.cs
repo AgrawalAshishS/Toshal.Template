@@ -2,7 +2,6 @@
 
 namespace Toshal.Template.Tokens
 {
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -37,25 +36,12 @@ namespace Toshal.Template.Tokens
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
 
-            if (split.Content.StartsWith("<%IF"))
+            // <%IF name THEN%> first, then <%IF name%>; the same for ELSEIF.
+            string keyword = split.Content.StartsWith("<%IF", StringComparison.Ordinal) ? "<%IF" : "<%ELSEIF";
+            this.Name = TagText.NameBeforeThen(split.Content, keyword).Trim();
+            if (string.IsNullOrEmpty(this.Name))
             {
-                const string ifWithThenTokenExpression = "<%IF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim();
-                if (string.IsNullOrEmpty(this.Name))
-                {
-                    const string ifWithoutThenTokenExpression = "<%IF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim();
-                }
-            }
-            else
-            {
-                const string ifWithThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)\\sTHEN%>";
-                this.Name = Regex.Match(split.Content, ifWithThenTokenExpression).Groups["Name"].Value.Trim();
-                if (string.IsNullOrEmpty(this.Name))
-                {
-                    const string ifWithoutThenTokenExpression = "<%ELSEIF\\s(?<Name>.*?)%>";
-                    this.Name = Regex.Match(split.Content, ifWithoutThenTokenExpression).Groups["Name"].Value.Trim();
-                }
+                this.Name = TagText.Name(split.Content, keyword, space: true, minLength: 0).Trim();
             }
 
             if (string.IsNullOrEmpty(this.Name))

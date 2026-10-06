@@ -6,7 +6,6 @@ namespace Toshal.Template
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
     using Toshal.Template.Tokens;
@@ -31,15 +30,6 @@ namespace Toshal.Template
     /// </example>
     public class Parser
     {
-        #region Constants
-
-        /// <summary>
-        ///     The reg ex option.
-        /// </summary>
-        private const RegexOptions RegExOption = RegexOptions.Singleline;
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -75,10 +65,6 @@ namespace Toshal.Template
 
             this._splits = SplitTemplateByTokens(templateText);
 
-            //this._splits =
-            //    Regex.Split(templateText, "(?<Name><%.*?%>)", RegExOption)
-            //        .Where(x => string.IsNullOrEmpty(x) == false)
-            //        .ToArray();
             this._splitIndex = 0;
 
             if (this.ProcessSplitsTillEnd(retList) == false)
@@ -91,86 +77,81 @@ namespace Toshal.Template
             return retList;
         }
 
-        private List<Split> SplitTemplateByTokens(string templateText)
+        // Cuts the template into plain text and tags. A split ends before each "<%" and after each "%>"; a "%>" right at the start of a split
+        // is plain text. Each split is one contiguous piece of the template, so it is cut with Substring, not built char by char.
+        private static List<Split> SplitTemplateByTokens(string templateText)
         {
             var retList = new List<Split>();
             int lineNumber = 1;
-            int charIndex = 1; // 1 based column of templateText[i]
-            var split = new Split { StartingPosition = charIndex, LineNumber = lineNumber };
-            var contentBuilder = new StringBuilder();
+            int column = 1;         // 1 based column of templateText[i]
+            int start = 0;          // where the current split starts in templateText
+            var split = new Split { StartingPosition = column, LineNumber = lineNumber };
+            int length = templateText.Length;
+            int i = 0;
 
-            for (int i = 0, len = templateText.Length; i < len; i++)
+            while (i < length)
             {
-                if (templateText[i] == '<')
+                int found = templateText.AsSpan(i).IndexOfAny('<', '%');
+                int next = found < 0 ? length : i + found;
+
+                // Move the line and column over the plain characters in between.
+                var between = templateText.AsSpan(i, next - i);
+                int lastNewLine = between.LastIndexOf('\n');
+                if (lastNewLine < 0)
                 {
-                    if (i + 1 < len)
+                    column += between.Length;
+                }
+                else
+                {
+                    lineNumber += between.Count('\n');
+                    column = between.Length - lastNewLine;
+                }
+
+                i = next;
+                if (i >= length || i + 1 >= length)
+                {
+                    break;
+                }
+
+                if (templateText[i] == '<' && templateText[i + 1] == '%')
+                {
+                    if (i > start)
                     {
-                        if (templateText[i + 1] == '%')
-                        {
-                            if (contentBuilder.Length > 0)
-                            {
-                                split.Content = contentBuilder.ToString();
-                                retList.Add(split);
-                                contentBuilder.Clear();
-                            }
-
-                            split = new Split();
-                            split.StartingPosition = charIndex;
-                            split.LineNumber = lineNumber;
-                            contentBuilder.Append("<%");
-                            i++;
-                            charIndex++;
-                            charIndex++;
-                            continue;
-                        }
+                        split.Content = templateText.Substring(start, i - start);
+                        retList.Add(split);
                     }
+
+                    split = new Split { StartingPosition = column, LineNumber = lineNumber };
+                    start = i;
+                    i += 2;
+                    column += 2;
+                    continue;
                 }
-                else if (templateText[i] == '%')
+
+                if (templateText[i] == '%' && templateText[i + 1] == '>')
                 {
-                    if (i + 1 < len)
+                    // "%>" with no open tag and no text before it is plain text.
+                    if (i > start)
                     {
-                        if (templateText[i + 1] == '>')
-                        {
-                            if (contentBuilder.Length == 0)
-                            {
-                                // "%>" with no open tag and no text before it is plain text.
-                                contentBuilder.Append("%>");
-                                i++;
-                                charIndex++;
-                                charIndex++;
-                                continue;
-                            }
-
-                            if (contentBuilder.Length > 0)
-                            {
-                                split.Content = contentBuilder.ToString();
-                                retList.Add(split);
-                                contentBuilder.Clear();
-                            }
-                            split.Content += "%>" ;
-                            split = new Split();
-                            split.StartingPosition = charIndex + 2; // the text after "%>"
-                            split.LineNumber = lineNumber;
-                            i++;
-                            charIndex++;
-                            charIndex++;
-                            continue;
-                        }
+                        split.Content = templateText.Substring(start, i + 2 - start);
+                        retList.Add(split);
+                        split = new Split { StartingPosition = column + 2, LineNumber = lineNumber }; // the text after "%>"
+                        start = i + 2;
                     }
+
+                    i += 2;
+                    column += 2;
+                    continue;
                 }
 
-                contentBuilder.Append(templateText[i]);
-                charIndex++;
-                if (templateText[i] == '\n')
-                {
-                    lineNumber++;
-                    charIndex = 1;
-                }
+                // A '<' or '%' on its own is plain text.
+                i++;
+                column++;
             }
 
-            if (contentBuilder.Length > 0)
+            if (length > start)
             {
-                split.Content = contentBuilder.ToString();
+                split.Content = templateText.Substring(start);
                 retList.Add(split);
             }
 
@@ -209,49 +190,50 @@ namespace Toshal.Template
 
         #region Methods
 
-        /// <summary>
-        ///     The check for inner block.
-        /// </summary>
-        /// <param name="split">
-        ///     The split.
-        /// </param>
-        /// <param name="name">
-        ///     The name.
-        /// </param>
-        /// <param name="containerTag">
-        ///     The container tag.
-        /// </param>
-        /// <param name="tokenList">
-        ///     The token list.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
-        /// <exception cref="TokenNotClosedException">
-        /// </exception>
-        private bool CheckForInnerBlock(Split split, string name, string containerTag, List<IToken> tokenList)
+        // The parts of a FOREACH, in the order the parser has always tried them.
+        private static readonly string[] SectionTags =
         {
-            if (this._splits[this._splitIndex].Content == "<%" + containerTag + "%>")
+            "NORECORD", "HEADER", "BEFOREFIRSTROW", "FIRSTROW", "AFTERFIRSTROW", "BEFOREROW", "ROW", "AFTERROW",
+            "BEFOREALTROW", "ALTROW", "AFTERALTROW", "BEFORELASTROW", "LASTROW", "AFTERLASTROW", "FOOTER",
+        };
+
+        private static readonly Dictionary<string, int> SectionByOpenTag = SectionTags
+            .Select((tag, index) => (tag, index))
+            .ToDictionary(x => "<%" + x.tag + "%>", x => x.index, StringComparer.Ordinal);
+
+        private static readonly string[] SectionCloseTags = SectionTags.Select(tag => "<%END" + tag + "%>").ToArray();
+
+        private static List<IToken> Section(ForEachToken token, int index) => index switch
+        {
+            0 => token.NoRecordTokens,
+            1 => token.HeaderTokens,
+            2 => token.BeforeFirstRowTokens,
+            3 => token.FirstRowTokens,
+            4 => token.AfterFirstRowTokens,
+            5 => token.BeforeRowTokens,
+            6 => token.RowTokens,
+            7 => token.AfterRowTokens,
+            8 => token.BeforeAltRowTokens,
+            9 => token.AltRowTokens,
+            10 => token.AfterAltRowTokens,
+            11 => token.BeforeLastRowTokens,
+            12 => token.LastRowTokens,
+            13 => token.AfterLastRowTokens,
+            _ => token.FooterTokens,
+        };
+
+        // Parses one part of a FOREACH, from its open tag (the current split) to its end tag.
+        private void ParseSection(Split split, string name, int section, List<IToken> tokenList)
+        {
+            var tempSplit = this._splits[this._splitIndex];
+
+            this._splitIndex++;
+            if (this.ProcessSplitsTillEnd(tokenList) || this._splits[this._splitIndex].Content != SectionCloseTags[section])
             {
-                var tempSplit = this._splits[this._splitIndex];
-
-                this._splitIndex++;
-                if (this.ProcessSplitsTillEnd(tokenList))
-                {
-                    throw new TokenNotClosedException(tempSplit, name, "<%" + containerTag + "%> not closed for " + split.Content);
-                }
-
-                if (this._splits[this._splitIndex].Content != "<%END" + containerTag + "%>")
-                {
-                    throw new TokenNotClosedException(tempSplit, name, "<%" + containerTag + "%> not closed for " + split.Content);
-                }
-
-                this._splitIndex++;
-
-                return true;
+                throw new TokenNotClosedException(tempSplit, name, "<%" + SectionTags[section] + "%> not closed for " + split.Content);
             }
 
-            return false;
+            this._splitIndex++;
         }
 
         /// <summary>
@@ -275,7 +257,7 @@ namespace Toshal.Template
                 throw new TokenNotClosedException(split, token.Name);
             }
 
-            if (this._splits[this._splitIndex].Content.StartsWith("<%ELSEIF "))
+            if (this._splits[this._splitIndex].Content.StartsWith("<%ELSEIF ", StringComparison.Ordinal))
             {
                 token.FalsePart = this.CreateConditionElement(this._splits[this._splitIndex]);
             }
@@ -314,7 +296,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsConditionToken(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%IF ") == false)
+            if (split.Content.StartsWith("<%IF ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -338,7 +320,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsContentToken(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%"))
+            if (split.Content.StartsWith("<%", StringComparison.Ordinal))
             {
                 return false;
             }
@@ -365,7 +347,7 @@ namespace Toshal.Template
         /// </exception>
         private bool HandledAsForEach(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%FOREACH ") == false)
+            if (split.Content.StartsWith("<%FOREACH ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -374,24 +356,8 @@ namespace Toshal.Template
 
             this._splitIndex++;
 
-            var tokenTypes = new Dictionary<string, List<IToken>>
-                                 {
-                                     { "NORECORD", token.NoRecordTokens },
-                                     { "HEADER", token.HeaderTokens },
-                                     { "BEFOREFIRSTROW", token.BeforeFirstRowTokens },
-                                     { "FIRSTROW", token.FirstRowTokens },
-                                     { "AFTERFIRSTROW", token.AfterFirstRowTokens },
-                                     { "BEFOREROW", token.BeforeRowTokens },
-                                     { "ROW", token.RowTokens },
-                                     { "AFTERROW", token.AfterRowTokens },
-                                     { "BEFOREALTROW", token.BeforeAltRowTokens },
-                                     { "ALTROW", token.AltRowTokens },
-                                     { "AFTERALTROW", token.AfterAltRowTokens },
-                                     { "BEFORELASTROW", token.BeforeLastRowTokens },
-                                     { "LASTROW", token.LastRowTokens },
-                                     { "AFTERLASTROW", token.AfterLastRowTokens },
-                                     { "FOOTER", token.FooterTokens }
-                                 };
+            int usedSections = 0;   // one bit per part; each part may be used once
+            int remaining = SectionTags.Length;
 
             while (true)
             {
@@ -401,21 +367,19 @@ namespace Toshal.Template
                     throw new TokenNotClosedException(split, token.Name);
                 }
 
-                if (tokenTypes.Keys.Count == 0)
+                if (remaining == 0)
                 {
                     // all known tokens are parsed - this is unknown token
                     throw new ParserException(this._splits[this._splitIndex]);
                 }
 
-                var beforeCount = tokenTypes.Keys.Count;
+                var beforeCount = remaining;
 
-                foreach (var tag in tokenTypes.Keys)
+                if (SectionByOpenTag.TryGetValue(this._splits[this._splitIndex].Content, out int section) && (usedSections & (1 << section)) == 0)
                 {
-                    if (this.CheckForInnerBlock(split, token.Name, tag, tokenTypes[tag]))
-                    {
-                        tokenTypes.Remove(tag);
-                        break;
-                    }
+                    this.ParseSection(split, token.Name, section, Section(token, section));
+                    usedSections |= 1 << section;
+                    remaining--;
                 }
 
                 if (this._splitIndex == this._splits.Count)
@@ -428,7 +392,7 @@ namespace Toshal.Template
                     break;
                 }
 
-                if (beforeCount == tokenTypes.Keys.Count)
+                if (beforeCount == remaining)
                 {
                     // none of inner token is matching - this is unknown token
                     throw new ParserException(this._splits[this._splitIndex]);
@@ -465,7 +429,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsNamedToken(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%=") == false)
+            if (split.Content.StartsWith("<%=", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -488,7 +452,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsReuseForEach(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%REUSE_FOREACH ") == false)
+            if (split.Content.StartsWith("<%REUSE_FOREACH ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -515,7 +479,7 @@ namespace Toshal.Template
         /// </exception>
         private bool HandledAsWith(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%WITH ") == false)
+            if (split.Content.StartsWith("<%WITH ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -552,7 +516,7 @@ namespace Toshal.Template
         /// </returns>
         private bool HandledAsSet(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%SET ") == false)
+            if (split.Content.StartsWith("<%SET ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -589,7 +553,7 @@ namespace Toshal.Template
 
         private bool HandledAsRemovePreviousChars(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%REMOVE_PREVIOUS ") == false)
+            if (split.Content.StartsWith("<%REMOVE_PREVIOUS ", StringComparison.Ordinal) == false)
             {
                 return false;
             }
@@ -601,7 +565,7 @@ namespace Toshal.Template
 
         private bool HandledAsProcessTemplate(Split split, List<IToken> tokenList)
         {
-            if (split.Content.StartsWith("<%PROCESS_TEMPLATE ") == false)
+            if (split.Content.StartsWith("<%PROCESS_TEMPLATE ", StringComparison.Ordinal) == false)
             {
                 return false;
             }

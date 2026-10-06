@@ -4,7 +4,7 @@ namespace Toshal.Template.Tokens
 {
     using Exceptions;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
+    using System.Collections.ObjectModel;
 
     /// <summary>
     /// The attributes of a tag, such as <c>format="0.00"</c> in <c>&lt;%=Total format="0.00"%&gt;</c>. Keys are the attribute names in lower case.
@@ -27,7 +27,8 @@ namespace Toshal.Template.Tokens
     /// </example>
     public class TokenAttributeDictionary : Dictionary<string, string>
     {
-        private readonly Dictionary<string, string> lowerCaseValues = new Dictionary<string, string>();
+        // Made only for a tag that has attributes, so most tokens carry one dictionary, not two.
+        private Dictionary<string, string>? lowerCaseValues;
 
         /// <summary>
         /// Gets the same attributes with the values in lower case (invariant culture), for example <c>n2</c> for <c>format="N2"</c>.
@@ -43,7 +44,7 @@ namespace Toshal.Template.Tokens
         /// bool kilograms = args.Attributes.LowerCaseValues.TryGetValue("unit", out var unit) &amp;&amp; unit == "kg";
         /// </code>
         /// </example>
-        public IReadOnlyDictionary<string, string> LowerCaseValues => this.lowerCaseValues;
+        public IReadOnlyDictionary<string, string> LowerCaseValues => (IReadOnlyDictionary<string, string>?)this.lowerCaseValues ?? ReadOnlyDictionary<string, string>.Empty;
 
         /// <summary>
         /// Gets an attribute value, or a default when the attribute is missing. The name is not case sensitive.
@@ -82,7 +83,8 @@ namespace Toshal.Template.Tokens
         {
             ArgumentNullException.ThrowIfNull(attributeName);
 
-            return this.lowerCaseValues.TryGetValue(attributeName.ToLower(), out var value) ? value : defaultValue;
+            string? value = null;
+            return this.lowerCaseValues?.TryGetValue(attributeName.ToLower(), out value) == true ? value! : defaultValue;
         }
 
 
@@ -106,28 +108,39 @@ namespace Toshal.Template.Tokens
             if (nameString.IndexOf('=') > -1 && firstSpace > -1)
             {
                 retVal = nameString.Substring(0, firstSpace);
-                string rest = nameString.Substring(firstSpace);
 
                 // Attributes follow each other: name="value". A quoted value may contain spaces.
-                const string tokenAttributeExpression = "\\G\\s*(?<Name>\\w+)=\"(?<Value>[^\"]*)\"";
-
-                int end = 0;
-                foreach (Match m in Regex.Matches(rest, tokenAttributeExpression))
+                // The loop reads what the regular expression \G\s*(?<Name>\w+)="(?<Value>[^"]*)" matched, one attribute after the other.
+                int position = firstSpace;
+                bool any = false;
+                while (true)
                 {
+                    int p = position;
+                    while (p < nameString.Length && char.IsWhiteSpace(nameString[p])) p++;
+
+                    int keyStart = p;
+                    while (p < nameString.Length && TagText.IsWordChar(nameString[p])) p++;
+                    if (p == keyStart || p + 1 >= nameString.Length || nameString[p] != '=' || nameString[p + 1] != '"') break;
+
+                    int valueStart = p + 2;
+                    int valueEnd = nameString.IndexOf('"', valueStart);
+                    if (valueEnd < 0) break;
+
                     // The same attribute twice is an error, not a choice between the two values.
-                    string key = m.Groups["Name"].Value.ToLower();
-                    string value = m.Groups["Value"].Value;
+                    string key = nameString.Substring(keyStart, p - keyStart).ToLower();
+                    string value = nameString.Substring(valueStart, valueEnd - valueStart);
                     if (attributes.TryAdd(key, value) == false)
                     {
                         throw new InvalidTokenAttributeException(split);
                     }
 
                     // The lower case copy is made once here, at parse time.
-                    attributes.lowerCaseValues.Add(key, value.ToLowerInvariant());
-                    end = m.Index + m.Length;
+                    (attributes.lowerCaseValues ??= new Dictionary<string, string>()).Add(key, value.ToLowerInvariant());
+                    position = valueEnd + 1;
+                    any = true;
                 }
 
-                if (end == 0 || rest.Substring(end).Trim().Length > 0)
+                if (!any || !nameString.AsSpan(position).Trim().IsEmpty)
                 {
                     throw new InvalidTokenAttributeException(split);
                 }

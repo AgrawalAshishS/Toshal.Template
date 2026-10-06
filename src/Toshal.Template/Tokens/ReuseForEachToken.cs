@@ -2,7 +2,6 @@
 
 namespace Toshal.Template.Tokens
 {
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -35,12 +34,10 @@ namespace Toshal.Template.Tokens
         {
             this.Name = string.Empty;
 
-            const string reuseForEachTokenExpression = "<%REUSE_FOREACH\\s(?<ExistingForEachName>.+?)\\s(?<Name>.+?)%>";
+            var (existing, name) = TagText.ReuseNames(split.Content);
 
-            var m = Regex.Match(split.Content, reuseForEachTokenExpression);
-
-            this.ExistingForEachName = m.Groups["ExistingForEachName"].Value.Trim().ToLower();
-            this.Name = m.Groups["Name"].Value.Trim().ToLower();
+            this.ExistingForEachName = existing.Trim().ToLower();
+            this.Name = name.Trim().ToLower();
             this.LineNumber = split.LineNumber;
             this.StartingPosition = split.StartingPosition;
 

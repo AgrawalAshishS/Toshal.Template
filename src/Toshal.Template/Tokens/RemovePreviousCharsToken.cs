@@ -1,6 +1,5 @@
 // Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
-using System.Text.RegularExpressions;
 
 using Toshal.Template.Exceptions;
 
@@ -29,8 +28,7 @@ namespace Toshal.Template.Tokens
         /// </example>
         public RemovePreviousCharsToken(Split split)
         {
-            const string tokenExpression = "<%REMOVE_PREVIOUS (?<charcount>.*?)%>";
-            string tempString = Regex.Match(split.Content, tokenExpression).Groups["charcount"].Value.Trim();
+            string tempString = TagText.Name(split.Content, "<%REMOVE_PREVIOUS ", space: false, minLength: 0).Trim();
             int charCount = 0;
             if(int.TryParse(tempString, out charCount) == false)
             {

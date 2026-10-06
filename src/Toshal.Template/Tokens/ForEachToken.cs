@@ -3,7 +3,6 @@
 namespace Toshal.Template.Tokens
 {
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -65,9 +64,7 @@ namespace Toshal.Template.Tokens
 
             this.FooterTokens = new List<IToken>();
 
-            const string forEachTokenExpression = "<%FOREACH\\s(?<Name>.*?)%>";
-
-            this.Name = Regex.Match(split.Content, forEachTokenExpression).Groups["Name"].Value.Trim();
+            this.Name = TagText.Name(split.Content, "<%FOREACH", space: true, minLength: 0).Trim();
             if (string.IsNullOrEmpty(this.Name))
             {
                 throw new TokenMissingNameException(split);

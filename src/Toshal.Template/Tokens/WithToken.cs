@@ -2,7 +2,6 @@
 
 namespace Toshal.Template.Tokens
 {
-    using System.Text.RegularExpressions;
 
     using Toshal.Template.Exceptions;
 
@@ -31,11 +30,9 @@ namespace Toshal.Template.Tokens
         /// </example>
         public WithToken(Split split)
         {
-            const string withTokenExpression = "<%WITH\\s(?<Name>.+?)%>";
-
             this.Name = TokenAttributeDictionary.GetNameAndAttributes(
                 split,
-                Regex.Match(split.Content, withTokenExpression).Groups["Name"].Value.Trim(),
+                TagText.Name(split.Content, "<%WITH", space: true, minLength: 1).Trim(),
                 this.Attributes);
 
             this.LineNumber = split.LineNumber;
