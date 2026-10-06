@@ -1,0 +1,6 @@
+// <%=project_name%> by <%=company_name%>
+<%FOREACH items%>public class <%=name%>
+{
+<%FOREACH items%>    public <%=nullable_type_name%> <%=name%> { get; set; } // <%WITH parent%><%=name%><%ENDWITH%><%IF is_nullable%> nullable<%ENDIF%><%IF is_string%> text<%ENDIF%>
+<%ENDFOR%>}
+<%ENDFOR%>

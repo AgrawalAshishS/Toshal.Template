@@ -25,6 +25,7 @@ namespace Toshal.Template.Tests.Examples
         [Fact] public void Email() => EmailExample.Run();
         [Fact] public void Report() => ReportExample.Run();
         [Fact] public void CodeGeneration() => CodeGenerationExample.Run();
+        [Fact] public void CompiledTemplates() => CompiledTemplatesExample.Run();
         [Fact] public void ProjectStructure() => ProjectStructureExample.Run();
 
         [Fact]

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compiled templates - Toshal.Template</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="compiled.html" class="active" aria-current="page">Compiled templates</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Compiled templates</h1>
+<p>A template can also be turned into a C# class when the project is built. The template text becomes plain C# code: <code>output.Append(&quot;...&quot;)</code> for text, <code>if</code> for IF, a <code>for</code> loop for FOREACH. So no parser runs and no token list is walked at run time. You write the template, not the string building code.</p>
+<h2>Install</h2>
+<p>Use the source generator (the class is made in memory on every build):</p>
+<pre><code class="lang-text">dotnet add package Toshal.Template.Generator</code></pre>
+<p>or the tool (the class is written to disk next to the template):</p>
+<pre><code class="lang-text">dotnet tool install --global Toshal.Template.Cli
+toshal-template generate Templates</code></pre>
+<p>Use one of the two in a project, not both: both would make the same class. Both bring the run time package <code>Toshal.Template.Compiled</code>.</p>
+<h2>Write a template</h2>
+<p>Give the file the extension <code>.ctt</code>. The syntax is the same as for the processor; see <a href="syntax.html">Template syntax</a>.</p>
+<pre><code class="lang-text">The &lt;%=Product abc=&quot;xyz&quot;%&gt; team</code></pre>
+<p>The class name is the file name. The namespace is the root namespace of the project and the folders, the way .resx files get theirs: <code>Templates/Email/OrderConfirm.ctt</code> in the project <code>MyApp</code> is the class <code>MyApp.Templates.Email.OrderConfirm</code>.</p>
+<p>With the generator every <code>.ctt</code> file of the project folder and its sub folders is used. To list them yourself, set the property <code>ToshalTemplateAutoInclude</code> to <code>false</code> and add <code>&lt;AdditionalFiles Include=&quot;Templates\**\*.ctt&quot; /&gt;</code>. The item metadata <code>ClassName</code> and <code>Namespace</code> change the names:</p>
+<pre><code class="lang-text">&lt;AdditionalFiles Update=&quot;Templates\Mail.ctt&quot; ClassName=&quot;MailTemplate&quot; Namespace=&quot;Shop.Mail&quot; /&gt;</code></pre>
+<p>The tool takes files or folders, and the options <code>--root-namespace</code>, <code>--project-dir</code>, <code>--namespace</code>, <code>--class</code>, <code>--writer</code> and <code>--no-stub</code>.</p>
+<h2>Give the values</h2>
+<p>The generated half of the class declares one partial method for each kind of tag the template uses:</p>
+<div class="table-wrap"><table>
+<tr><th>Tag</th><th>Partial method</th></tr>
+<tr><td><code>&lt;%=name%&gt;</code></td><td><code>string? TokenValue(TokenArgs args)</code>, or <code>void WriteToken(TokenArgs args, StringBuilder output)</code></td></tr>
+<tr><td><code>&lt;%IF name%&gt;</code>, <code>&lt;%ELSEIF name%&gt;</code></td><td><code>bool Condition(ConditionArgs args)</code></td></tr>
+<tr><td><code>&lt;%FOREACH name%&gt;</code>, <code>&lt;%REUSE_FOREACH existing name%&gt;</code></td><td><code>IList? Loop(LoopArgs args)</code></td></tr>
+<tr><td><code>&lt;%WITH name%&gt;</code></td><td><code>object? With(TokenArgs args)</code></td></tr>
+<tr><td><code>&lt;%PROCESS_TEMPLATE name%&gt;</code></td><td><code>CompiledTemplate? SubTemplate(ProcessTemplateArgs args)</code></td></tr>
+</table></div>
+<p>The other half is made for you once, next to the template (<code>OrderConfirm.cs</code> beside <code>OrderConfirm.ctt</code>), with a case for every name the template uses. It is yours: fill in the values. It is never made again. When the template later uses a new kind of tag, the compiler names the method to add. To use <code>WriteToken</code> instead of <code>TokenValue</code>, rename the method in your half (with the tool, also pass <code>--writer</code> once).</p>
+<p>The args are the same as for the processor, so the values are found the same way: <code>args.Name</code> in lower case, <code>args.Attributes</code>, <code>args.Context</code> and <code>args.ParentContext</code>. A method that switches on the type of <code>args.Context</code> and then on <code>args.Name</code> needs no reflection.</p>
+<h2>Run it</h2>
+<pre><code class="lang-text">string text = new OrderConfirm().Process(order).ToString();</code></pre>
+<p><code>Process(context, output)</code> appends to a builder you give, as <code>Processor.Process(args, output)</code> does. One instance can be used from many threads at once, as long as your partial methods can.</p>
+<h2>Same text as the processor</h2>
+<p>A compiled template writes exactly the text the processor writes for the same template and the same provider answers: the same SET scopes, FOREACH parts, SEPARATOR, REMOVE_PREVIOUS, indents of sub templates and lines that hold only control tags. The tests run every template of the parser tests through both and compare the text.</p>
+<p>Differences: a sub template is another compiled class, returned by <code>SubTemplate</code>, not a token list. A template with an error does not build: the generator reports <code>TTC001</code> at the line and column of the error, and the tool prints the same.</p>
+<pre><code class="lang-csharp">// Title: Compiled templates (.ctt)
+// Summary: A .ctt file becomes a C# class at build time (Toshal.Template.Generator). No parser runs at run time; the values come from partial methods in the other half of the class, which is made once for you. The text is the same as the processor writes.
+
+using Toshal.Template.Examples.CompiledTemplates;
+using Toshal.Template.Examples.Support;
+
+namespace Toshal.Template.Examples;
+
+public static class CompiledTemplatesExample
+{
+    public static void Run()
+    {
+        Console.WriteLine(&quot;== Compiled templates ==&quot;);
+
+        var customer = new CodeGenerationExample.TableModel(&quot;customer&quot;, &quot;Shop.Data&quot;,
+        [
+            new CodeGenerationExample.Column(&quot;id&quot;, &quot;integer&quot;, Nullable: false, Key: true, Comment: &quot;The customer number.&quot;),
+            new CodeGenerationExample.Column(&quot;full_name&quot;, &quot;text&quot;, Nullable: false),
+            new CodeGenerationExample.Column(&quot;email&quot;, &quot;text&quot;, Nullable: true),
+        ]);
+
+        // CompiledTemplates/Entity.ctt is the same text as Templates/Entity.txt. The class Entity was made from it when the project was built.
+        // One instance can be used again and again, also from many threads.
+        var entity = new Entity();
+        string compiled = entity.Process(customer).ToString();
+        Console.WriteLine(compiled);
+
+        // The same template through the parser and the processor gives the same text.
+        Verify.Equal(CodeGenerationExample.Generate(&quot;Entity.txt&quot;, customer), compiled, &quot;compiled template&quot;);
+    }
+}</code></pre>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

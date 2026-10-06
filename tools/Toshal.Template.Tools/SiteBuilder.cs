@@ -18,7 +18,7 @@ internal static class SiteBuilder
 
     // The generated files. known-issues.md is written by hand and is not in this list.
     private static readonly string[] GeneratedFolders = { "api", "examples", "assets" };
-    private static readonly string[] GeneratedPages = { "index.html", "why.html", "getting-started.html", "syntax.html", "pattern.html", "known-issues.html", "contributing.html", ".nojekyll" };
+    private static readonly string[] GeneratedPages = { "index.html", "why.html", "getting-started.html", "syntax.html", "compiled.html", "pattern.html", "known-issues.html", "contributing.html", ".nojekyll" };
 
     /// <summary>Builds the site in a temp folder and compares it with docs/. Returns 1 and lists the differences when docs/ is out of date.</summary>
     public static int Check(string root)
@@ -82,7 +82,7 @@ internal static class SiteBuilder
 
     private static void Build(string root, string docs, bool quiet)
     {
-        var api = new ApiModel(new[] { typeof(Parser).Assembly });
+        var api = new ApiModel(new[] { typeof(Parser).Assembly, typeof(Toshal.Template.Compiled.CompiledTemplate).Assembly });
         var examples = LoadExamples(root);
 
         // Remove pages made earlier, so a removed type or example does not stay on the site. Hand-written files are kept.
@@ -111,6 +111,7 @@ internal static class SiteBuilder
         Write(docs, "why.html", Page("Why use it", "", "why", Md("why.md")));
         Write(docs, "getting-started.html", Page("Getting started", "", "getting-started", Md("getting-started.md")));
         Write(docs, "syntax.html", Page("Template syntax", "", "syntax", Md("syntax.md")));
+        Write(docs, "compiled.html", Page("Compiled templates", "", "compiled", Md("compiled.md")));
         Write(docs, "pattern.html", Page("Testing pattern", "", "pattern", Md("pattern.md")));
         Write(docs, "known-issues.html", Page("Known issues", "", "known-issues", Markdown.ToHtml(File.ReadAllText(Path.Combine(docs, "known-issues.md")), root)));
         Write(docs, "contributing.html", Page("Contributing", "", "contributing", Markdown.ToHtml(File.ReadAllText(Path.Combine(root, "CONTRIBUTING.md")), root)));
@@ -146,6 +147,7 @@ internal static class SiteBuilder
         string examplesRoot = Path.Combine(root, "examples", "Toshal.Template.Examples");
         var files = Directory.GetFiles(examplesRoot, "*.cs")
             .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "Patterns"), "*.cs"))
+            .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "CompiledTemplates"), "*.cs"))
             .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "Support"), "*.cs").Where(f => !f.EndsWith("Verify.cs")))
             .OrderBy(f => f, StringComparer.Ordinal);
         foreach (var file in files)
@@ -176,6 +178,15 @@ internal static class SiteBuilder
             sb.AppendLine($"<h2>{Enc(Path.GetRelativePath(dir, file).Replace('\\', '/'))}</h2>");
             sb.AppendLine($"<pre><code class=\"lang-text\">{Enc(File.ReadAllText(file).Replace("\r\n", "\n"))}</code></pre>");
         }
+
+        // The compiled example keeps its .ctt templates next to the classes made from them.
+        string compiled = Path.Combine(root, "examples", "Toshal.Template.Examples", "CompiledTemplates");
+        foreach (var file in Directory.GetFiles(compiled, "*.ctt", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
+        {
+            sb.AppendLine($"<h2>{Enc(Path.GetRelativePath(Path.GetDirectoryName(compiled)!, file).Replace('\\', '/'))}</h2>");
+            sb.AppendLine($"<pre><code class=\"lang-text\">{Enc(File.ReadAllText(file).Replace("\r\n", "\n"))}</code></pre>");
+        }
+
         return sb.ToString();
     }
 
@@ -344,6 +355,7 @@ internal static class SiteBuilder
         ("why", "Why use it", "why.html"),
         ("getting-started", "Getting started", "getting-started.html"),
         ("syntax", "Template syntax", "syntax.html"),
+        ("compiled", "Compiled templates", "compiled.html"),
         ("pattern", "Testing pattern", "pattern.html"),
         ("api", "API reference", "api/index.html"),
         ("examples", "Examples", "examples/index.html"),

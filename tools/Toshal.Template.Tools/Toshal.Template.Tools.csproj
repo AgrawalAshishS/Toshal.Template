@@ -16,6 +16,7 @@
   <ItemGroup>
     <!-- The tool loads this assembly and its XML doc file to build the API pages. -->
     <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Compiled\Toshal.Template.Compiled.csproj" />
   </ItemGroup>
 
 </Project>

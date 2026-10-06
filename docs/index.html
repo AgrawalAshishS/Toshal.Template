@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html" class="active" aria-current="page">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html" class="active" aria-current="page">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="compiled.html">Compiled templates</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Toshal.Template</h1>
 <p>A text template engine for .NET 10 with ASP style tags. It produces any text: emails, reports, source code, SQL scripts, project files.</p>
@@ -83,6 +83,12 @@ string text = processor.Process(new ProcessorArgs(tokens)).ToString();   // Hell
 <tr><td><a href="api/Token.html"><code>Token</code></a></td><td>The base class of all tokens. It holds the position of the token in the template.</td></tr>
 <tr><td><a href="api/TokenAttributeDictionary.html"><code>TokenAttributeDictionary</code></a></td><td>The attributes of a tag, such as <code>format=&quot;0.00&quot;</code> in <code>&lt;%=Total format=&quot;0.00&quot;%&gt;</code>. Keys are the attribute names in lower case. Values keep the case the template author wrote, in every tag. A quoted value may contain spaces.</td></tr>
 <tr><td><a href="api/WithToken.html"><code>WithToken</code></a></td><td>A parsed <code>&lt;%WITH name%&gt;</code> ... <code>&lt;%ENDWITH%&gt;</code> block. The processor asks <a href="api/Processor.html"><code>WithValueProvider</code></a> for an object, and that object is the context of the tags inside the block. When the provider returns null the whole block is skipped.</td></tr>
+</table></div>
+<h2>Toshal.Template.Compiled</h2>
+<div class="table-wrap"><table><tr><th>Type</th><th>Summary</th></tr>
+<tr><td><a href="api/CompiledTemplate.html"><code>CompiledTemplate</code></a></td><td>The base class of a compiled template: a C# class made at build time from a <code>.ctt</code> file by Toshal.Template.Generator or by the <code>toshal-template</code> tool. The template text is already turned into code, so no parser runs and no token list is walked at run time.</td></tr>
+<tr><td><a href="api/TemplateRun.html"><code>TemplateRun</code></a></td><td>The state of one call of <a href="api/CompiledTemplate.html"><code>Process</code></a>: the parent context stack, the FOREACH rows being written and the args objects that every provider call reuses. Generated code uses it; you do not need it in your own code.</td></tr>
+<tr><td><a href="api/TemplateScope.html"><code>TemplateScope</code></a></td><td>The SET variables of one block of a compiled template. Generated code uses it; you do not need it in your own code.</td></tr>
 </table></div>
 
 </main>

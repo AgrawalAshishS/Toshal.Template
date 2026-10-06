@@ -23,6 +23,7 @@ ContextProvidersExample.Run();
 EmailExample.Run();
 ReportExample.Run();
 CodeGenerationExample.Run();
+CompiledTemplatesExample.Run();
 ProjectStructureExample.Run();
 await FakeOrRealTestPatternExample.Run(connectionString);
 

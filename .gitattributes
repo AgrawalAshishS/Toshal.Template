@@ -68,3 +68,6 @@
 
 # The website is generated with LF line endings. Keep them, so docs check sees no change.
 docs/** text eol=lf
+
+# The benchmark template must keep CRLF: the benchmark compares its text with a C# string that has CRLF line breaks.
+benchmarks/**/*.ctt text eol=crlf

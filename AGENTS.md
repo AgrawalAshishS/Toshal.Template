@@ -8,6 +8,13 @@ Repo: https://github.com/AgrawalAshishS/Toshal.Template. Default branch: `main`.
 ```
 Toshal.Template.sln
 src/Toshal.Template/                  the library (NuGet package Toshal.Template)
+src/Toshal.Template.Compiled/         run time of compiled .ctt templates: CompiledTemplate (NuGet package Toshal.Template.Compiled).
+                                      Uses internals of Toshal.Template (Processing/ProcessRun, TemplateVariables), so both write the same text
+src/Toshal.Template.CodeGen/          netstandard2.0: parser sources of Toshal.Template linked in (CodeGenSources.props) + emitters that turn
+                                      a template into C#. Not packed alone
+src/Toshal.Template.Generator/        Roslyn source generator + MSBuild stub task, compiles the CodeGen sources in (NuGet Toshal.Template.Generator);
+                                      build/ holds the .props/.targets of the package
+src/Toshal.Template.Cli/              the toshal-template dotnet tool: writes Name.g.cs and the stub Name.cs to disk (NuGet Toshal.Template.Cli)
 src/Directory.Build.props             shared NuGet metadata
 tests/Toshal.Template.Tests/          xUnit tests, offline
   Fixes/                              one test file per fixed bug
@@ -15,12 +22,16 @@ tests/Toshal.Template.Tests/          xUnit tests, offline
   Examples/ExamplesTests.cs           runs every example
   DocClaimsTests.cs                   proves the behavior that the XML docs describe
   DocsTests.cs                        fails when docs/ is out of date
-examples/Toshal.Template.Examples/    console app, one file per topic; Templates/ holds embedded .txt templates;
+tests/Toshal.Template.Compiled.Tests/ compiled templates: every template runs through Processor and through its Roslyn-compiled class and
+                                      the texts must be equal; generator, stub task and tool tests
+examples/Toshal.Template.Examples/    console app, one file per topic; Templates/ holds embedded .txt templates; CompiledTemplates/ holds .ctt
+                                      templates and their filled-in stubs (made by the generator of this repository);
                                       Patterns/ + FakeOrRealTestPatternExample.cs: the fake or real database pattern (NpgsqlCommon)
 tools/Toshal.Template.Tools/          C# tool: website generator and coverage report. content/ holds the hand written page texts
 tools/VisualEditor/                   old browser based template editor (JavaScript). Not built, not maintained yet
-benchmarks/Toshal.Template.Benchmarks/ BenchmarkDotNet: the same template through the old chain style, ContextProviderRegistry and a
-                                      hand written lower bound. Not packed. Run before and after any change to Processor or the registry
+benchmarks/Toshal.Template.Benchmarks/ BenchmarkDotNet: the same template through the old chain style, ContextProviderRegistry, a
+                                      hand written lower bound and as a compiled template (CompiledShop.ctt). Not packed. Run before and after
+                                      any change to Processor, the registry or the code generator
 docs/                                 GitHub Pages site. known-issues.md is hand written, everything else is generated
 coverlet.runsettings                  coverage settings
 .github/workflows/ci.yml              GitHub Actions: build (warnings fail), tests, coverage >= 90%, docs check, pack;
