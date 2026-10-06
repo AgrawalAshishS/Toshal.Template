@@ -74,3 +74,6 @@ benchmarks/**/*.ctt text eol=crlf
 
 # The golden files of the emitters are compared byte for byte with their output, which has CRLF line breaks.
 tests/**/Golden/*.txt text eol=crlf
+
+# The templates the code generator writes its files with. Their line breaks are the line breaks of those files.
+src/Toshal.Template.CodeGen/Templates/*.txt text eol=crlf

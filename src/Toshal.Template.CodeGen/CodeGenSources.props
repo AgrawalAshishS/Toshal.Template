@@ -1,12 +1,14 @@
 <Project>
 
-  <!-- The sources of the code generator: the parser of Toshal.Template, linked in, and the emitters next to this file.
-       Toshal.Template.CodeGen and Toshal.Template.Generator both compile them, so the analyzer is one assembly with nothing to load beside it. -->
+  <!-- The sources of the code generator: the parser and the Processor of Toshal.Template, linked in, and the emitters next to this file.
+       The emitters write their files with Processor from the templates in Templates/, which are embedded. Toshal.Template.CodeGen and
+       Toshal.Template.Generator both compile them, so the analyzer is one assembly with nothing to load beside it. -->
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Parser.cs" Link="Linked\Parser.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Split.cs" Link="Linked\Split.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\*.cs" Link="Linked\%(Filename).cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Processing\*.cs" Link="Linked\Processing\%(Filename).cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Tokens\*.cs" Link="Linked\Tokens\%(Filename).cs" />
     <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Exceptions\*.cs" Link="Linked\Exceptions\%(Filename).cs" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Templates\*.txt" LogicalName="Toshal.Template.CodeGen.Templates.%(Filename)%(Extension)" Link="Templates\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'Toshal.Template.CodeGen'">

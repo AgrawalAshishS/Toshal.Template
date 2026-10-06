@@ -58,6 +58,17 @@ namespace System
             }
         }
 
+        // Processor sources: one chunk with the whole text, and Append of a span through a string. Only the templates of the emitters run here.
+        extension(System.Text.StringBuilder builder)
+        {
+            public IEnumerable<ReadOnlyMemory<char>> GetChunks()
+            {
+                yield return builder.ToString().AsMemory();
+            }
+
+            public System.Text.StringBuilder Append(ReadOnlySpan<char> value) => builder.Append(value.ToString());
+        }
+
         private static class EmptyDictionary<TKey, TValue>
             where TKey : notnull
         {

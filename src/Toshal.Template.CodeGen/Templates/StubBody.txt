@@ -1,0 +1,83 @@
+<%IF hasloop%>
+using System.Collections;
+<%ENDIF%>
+<%IF haswritetoken%>
+using System.Text;
+<%ENDIF%>
+<%IF systemusings%>
+
+<%ENDIF%>
+<%IF hasany%>
+using Toshal.Template;
+<%IF hassubtemplate%>
+using Toshal.Template.Compiled;
+<%ENDIF%>
+
+<%ENDIF%>
+public partial class <%=classname%>
+{
+    <%FOREACH methods%>
+    <%IF tokenvalue%>
+    // The text of <%=tag of="=name"%>. Null or empty writes nothing.
+    private partial string? TokenValue(TokenArgs args) => args.Name switch
+    {
+        <%FOREACH names%>
+        <%=literal%> => null, // TODO
+        <%ENDFOR%>
+        _ => null,
+    };
+    <%ELSEIF writetoken%>
+    // Appends the value of <%=tag of="=name"%> to the output. Only append; do not change text that is already there.
+    private partial void WriteToken(TokenArgs args, StringBuilder output)
+    {
+        switch (args.Name)
+        {
+            <%FOREACH names%>
+            case <%=literal%>:
+                // output.Append(...);
+                break;
+            <%ENDFOR%>
+        }
+    }
+    <%ELSEIF condition%>
+    // Whether <%=tag of="IF name"%> or <%=tag of="ELSEIF name"%> is true. For <%=tag of="IF not name"%> you get the name without not.
+    private partial bool Condition(ConditionArgs args) => args.Name switch
+    {
+        <%FOREACH names%>
+        <%=literal%> => false, // TODO
+        <%ENDFOR%>
+        _ => false,
+    };
+    <%ELSEIF loop%>
+    // The rows of <%=tag of="FOREACH name"%>. Null or an empty list writes the NORECORD part.
+    private partial IList? Loop(LoopArgs args) => args.Name switch
+    {
+        <%FOREACH names%>
+        <%=literal%> => null, // TODO
+        <%ENDFOR%>
+        _ => null,
+    };
+    <%ELSEIF with%>
+    // The context inside <%=tag of="WITH name"%>. Null skips the block.
+    private partial object? With(TokenArgs args) => args.Name switch
+    {
+        <%FOREACH names%>
+        <%=literal%> => null, // TODO
+        <%ENDFOR%>
+        _ => null,
+    };
+    <%ELSEIF subtemplate%>
+    // The template written by <%=tag of="PROCESS_TEMPLATE name"%>, for example new Footer(). Null writes nothing.
+    private partial CompiledTemplate? SubTemplate(ProcessTemplateArgs args) => args.Name switch
+    {
+        <%FOREACH names%>
+        <%=literal%> => null, // TODO
+        <%ENDFOR%>
+        _ => null,
+    };
+    <%ENDIF%>
+    <%SEPARATOR%>
+
+    <%ENDSEPARATOR%>
+    <%ENDFOR%>
+}

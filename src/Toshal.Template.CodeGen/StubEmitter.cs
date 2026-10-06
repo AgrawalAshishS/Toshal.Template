@@ -2,114 +2,69 @@
 
 namespace Toshal.Template.CodeGen
 {
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
+
+    using Toshal.Template.Tokens;
 
     // Writes the other half of the class: the partial methods the template needs, with a case for every name it uses.
     // It is written once, next to the template, and then it belongs to the user; it is never written again.
+    // The text is in Templates/Stub.txt and Templates/StubBody.txt; this class only gives the values.
     public static class StubEmitter
     {
+        // The order of the methods in the stub.
+        private static readonly ProviderKinds[] Methods =
+        {
+            ProviderKinds.TokenValue, ProviderKinds.WriteToken, ProviderKinds.Condition, ProviderKinds.Loop, ProviderKinds.With, ProviderKinds.SubTemplate,
+        };
+
+        private static readonly List<IToken> Stub = EmbeddedTemplates.Parse("Stub.txt");
+        private static readonly List<IToken> Body = EmbeddedTemplates.Parse("StubBody.txt");
+
         public static string Emit(TemplateSource source, TemplateCode code)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (code == null) throw new ArgumentNullException(nameof(code));
 
-            bool hasNamespace = source.Namespace.Length > 0;
-            var w = new CodeWriter();
-            w.Line("// Made once by Toshal.Template from " + (source.SourcePath ?? "the template") + ". This file is yours: give the values here.");
-            w.Line("// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.");
-            w.Line();
-            w.Line("#nullable enable");
-            w.Line();
-            if (hasNamespace) w.Open("namespace " + source.Namespace);
+            bool Has(ProviderKinds kind) => (code.Kinds & kind) != 0;
 
-            // Only the usings the methods below need, so the file has no unused ones.
-            bool systemUsings = false;
-            if ((code.Kinds & ProviderKinds.Loop) != 0) { w.Line("using System.Collections;"); systemUsings = true; }
-            if ((code.Kinds & ProviderKinds.WriteToken) != 0) { w.Line("using System.Text;"); systemUsings = true; }
-            if (systemUsings) w.Line();
-            if (code.Kinds != ProviderKinds.None)
+            var processor = new Processor
             {
-                w.Line("using Toshal.Template;");
-                if ((code.Kinds & ProviderKinds.SubTemplate) != 0) w.Line("using Toshal.Template.Compiled;");
-                w.Line();
-            }
-            w.Open("public partial class " + source.ClassName);
-
-            bool first = true;
-            void Separate()
-            {
-                if (!first) w.Line();
-                first = false;
-            }
-
-            if ((code.Kinds & ProviderKinds.TokenValue) != 0)
-            {
-                Separate();
-                w.Line("// The text of <%=name%>. Null or empty writes nothing.");
-                Switch(w, "private partial string? TokenValue(TokenArgs args)", code.NamesOf(ProviderKinds.TokenValue), "null");
-            }
-
-            if ((code.Kinds & ProviderKinds.WriteToken) != 0)
-            {
-                Separate();
-                w.Line("// Appends the value of <%=name%> to the output. Only append; do not change text that is already there.");
-                w.Open("private partial void WriteToken(TokenArgs args, StringBuilder output)");
-                w.Open("switch (args.Name)");
-                foreach (var name in code.NamesOf(ProviderKinds.WriteToken))
+                TokenValueProvider = args => args.Name switch
                 {
-                    w.Line("case " + CodeWriter.Literal(name) + ":");
-                    w.Line("    // output.Append(...);");
-                    w.Line("    break;");
-                }
+                    "sourcepath" => source.SourcePath ?? "the template",
+                    "namespace" => source.Namespace,
+                    "classname" => source.ClassName,
+                    "literal" => CodeWriter.Literal((string)args.Context!),
 
-                w.Close();
-                w.Close();
-            }
+                    // A tag of the template syntax inside a comment, which the template cannot hold as text: <%=tag of="IF name"%>.
+                    "tag" => "<%" + args.GetAttribute("of", string.Empty) + "%>",
+                    _ => null,
+                },
 
-            if ((code.Kinds & ProviderKinds.Condition) != 0)
-            {
-                Separate();
-                w.Line("// Whether <%IF name%> or <%ELSEIF name%> is true. For <%IF not name%> you get the name without not.");
-                Switch(w, "private partial bool Condition(ConditionArgs args)", code.NamesOf(ProviderKinds.Condition), "false");
-            }
+                // At the top: which kinds the template uses (hasloop, hasany). Inside FOREACH methods: which kind the row is (loop).
+                ConditionValueProvider = args => args.Name switch
+                {
+                    "namespace" => source.Namespace.Length > 0,
+                    "hasany" => code.Kinds != ProviderKinds.None,
+                    "systemusings" => Has(ProviderKinds.Loop) || Has(ProviderKinds.WriteToken),
+                    _ when args.Name.StartsWith("has", StringComparison.Ordinal) => Has(Kind(args.Name.Substring(3))),
+                    _ => args.Context is ProviderKinds row && row == Kind(args.Name),
+                },
+                LoopValueProvider = args => args.Name switch
+                {
+                    "methods" => Methods.Where(Has).ToList(),
+                    "names" => code.NamesOf((ProviderKinds)args.Context!).ToList(),
+                    _ => (IList?)null,
+                },
+                ProcessTemplateValueProvider = args => args.Name == "body" ? Body : null,
+            };
 
-            if ((code.Kinds & ProviderKinds.Loop) != 0)
-            {
-                Separate();
-                w.Line("// The rows of <%FOREACH name%>. Null or an empty list writes the NORECORD part.");
-                Switch(w, "private partial IList? Loop(LoopArgs args)", code.NamesOf(ProviderKinds.Loop), "null");
-            }
-
-            if ((code.Kinds & ProviderKinds.With) != 0)
-            {
-                Separate();
-                w.Line("// The context inside <%WITH name%>. Null skips the block.");
-                Switch(w, "private partial object? With(TokenArgs args)", code.NamesOf(ProviderKinds.With), "null");
-            }
-
-            if ((code.Kinds & ProviderKinds.SubTemplate) != 0)
-            {
-                Separate();
-                w.Line("// The template written by <%PROCESS_TEMPLATE name%>, for example new Footer(). Null writes nothing.");
-                Switch(w, "private partial CompiledTemplate? SubTemplate(ProcessTemplateArgs args)", code.NamesOf(ProviderKinds.SubTemplate), "null");
-            }
-
-            w.Close();
-            if (hasNamespace) w.Close();
-            return w.ToString();
+            return processor.Process(new ProcessorArgs(Stub)).ToString();
         }
 
-        private static void Switch(CodeWriter w, string signature, IReadOnlyList<string> names, string defaultValue)
-        {
-            w.Line(signature + " => args.Name switch");
-            w.Open();
-            foreach (var name in names)
-            {
-                w.Line(CodeWriter.Literal(name) + " => " + defaultValue + ", // TODO");
-            }
-
-            w.Line("_ => " + defaultValue + ",");
-            w.Close("};");
-        }
+        private static ProviderKinds Kind(string name) =>
+            Enum.TryParse<ProviderKinds>(name, ignoreCase: true, out var kind) ? kind : throw new InvalidOperationException("No kind named " + name + ".");
     }
 }
