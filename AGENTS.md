@@ -10,8 +10,9 @@ Toshal.Template.sln
 src/Toshal.Template/                  the library (NuGet package Toshal.Template)
 src/Toshal.Template.Compiled/         run time of compiled .ctt templates: CompiledTemplate (NuGet package Toshal.Template.Compiled).
                                       Uses internals of Toshal.Template (Processing/ProcessRun, TemplateVariables), so both write the same text
-src/Toshal.Template.CodeGen/          netstandard2.0: parser sources of Toshal.Template linked in (CodeGenSources.props) + emitters that turn
-                                      a template into C#. Not packed alone
+src/Toshal.Template.CodeGen/          netstandard2.0: parser and Processor sources of Toshal.Template linked in (CodeGenSources.props) +
+                                      emitters that turn a template into C#. Not packed alone. The fixed text of the files they write
+                                      (stub, frame of the generated file) is in Templates/*.txt, embedded and run through Processor
 src/Toshal.Template.Generator/        Roslyn source generator + MSBuild stub task, compiles the CodeGen sources in (NuGet Toshal.Template.Generator);
                                       build/ holds the .props/.targets of the package
 src/Toshal.Template.Cli/              the toshal-template dotnet tool: writes Name.g.cs and the stub Name.cs to disk (NuGet Toshal.Template.Cli)
@@ -24,6 +25,7 @@ tests/Toshal.Template.Tests/          xUnit tests, offline
   DocsTests.cs                        fails when docs/ is out of date
 tests/Toshal.Template.Compiled.Tests/ compiled templates: every template runs through Processor and through its Roslyn-compiled class and
                                       the texts must be equal; generator, stub task and tool tests
+  Golden/                             the output of the emitters byte for byte; TOSHAL_UPDATE_GOLDEN=1 rewrites it after a wanted change
 examples/Toshal.Template.Examples/    console app, one file per topic; Templates/ holds embedded .txt templates; CompiledTemplates/ holds .ctt
                                       templates and their filled-in stubs (made by the generator of this repository);
                                       Patterns/ + FakeOrRealTestPatternExample.cs: the fake or real database pattern (NpgsqlCommon)
