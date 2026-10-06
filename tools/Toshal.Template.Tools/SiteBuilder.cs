@@ -147,7 +147,7 @@ internal static class SiteBuilder
         string examplesRoot = Path.Combine(root, "examples", "Toshal.Template.Examples");
         var files = Directory.GetFiles(examplesRoot, "*.cs")
             .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "Patterns"), "*.cs"))
-            .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "CompiledTemplates"), "*.cs"))
+            .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "CompiledTemplates"), "*.cs").Where(f => !f.EndsWith(".g.cs", StringComparison.Ordinal)))
             .Concat(Directory.GetFiles(Path.Combine(examplesRoot, "Support"), "*.cs").Where(f => !f.EndsWith("Verify.cs")))
             .OrderBy(f => f, StringComparer.Ordinal);
         foreach (var file in files)

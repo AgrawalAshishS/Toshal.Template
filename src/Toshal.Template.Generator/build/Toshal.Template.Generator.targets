@@ -1,0 +1,32 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- The task is in the tasks folder of the package. A project in this repository sets the path to its build output. -->
+    <ToshalTemplateTaskAssembly Condition="'$(ToshalTemplateTaskAssembly)' == ''">$(MSBuildThisFileDirectory)..\tasks\netstandard2.0\Toshal.Template.Generator.dll</ToshalTemplateTaskAssembly>
+  </PropertyGroup>
+
+  <!-- Every .ctt file of the project folder and its sub folders, except bin and obj and the ones already listed. -->
+  <ItemGroup Condition="'$(ToshalTemplateAutoInclude)' == 'true'">
+    <AdditionalFiles Include="**\*.ctt" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);@(AdditionalFiles)" />
+  </ItemGroup>
+
+  <!-- TaskHostFactory runs the task in its own process, so MSBuild does not keep the assembly locked after the build. -->
+  <UsingTask TaskName="Toshal.Template.Generator.GenerateTemplates" AssemblyFile="$(ToshalTemplateTaskAssembly)" TaskFactory="TaskHostFactory" />
+
+  <!-- Writes Name.g.cs next to Name.ctt (only when its text changes) and Name.cs when it does not exist, and compiles both in this build.
+       An existing Name.cs is never changed. -->
+  <Target Name="ToshalTemplateGenerate" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
+    <GenerateTemplates Templates="@(AdditionalFiles)" RootNamespace="$(RootNamespace)" ProjectDirectory="$(MSBuildProjectDirectory)" CreateStubs="$(ToshalTemplateCreateStubs)">
+      <Output TaskParameter="GeneratedFiles" ItemName="_ToshalTemplateGenerated" />
+      <Output TaskParameter="CreatedFiles" ItemName="_ToshalTemplateNewStubs" />
+    </GenerateTemplates>
+
+    <!-- The files that were there when the project was loaded are Compile items already (by a relative path), so only the new ones are added. -->
+    <ItemGroup>
+      <_ToshalTemplateNew Include="@(_ToshalTemplateGenerated);@(_ToshalTemplateNewStubs)" />
+      <_ToshalTemplateNew Remove="@(Compile->'%(FullPath)')" />
+      <Compile Include="@(_ToshalTemplateNew)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

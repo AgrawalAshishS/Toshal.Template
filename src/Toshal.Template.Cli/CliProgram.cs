@@ -14,7 +14,7 @@ namespace Toshal.Template.Cli
     /// </summary>
     /// <remarks>
     /// <para>The class name is the file name. The namespace is the root namespace of the nearest project file (its RootNamespace, else its
-    /// name) and the folders between the project folder and the template, as for the source generator.</para>
+    /// name) and the folders between the project folder and the template, as for the Toshal.Template.Generator package.</para>
     /// <para><b>Warning:</b> use the tool or the Toshal.Template.Generator package in a project, not both: both would make the same class.</para>
     /// </remarks>
     /// <example>
@@ -157,7 +157,7 @@ Options:
             }
 
             var stubPath = StubFile.PathFor(templatePath);
-            var writer = options.Writer || (File.Exists(stubPath) && File.ReadAllText(stubPath).Contains("partial void WriteToken(", StringComparison.Ordinal));
+            var writer = options.Writer || GeneratedFile.UsesTokenWriter(stubPath);
             var source = new TemplateSource(names.Namespace, names.ClassName, File.ReadAllText(templatePath)) { SourcePath = relative, UseTokenWriter = writer };
 
             TemplateCode code;
@@ -171,10 +171,9 @@ Options:
                 return false;
             }
 
-            var generatedPath = Path.ChangeExtension(templatePath, ".g.cs");
-            if (!File.Exists(generatedPath) || File.ReadAllText(generatedPath) != code.Code)
+            var generatedPath = GeneratedFile.PathFor(templatePath);
+            if (GeneratedFile.WriteIfChanged(generatedPath, code.Code))
             {
-                File.WriteAllText(generatedPath, code.Code, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 output.WriteLine("Wrote " + generatedPath);
             }
 

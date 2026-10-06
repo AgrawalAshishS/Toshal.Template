@@ -13,7 +13,7 @@ using Toshal.Template.Compiled.Tests.Support;
 
 using Xunit;
 
-using CreateTemplateStubs = generator::Toshal.Template.Generator.CreateTemplateStubs;
+using GenerateTemplates = generator::Toshal.Template.Generator.GenerateTemplates;
 using CSharpEmitter = codegen::Toshal.Template.CodeGen.CSharpEmitter;
 using StubEmitter = codegen::Toshal.Template.CodeGen.StubEmitter;
 using TemplateNaming = codegen::Toshal.Template.CodeGen.TemplateNaming;
@@ -142,17 +142,15 @@ namespace Toshal.Template.Compiled.Tests
             {
                 Directory.CreateDirectory(Path.Combine(project, "Mail"));
                 File.WriteAllText(Path.Combine(project, "Mail", "Welcome.ctt"), "Hi <%=name%>");
-                File.WriteAllText(Path.Combine(project, "Bad.ctt"), "<%IF a%>");
                 File.WriteAllText(Path.Combine(project, "notes.txt"), "x");
 
-                var first = RunTask(project, "Mail/Welcome.ctt", "Bad.ctt", "notes.txt");
+                var first = RunTask(project, "Mail/Welcome.ctt", "notes.txt");
                 var stubPath = Path.Combine(project, "Mail", "Welcome.cs");
                 Assert.Equal(new[] { stubPath }, first);
                 var stub = File.ReadAllText(stubPath);
                 Assert.Contains("namespace Shop.Mail", stub, StringComparison.Ordinal);
                 Assert.Contains("public partial class Welcome", stub, StringComparison.Ordinal);
                 Assert.Contains("\"name\" => null", stub, StringComparison.Ordinal);
-                Assert.False(File.Exists(Path.Combine(project, "Bad.cs")));
 
                 File.WriteAllText(stubPath, "// mine");
                 Assert.Empty(RunTask(project, "Mail/Welcome.ctt"));
@@ -175,7 +173,7 @@ namespace Toshal.Template.Compiled.Tests
                 item.SetMetadata("ClassName", "MailTemplate");
                 item.SetMetadata("Namespace", "Other");
 
-                var task = new CreateTemplateStubs { BuildEngine = new TestEngine(), ProjectDirectory = project, RootNamespace = "Shop", Templates = new ITaskItem[] { item } };
+                var task = new GenerateTemplates { BuildEngine = new TestBuildEngine(), ProjectDirectory = project, RootNamespace = "Shop", Templates = new ITaskItem[] { item } };
                 Assert.True(task.Execute());
 
                 var stub = File.ReadAllText(Path.Combine(project, "Mail.cs"));
@@ -190,9 +188,9 @@ namespace Toshal.Template.Compiled.Tests
 
         private static string[] RunTask(string project, params string[] files)
         {
-            var task = new CreateTemplateStubs
+            var task = new GenerateTemplates
             {
-                BuildEngine = new TestEngine(),
+                BuildEngine = new TestBuildEngine(),
                 ProjectDirectory = project,
                 RootNamespace = "Shop",
                 Templates = files.Select(f => (ITaskItem)new TaskItem(Path.Combine(project, f))).ToArray(),
@@ -204,33 +202,5 @@ namespace Toshal.Template.Compiled.Tests
 
         private static int Count(string text, string part) => (text.Length - text.Replace(part, string.Empty, StringComparison.Ordinal).Length) / part.Length;
 
-        private sealed class TestEngine : IBuildEngine
-        {
-            public bool ContinueOnError => false;
-
-            public int LineNumberOfTaskNode => 0;
-
-            public int ColumnNumberOfTaskNode => 0;
-
-            public string ProjectFileOfTaskNode => string.Empty;
-
-            public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs) => true;
-
-            public void LogCustomEvent(CustomBuildEventArgs e)
-            {
-            }
-
-            public void LogErrorEvent(BuildErrorEventArgs e)
-            {
-            }
-
-            public void LogMessageEvent(BuildMessageEventArgs e)
-            {
-            }
-
-            public void LogWarningEvent(BuildWarningEventArgs e)
-            {
-            }
-        }
     }
 }

@@ -14,7 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
     <ProjectReference Include="..\..\src\Toshal.Template.Compiled\Toshal.Template.Compiled.csproj" />
-    <ProjectReference Include="..\..\src\Toshal.Template.Generator\Toshal.Template.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Generator\Toshal.Template.Generator.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

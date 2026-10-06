@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Toshal.Template.Generator: every .ctt file of the project becomes a C# class at build time, written next to it as Name.g.cs. -->
+  <PropertyGroup>
+    <!-- false: only the .ctt files you list as AdditionalFiles are used, for example <AdditionalFiles Include="Templates\**\*.ctt" />. -->
+    <ToshalTemplateAutoInclude Condition="'$(ToshalTemplateAutoInclude)' == ''">true</ToshalTemplateAutoInclude>
+    <!-- false: no stub file (the other half of the class) is written next to a template that has none. -->
+    <ToshalTemplateCreateStubs Condition="'$(ToshalTemplateCreateStubs)' == ''">true</ToshalTemplateCreateStubs>
+  </PropertyGroup>
+
+</Project>
