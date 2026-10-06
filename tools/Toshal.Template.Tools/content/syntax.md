@@ -15,9 +15,10 @@ Text outside tags is written as it is, including spaces and line breaks, with on
 | `<%REUSE_FOREACH Existing NewName%>` | Runs the layout of the nearest FOREACH named `Existing` again, for the list named `NewName`. | `LoopValueProvider` |
 | `<%WITH Name%>...<%ENDWITH%>` | Makes an object the context of the inner part. Null skips the part. | `WithValueProvider` |
 | `<%SET Name%>...<%ENDSET%>` | Writes the inner part into a variable instead of the output. | none |
-| `<%PROCESS_TEMPLATE Name%>` | Runs a sub template in place, with the current context. | `ProcessTemplateValueProvider` returns tokens |
+| `<%PROCESS_TEMPLATE Name%>` | Runs a sub template in place, with the current context. Alone on an indented line, it indents every line of the sub template (see below). | `ProcessTemplateValueProvider` returns tokens |
+| `<%SEPARATOR%>...<%ENDSEPARATOR%>` | Inside a FOREACH row: written in every row except the last, like the separator of `string.Join`. | none |
 | `<%CONTEXT_AS_STRING%>` | Writes `ToString()` of the current context. | none |
-| `<%REMOVE_PREVIOUS n%>` | Removes the last n characters written so far. | none |
+| `<%REMOVE_PREVIOUS n%>` | Removes the last n characters written so far. For a separator between rows, SEPARATOR is simpler and does not depend on the line breaks. | none |
 | `<%REMOVE_PREVIOUS_NEW_LINE%>` | Removes a `\n` at the end of the output, then a `\r` at the end. | none |
 
 ## Lines with only control tags
@@ -25,7 +26,8 @@ Text outside tags is written as it is, including spaces and line breaks, with on
 A line that holds only control tags and spaces or tabs writes nothing: not its indent, not the spaces between the tags, not its line break.
 So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.
 
-Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET and ENDSET.
+Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET, ENDSET,
+SEPARATOR and ENDSEPARATOR.
 A line with any text, or with a tag that writes something (`<%=Name%>`, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with
 REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both `
 ` and `
@@ -51,6 +53,68 @@ public class Customer
 ```
 
 The parser does this once, when it parses the template, so it costs nothing while processing.
+
+## SEPARATOR
+
+`<%SEPARATOR%>...<%ENDSEPARATOR%>` is written in every row of the innermost FOREACH except the last one. It counts no characters, so unlike
+`<%REMOVE_PREVIOUS n%>` it works the same with `\n` and `\r\n` line breaks.
+
+```text
+public Customer(
+    <%FOREACH Fields%>
+    <%=Type%> <%=Name%><%SEPARATOR%>,<%ENDSEPARATOR%>
+    <%ENDFOR%>
+)
+```
+
+writes
+
+```text
+public Customer(
+    int id,
+    string email
+)
+```
+
+It may stand anywhere in a row: in the ROW, ALTROW, FIRSTROW or LASTROW part, in a BEFORE or AFTER part, or inside an IF or WITH in the row.
+In a HEADER, FOOTER or NORECORD part, or outside any FOREACH, it writes nothing. In a sub template that a row runs with PROCESS_TEMPLATE it
+belongs to that row.
+
+## Indented sub templates
+
+When `<%PROCESS_TEMPLATE Name%>` stands alone on its line after spaces or tabs, those spaces or tabs indent every line of the sub template.
+The sub template keeps its own indent; the outer indent is added on top. Empty lines get no indent, so no line ends with spaces.
+
+```text
+    public void Save(Customer customer)
+    {
+        <%PROCESS_TEMPLATE NullCheck%>
+    }
+```
+
+with the sub template
+
+```text
+if (customer == null)
+{
+    throw new ArgumentNullException(nameof(customer));
+}
+```
+
+writes
+
+```text
+    public void Save(Customer customer)
+    {
+        if (customer == null)
+        {
+            throw new ArgumentNullException(nameof(customer));
+        }
+    }
+```
+
+A sub template that is not alone on its line is written as it is. Inside an indented sub template, REMOVE_PREVIOUS and REMOVE_PREVIOUS_NEW_LINE
+remove only text of the sub template.
 
 ## FOREACH names and REUSE_FOREACH
 

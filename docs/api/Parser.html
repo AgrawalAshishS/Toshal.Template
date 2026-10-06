@@ -34,7 +34,8 @@
 <dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is nowhere in the template.</dd>
 <dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</dd>
 </dl>
-<h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
+<h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
+<p>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <a href="ProcessTemplateToken.html"><code>Indent</code></a>.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">var parser = new Parser();

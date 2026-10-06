@@ -1,5 +1,5 @@
 // Title: Whitespace control
-// Summary: Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing, not even its line break. REMOVE_PREVIOUS n still removes a last separator.
+// Summary: Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing. SEPARATOR writes a separator between rows, and a sub template on an indented line is indented as a whole.
 
 using Toshal.Template.Examples.Support;
 
@@ -32,10 +32,26 @@ public static class WhitespaceExample
         Console.WriteLine(status);
         Verify.Equal("Status: has items\n", status, "tags inside a text line");
 
-        // Remove the last separator of a list.
-        const string csv = "<%FOREACH items%><%CONTEXT_AS_STRING%>, <%ENDFOR%><%REMOVE_PREVIOUS 2%>.";
-        string line = processor.Process(new ProcessorArgs(new Parser().Parse(csv))).ToString();
-        Console.WriteLine(line);
-        Verify.Equal("Red, Green.", line, "remove previous 2");
+        // SEPARATOR is written in every row except the last: no trailing comma, and no characters to count.
+        const string parameters =
+            "public Paint(\n" +
+            "    <%FOREACH items%>\n" +
+            "    Color <%CONTEXT_AS_STRING%><%SEPARATOR%>,<%ENDSEPARATOR%>\n" +
+            "    <%ENDFOR%>\n" +
+            ")\n";
+        string signature = processor.Process(new ProcessorArgs(new Parser().Parse(parameters))).ToString();
+        Console.WriteLine(signature);
+        Verify.Equal("public Paint(\n    Color Red,\n    Color Green\n)\n", signature, "separator");
+
+        // A sub template alone on an indented line gets that indent on every line; its own indent stays.
+        var nullCheck = new Parser().Parse("if (color == null)\n{\n    throw new ArgumentNullException(nameof(color));\n}");
+        var subProcessor = new Processor { ProcessTemplateValueProvider = args => nullCheck };
+        const string method = "    public void Paint(Color color)\n    {\n        <%PROCESS_TEMPLATE null_check%>\n    }\n";
+        string body = subProcessor.Process(new ProcessorArgs(new Parser().Parse(method))).ToString();
+        Console.WriteLine(body);
+        Verify.Equal(
+            "    public void Paint(Color color)\n    {\n        if (color == null)\n        {\n            throw new ArgumentNullException(nameof(color));\n        }\n    }\n",
+            body,
+            "indented sub template");
     }
 }

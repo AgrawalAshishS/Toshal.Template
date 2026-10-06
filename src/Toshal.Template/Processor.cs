@@ -239,6 +239,14 @@ namespace Toshal.Template
                         if (context != null) output.Append(context.ToString());
                         break;
 
+                    case SeparatorToken separatorToken:
+                        if (run.InRowBeforeTheLast)
+                        {
+                            this.Process(output, separatorToken.InnerTokens, context, run, ref vars);
+                        }
+
+                        break;
+
                     case SetToken setToken:
                         var valueOutput = run.RentBuilder();
                         this.Process(valueOutput, setToken.InnerTokens, context, run, ref vars);
@@ -329,7 +337,51 @@ namespace Toshal.Template
             if (val != null)
             {
                 var templateVars = Variables.Child(vars);
-                this.Process(output, val, context, run, ref templateVars);
+                var indent = processTemplateToken.Indent;
+                if (string.IsNullOrEmpty(indent))
+                {
+                    this.Process(output, val, context, run, ref templateVars);
+                    return;
+                }
+
+                // Write the sub template into its own builder, then copy it with the indent after each line break.
+                var subOutput = run.RentBuilder();
+                this.Process(subOutput, val, context, run, ref templateVars);
+                AppendIndented(output, subOutput, indent);
+                run.ReturnBuilder(subOutput);
+            }
+        }
+
+        // Copies text and writes the indent at the start of every line after the first, except before an empty line and after the last line break,
+        // so no line gets trailing spaces.
+        private static void AppendIndented(StringBuilder output, StringBuilder text, string indent)
+        {
+            bool lineStart = false;
+            foreach (var chunk in text.GetChunks())
+            {
+                var span = chunk.Span;
+                while (!span.IsEmpty)
+                {
+                    if (lineStart)
+                    {
+                        lineStart = false;
+                        if (span[0] != '\n' && span[0] != '\r')
+                        {
+                            output.Append(indent);
+                        }
+                    }
+
+                    int newLine = span.IndexOf('\n');
+                    if (newLine < 0)
+                    {
+                        output.Append(span);
+                        break;
+                    }
+
+                    output.Append(span.Slice(0, newLine + 1));
+                    span = span.Slice(newLine + 1);
+                    lineStart = true;
+                }
             }
         }
 
@@ -353,11 +405,15 @@ namespace Toshal.Template
                 if (forEachToken.NoRecordTokens.Count > 0)
                 {
                     var noRecordVars = Variables.Child(vars);
+                    run.EnterLoop();
                     this.Process(output, forEachToken.NoRecordTokens, context, run, ref noRecordVars);
+                    run.ExitLoop();
                 }
 
                 return;
             }
+
+            run.EnterLoop();
 
             // The rows share one scope: a SET in a row is seen by the next rows, but not after the loop.
             var rowVars = Variables.Child(vars);
@@ -376,6 +432,7 @@ namespace Toshal.Template
                 var isAlt = i % 2 == 1;
 
                 run.ParentContext.Add(item);
+                run.SetRow(isLast: i == val.Count - 1);
 
                 var beforeTokens = (isAlt && forEachToken.BeforeAltRowTokens.Count > 0)
                                        ? forEachToken.BeforeAltRowTokens
@@ -438,6 +495,8 @@ namespace Toshal.Template
                 RemoveLast(run.ParentContext, item);
             }
 
+            run.LeaveRow();
+
             if (forEachToken.FooterTokens.Count > 0)
             {
                 var footerVars = Variables.Child(vars);
@@ -445,6 +504,7 @@ namespace Toshal.Template
             }
 
             RemoveLast(run.ParentContext, val);
+            run.ExitLoop();
         }
 
         // The parent context is a stack, so the entry a block added is the last one equal to it.
@@ -488,6 +548,32 @@ namespace Toshal.Template
 
             // Where the text of this call starts in a builder: after the text the caller had in the main output, at 0 in a SET value.
             public int StartOf(StringBuilder builder) => ReferenceEquals(builder, this.output) ? this.outputStart : 0;
+
+            // One state per FOREACH being processed, the innermost last: not in a row, in a row before the last, or in the last row.
+            private const byte NotInRow = 0;
+            private const byte RowBeforeTheLast = 1;
+            private const byte LastRow = 2;
+            private byte[] loopStates = Array.Empty<byte>();
+            private int loopDepth;
+
+            // True while a row of the innermost FOREACH is processed and it is not the last row: SEPARATOR blocks are written.
+            public bool InRowBeforeTheLast => this.loopDepth > 0 && this.loopStates[this.loopDepth - 1] == RowBeforeTheLast;
+
+            public void EnterLoop()
+            {
+                if (this.loopDepth == this.loopStates.Length)
+                {
+                    Array.Resize(ref this.loopStates, this.loopStates.Length + 4);
+                }
+
+                this.loopStates[this.loopDepth++] = NotInRow;
+            }
+
+            public void SetRow(bool isLast) => this.loopStates[this.loopDepth - 1] = isLast ? LastRow : RowBeforeTheLast;
+
+            public void LeaveRow() => this.loopStates[this.loopDepth - 1] = NotInRow;
+
+            public void ExitLoop() => this.loopDepth--;
 
             public List<object?> ParentContext { get; }
 

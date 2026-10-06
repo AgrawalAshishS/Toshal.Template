@@ -37,9 +37,11 @@ namespace Toshal.Template
         /// hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.
         /// </summary>
         /// <remarks>
-        /// <para>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET) and spaces
+        /// <para>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR,
+        /// ENDSEPARATOR) and spaces
         /// or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that
         /// writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</para>
+        /// <para>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <see cref="ProcessTemplateToken.Indent"/>.</para>
         /// </remarks>
         /// <param name="templateText">The template. An empty string gives an empty list.</param>
         /// <returns>The top level tokens, in template order.</returns>
@@ -67,8 +69,10 @@ namespace Toshal.Template
             this._forEachByLevel.Clear();
             this._allReuseForEachTokens.Clear();
             this._levels.Clear();
+            this._subTemplateIndents?.Clear();
 
             this._splits = SplitTemplateByTokens(templateText);
+            this.FindSubTemplateIndents(this._splits);
             RemoveTagLines(this._splits);
 
             this._splitIndex = 0;
@@ -186,6 +190,9 @@ namespace Toshal.Template
         ///     The _split index.
         /// </summary>
         private int _splitIndex;
+
+        // The indent of each PROCESS_TEMPLATE that stands alone on its line. Made only when a template has one.
+        private Dictionary<Split, string>? _subTemplateIndents;
 
         /// <summary>
         ///     The _splits.
@@ -424,7 +431,7 @@ namespace Toshal.Template
                 'I' => content.StartsWith("<%IF ", StringComparison.Ordinal),
                 'F' => content.StartsWith("<%FOREACH ", StringComparison.Ordinal) || ControlTags.Contains(content),
                 'W' => content.StartsWith("<%WITH ", StringComparison.Ordinal),
-                'S' => content.StartsWith("<%SET ", StringComparison.Ordinal),
+                'S' => content.StartsWith("<%SET ", StringComparison.Ordinal) || ControlTags.Contains(content),
                 'E' => content.StartsWith("<%ELSEIF ", StringComparison.Ordinal) || ControlTags.Contains(content),
                 'N' or 'H' or 'B' or 'R' or 'A' or 'L' => ControlTags.Contains(content),
                 _ => false,
@@ -436,7 +443,7 @@ namespace Toshal.Template
         private static readonly HashSet<string> ControlTags = new HashSet<string>(
             SectionTags.Select(tag => "<%" + tag + "%>")
                 .Concat(SectionTags.Select(tag => "<%END" + tag + "%>"))
-                .Concat(new[] { "<%ELSE%>", "<%ENDIF%>", "<%ENDFOR%>", "<%ENDWITH%>", "<%ENDSET%>" }),
+                .Concat(new[] { "<%ELSE%>", "<%ENDIF%>", "<%ENDFOR%>", "<%ENDWITH%>", "<%ENDSET%>", "<%SEPARATOR%>", "<%ENDSEPARATOR%>" }),
             StringComparer.Ordinal);
 
         // Parses one part of a FOREACH, from its open tag (the current split) to its end tag.
@@ -787,9 +794,85 @@ namespace Toshal.Template
                 return false;
             }
 
-            tokenList.Add(new ProcessTemplateToken(split));
+            var token = new ProcessTemplateToken(split);
+            if (this._subTemplateIndents != null && this._subTemplateIndents.TryGetValue(split, out var indent))
+            {
+                token.Indent = indent;
+            }
+
+            tokenList.Add(token);
 
             return true;
+        }
+
+        // <%SEPARATOR%>...<%ENDSEPARATOR%>: written in every row of the innermost FOREACH but the last.
+        private bool HandledAsSeparator(Split split, List<IToken> tokenList)
+        {
+            if (split.Content != "<%SEPARATOR%>")
+            {
+                return false;
+            }
+
+            var token = new SeparatorToken(split);
+
+            this._splitIndex++;
+            if (this.ProcessSplitsTillEnd(token.InnerTokens) || this._splits[this._splitIndex].Content != "<%ENDSEPARATOR%>")
+            {
+                throw new TokenNotClosedException(split, "SEPARATOR");
+            }
+
+            tokenList.Add(token);
+            return true;
+        }
+
+        // A PROCESS_TEMPLATE alone on its line, after spaces or tabs: those spaces or tabs indent every line of the sub template.
+        // Found on the original text, before RemoveTagLines changes the text around the tags.
+        private void FindSubTemplateIndents(List<Split> splits)
+        {
+            for (int i = 1; i < splits.Count; i++)
+            {
+                if (!splits[i].Content.StartsWith("<%PROCESS_TEMPLATE ", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                // Before the tag: the text after the last line break, or the whole first split of the template, must be spaces or tabs.
+                string before = splits[i - 1].Content;
+                if (before.StartsWith("<%", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                int lastNewLine = before.LastIndexOf('\n');
+                if (lastNewLine < 0 && i - 1 != 0)
+                {
+                    continue;
+                }
+
+                if (!IsBlank(before, lastNewLine + 1, before.Length) || lastNewLine + 1 == before.Length)
+                {
+                    continue;
+                }
+
+                // After the tag: nothing, or text that is blank up to its first line break.
+                if (i + 1 < splits.Count)
+                {
+                    string after = splits[i + 1].Content;
+                    if (after.StartsWith("<%", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    int newLine = after.IndexOf('\n');
+                    if (!IsBlank(after, 0, newLine < 0 ? after.Length : newLine, allowCarriageReturnAtEnd: newLine >= 0))
+                    {
+                        continue;
+                    }
+                }
+
+                this._subTemplateIndents ??= new Dictionary<Split, string>(ReferenceEqualityComparer.Instance);
+                this._subTemplateIndents[splits[i]] = before.Substring(lastNewLine + 1);
+            }
         }
 
         private bool HandledAsContextAsString(Split split, List<IToken> tokenList)
@@ -889,6 +972,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandledAsContextAsString(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (this.HandledAsSeparator(split, tokenList))
                 {
                     continue;
                 }

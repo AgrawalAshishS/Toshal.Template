@@ -65,6 +65,25 @@ namespace Toshal.Template.Tokens
         public string Name { get; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the indent for the lines of the sub template: the spaces or tabs before the tag when the tag stands alone on its line,
+        /// otherwise an empty string. The parser sets it.
+        /// </summary>
+        /// <remarks>
+        /// <para>The processor writes the indent after every line break inside the sub template's text, except before an empty line and after the
+        /// last line break, so the sub template keeps its own indent and the outer indent is added on top. The first line gets the indent from the
+        /// template itself.</para>
+        /// <para>With an indent, <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> and <c>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</c> inside the sub template remove
+        /// only text of the sub template.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// var token = (ProcessTemplateToken)new Parser().Parse("{\n    &lt;%PROCESS_TEMPLATE body%&gt;\n}")[1];
+        /// string indent = token.Indent;   // four spaces
+        /// </code>
+        /// </example>
+        public string Indent { get; set; } = string.Empty;
+
+        /// <summary>
         /// Gets an attribute value, or a default when the tag does not have that attribute. The name is not case sensitive.
         /// </summary>
         /// <param name="attributeName">The attribute name.</param>

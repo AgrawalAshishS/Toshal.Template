@@ -22,14 +22,15 @@
 <tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the nearest FOREACH named <code>Existing</code> again, for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
 <tr><td><code>&lt;%WITH Name%&gt;...&lt;%ENDWITH%&gt;</code></td><td>Makes an object the context of the inner part. Null skips the part.</td><td><code>WithValueProvider</code></td></tr>
 <tr><td><code>&lt;%SET Name%&gt;...&lt;%ENDSET%&gt;</code></td><td>Writes the inner part into a variable instead of the output.</td><td>none</td></tr>
-<tr><td><code>&lt;%PROCESS_TEMPLATE Name%&gt;</code></td><td>Runs a sub template in place, with the current context.</td><td><code>ProcessTemplateValueProvider</code> returns tokens</td></tr>
+<tr><td><code>&lt;%PROCESS_TEMPLATE Name%&gt;</code></td><td>Runs a sub template in place, with the current context. Alone on an indented line, it indents every line of the sub template (see below).</td><td><code>ProcessTemplateValueProvider</code> returns tokens</td></tr>
+<tr><td><code>&lt;%SEPARATOR%&gt;...&lt;%ENDSEPARATOR%&gt;</code></td><td>Inside a FOREACH row: written in every row except the last, like the separator of <code>string.Join</code>.</td><td>none</td></tr>
 <tr><td><code>&lt;%CONTEXT_AS_STRING%&gt;</code></td><td>Writes <code>ToString()</code> of the current context.</td><td>none</td></tr>
-<tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far.</td><td>none</td></tr>
+<tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far. For a separator between rows, SEPARATOR is simpler and does not depend on the line breaks.</td><td>none</td></tr>
 <tr><td><code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code></td><td>Removes a <code>\n</code> at the end of the output, then a <code>\r</code> at the end.</td><td>none</td></tr>
 </table></div>
 <h2>Lines with only control tags</h2>
 <p>A line that holds only control tags and spaces or tabs writes nothing: not its indent, not the spaces between the tags, not its line break. So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.</p>
-<p>Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET and ENDSET. A line with any text, or with a tag that writes something (<code>&lt;%=Name%&gt;</code>, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both <code> </code> and <code> </code> line breaks work.</p>
+<p>Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET, ENDSET, SEPARATOR and ENDSEPARATOR. A line with any text, or with a tag that writes something (<code>&lt;%=Name%&gt;</code>, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both <code> </code> and <code> </code> line breaks work.</p>
 <pre><code class="lang-text">public class &lt;%=Name%&gt;
 {
     &lt;%FOREACH Columns%&gt;
@@ -43,6 +44,39 @@
     public string Email { get; set; }
 }</code></pre>
 <p>The parser does this once, when it parses the template, so it costs nothing while processing.</p>
+<h2>SEPARATOR</h2>
+<p><code>&lt;%SEPARATOR%&gt;...&lt;%ENDSEPARATOR%&gt;</code> is written in every row of the innermost FOREACH except the last one. It counts no characters, so unlike <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> it works the same with <code>\n</code> and <code>\r\n</code> line breaks.</p>
+<pre><code class="lang-text">public Customer(
+    &lt;%FOREACH Fields%&gt;
+    &lt;%=Type%&gt; &lt;%=Name%&gt;&lt;%SEPARATOR%&gt;,&lt;%ENDSEPARATOR%&gt;
+    &lt;%ENDFOR%&gt;
+)</code></pre>
+<p>writes</p>
+<pre><code class="lang-text">public Customer(
+    int id,
+    string email
+)</code></pre>
+<p>It may stand anywhere in a row: in the ROW, ALTROW, FIRSTROW or LASTROW part, in a BEFORE or AFTER part, or inside an IF or WITH in the row. In a HEADER, FOOTER or NORECORD part, or outside any FOREACH, it writes nothing. In a sub template that a row runs with PROCESS_TEMPLATE it belongs to that row.</p>
+<h2>Indented sub templates</h2>
+<p>When <code>&lt;%PROCESS_TEMPLATE Name%&gt;</code> stands alone on its line after spaces or tabs, those spaces or tabs indent every line of the sub template. The sub template keeps its own indent; the outer indent is added on top. Empty lines get no indent, so no line ends with spaces.</p>
+<pre><code class="lang-text">    public void Save(Customer customer)
+    {
+        &lt;%PROCESS_TEMPLATE NullCheck%&gt;
+    }</code></pre>
+<p>with the sub template</p>
+<pre><code class="lang-text">if (customer == null)
+{
+    throw new ArgumentNullException(nameof(customer));
+}</code></pre>
+<p>writes</p>
+<pre><code class="lang-text">    public void Save(Customer customer)
+    {
+        if (customer == null)
+        {
+            throw new ArgumentNullException(nameof(customer));
+        }
+    }</code></pre>
+<p>A sub template that is not alone on its line is written as it is. Inside an indented sub template, REMOVE_PREVIOUS and REMOVE_PREVIOUS_NEW_LINE remove only text of the sub template.</p>
 <h2>FOREACH names and REUSE_FOREACH</h2>
 <p>A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. Two FOREACH blocks with the same name at the same level are a <code>ParserException</code>; the same name at a deeper level, or in the IF and the ELSE part, is fine.</p>
 <p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).</p>
