@@ -17,7 +17,7 @@ namespace Toshal.Template.Tokens
     /// // token.Name == "total", token.GetAttribute("format", "") == "0.00"
     /// </code>
     /// </example>
-    public class NamedToken : Token
+    public sealed class NamedToken : Token
     {
         /// <summary>
         /// Reads the name and attributes of a value tag. The parser calls it.

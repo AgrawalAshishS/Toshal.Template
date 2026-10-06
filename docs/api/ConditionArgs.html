@@ -13,6 +13,7 @@
 <p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
 <p>The arguments of <a href="Processor.html"><code>ConditionValueProvider</code></a> for an <code>&lt;%IF name%&gt;</code> or <code>&lt;%ELSEIF name%&gt;</code> tag.</p>
 <h4>Remarks</h4><p>For <code>&lt;%IF not Paid%&gt;</code> the name is <code>paid</code>. Return whether <code>paid</code> is true; the processor applies the <code>not</code>.</p>
+<p class="warning"><strong>Warning:</strong> within one <a href="Processor.html"><code>Process</code></a> call the processor reuses one <a href="ConditionArgs.html"><code>ConditionArgs</code></a> object for every IF and ELSEIF tag, so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">processor.ConditionValueProvider = args =&gt; args.Name == &quot;paid&quot; &amp;&amp; ((Invoice)args.Context!).Paid;</code></pre>

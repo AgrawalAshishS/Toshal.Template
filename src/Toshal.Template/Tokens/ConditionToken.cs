@@ -17,7 +17,7 @@ namespace Toshal.Template.Tokens
     /// // token.Name == "paid", token.IsPositive == false, token.FalsePart is an ElseToken
     /// </code>
     /// </example>
-    public class ConditionToken : ContainerTokenBase
+    public sealed class ConditionToken : ContainerTokenBase
     {
         /// <summary>
         /// Reads the name, the <c>not</c> and the attributes from an IF or ELSEIF tag. The parser calls it.

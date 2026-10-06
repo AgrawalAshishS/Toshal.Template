@@ -16,7 +16,7 @@ namespace Toshal.Template.Tokens
     /// processor.WithValueProvider = args =&gt; args.Name == "customer" ? ((Order)args.Context!).Customer : null;
     /// </code>
     /// </example>
-    public class WithToken : ContainerTokenBase
+    public sealed class WithToken : ContainerTokenBase
     {
         /// <summary>
         /// Reads the name and attributes of the tag. The parser calls it and then fills <see cref="ContainerTokenBase.InnerTokens"/>.

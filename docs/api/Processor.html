@@ -13,7 +13,8 @@
 <p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
 <p>Turns parsed tokens into text. The data comes from five provider delegates that you set: one for each kind of tag that needs data. The processor does not read properties by reflection; your providers decide what each name means.</p>
 <h4>Remarks</h4><p class="warning"><strong>Warning:</strong> when a provider is not set, its tags are skipped without an error. An IF block (with its ELSE) is skipped when <a href="Processor.html"><code>ConditionValueProvider</code></a> is null, a FOREACH block (with its NORECORD) when <a href="Processor.html"><code>LoopValueProvider</code></a> is null, and so on. A <code>&lt;%=name%&gt;</code> still writes a SET variable of that name when there is one.</p>
-<p>The processor keeps no state between calls other than the provider properties, so one instance can process many templates.</p>
+<p>The processor keeps no state between calls other than the provider properties, so one instance can process many templates, also from many threads at once.</p>
+<p class="warning"><strong>Warning:</strong> to save allocations, one call of <a href="Processor.html"><code>Process</code></a> reuses one <a href="TokenArgs.html"><code>TokenArgs</code></a> for all value and WITH tags and one <a href="ConditionArgs.html"><code>ConditionArgs</code></a> for all IF and ELSEIF tags. An args object is valid only while your provider runs; do not keep it.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">var processor = new Processor

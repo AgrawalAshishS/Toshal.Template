@@ -10,6 +10,8 @@ namespace Toshal.Template
     /// </summary>
     /// <remarks>
     /// <para>For <c>&lt;%IF not Paid%&gt;</c> the name is <c>paid</c>. Return whether <c>paid</c> is true; the processor applies the <c>not</c>.</para>
+    /// <para><b>Warning:</b> within one <see cref="Processor.Process(ProcessorArgs)"/> call the processor reuses one <see cref="ConditionArgs"/> object for every IF and ELSEIF tag,
+    /// so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</para>
     /// </remarks>
     /// <example>
     /// <code>
@@ -66,5 +68,12 @@ namespace Toshal.Template
         /// </code>
         /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
+
+        internal ConditionArgs Reuse(ConditionToken token, object? context)
+        {
+            this.Reuse(token.Name, context);
+            this.Attributes = token.Attributes;
+            return this;
+        }
     }
 }

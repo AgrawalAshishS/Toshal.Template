@@ -11,7 +11,7 @@ namespace Toshal.Template.Tokens
     /// var elsePart = (ElseToken)token.FalsePart!;   // elsePart.InnerTokens holds "Please pay"
     /// </code>
     /// </example>
-    public class ElseToken : ContainerTokenBase
+    public sealed class ElseToken : ContainerTokenBase
     {
         /// <summary>
         /// Creates the token. The parser calls it and then fills <see cref="ContainerTokenBase.InnerTokens"/>.

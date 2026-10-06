@@ -21,7 +21,7 @@ namespace Toshal.Template.Tokens
     /// // &lt;%SET greeting%&gt;Hello &lt;%=Name%&gt;&lt;%ENDSET%&gt;&lt;%=greeting%&gt;, &lt;%=greeting%&gt;!
     /// </code>
     /// </example>
-    public class SetToken : ContainerTokenBase
+    public sealed class SetToken : ContainerTokenBase
     {
         /// <summary>
         /// Reads the variable name and attributes of the tag. The parser calls it and then fills <see cref="ContainerTokenBase.InnerTokens"/>.

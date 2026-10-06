@@ -18,7 +18,10 @@ namespace Toshal.Template
     /// <para><b>Warning:</b> when a provider is not set, its tags are skipped without an error. An IF block (with its ELSE) is skipped when
     /// <see cref="ConditionValueProvider"/> is null, a FOREACH block (with its NORECORD) when <see cref="LoopValueProvider"/> is null, and so on.
     /// A <c>&lt;%=name%&gt;</c> still writes a SET variable of that name when there is one.</para>
-    /// <para>The processor keeps no state between calls other than the provider properties, so one instance can process many templates.</para>
+    /// <para>The processor keeps no state between calls other than the provider properties, so one instance can process many templates,
+    /// also from many threads at once.</para>
+    /// <para><b>Warning:</b> to save allocations, one call of <see cref="Process(ProcessorArgs)"/> reuses one <see cref="TokenArgs"/> for all value and
+    /// WITH tags and one <see cref="ConditionArgs"/> for all IF and ELSEIF tags. An args object is valid only while your provider runs; do not keep it.</para>
     /// </remarks>
     /// <example>
     /// <code>
@@ -58,7 +61,7 @@ namespace Toshal.Template
             if (args.Context != null) { parentContext.Add(args.Context); }
 
             var vars = default(Variables);
-            this.Process(retVal, args.TokenList, args.Context, parentContext, ref vars);
+            this.Process(retVal, args.TokenList, args.Context, new Run(parentContext), ref vars);
 
             return retVal;
         }
@@ -125,11 +128,11 @@ namespace Toshal.Template
 
         // Runs the tokens of one block. vars is the scope of SET variables: a block that shares the scope of its parent (IF, ELSE, a SET value,
         // the rows of one FOREACH) gets the same ref; a block with its own scope gets Variables.Child, which copies only when a SET writes.
-        private void Process(StringBuilder output, List<IToken> tokenList, object? context, List<object?> parentContext, ref Variables vars)
+        private void Process(StringBuilder output, List<IToken> tokenList, object? context, Run run, ref Variables vars)
         {
             for (var i = 0; i < tokenList.Count; i++)
             {
-                // Same order of checks as before: a class that derives from two token types is handled as the first one.
+                // The token classes are sealed, so each case is one type compare. The most common tokens come first.
                 switch (tokenList[i])
                 {
                     case ContentToken contentToken:
@@ -137,13 +140,13 @@ namespace Toshal.Template
                         break;
 
                     case NamedToken namedToken:
-                        this.ProcessNamed(output, namedToken, context, parentContext, ref vars);
+                        this.ProcessNamed(output, namedToken, context, run, ref vars);
                         break;
 
                     case ConditionToken conditionToken:
                         if (this.ConditionValueProvider != null)
                         {
-                            this.ProcessCondition(output, conditionToken, context, parentContext, ref vars);
+                            this.ProcessCondition(output, conditionToken, context, run, ref vars);
                         }
 
                         break;
@@ -152,18 +155,18 @@ namespace Toshal.Template
                         var loopValueProvider = this.LoopValueProvider;
                         if (loopValueProvider != null)
                         {
-                            var args = new LoopArgs(forEachToken, context, parentContext);
-                            this.ProcessForEach(output, context, args, forEachToken, loopValueProvider, ref vars);
+                            var args = new LoopArgs(forEachToken, context, run.ParentContext);
+                            this.ProcessForEach(output, context, args, forEachToken, loopValueProvider, run, ref vars);
                         }
 
                         break;
 
                     case ReuseForEachToken reuseForEachToken:
-                        this.ProcessReuseForEach(output, reuseForEachToken, context, parentContext, ref vars);
+                        this.ProcessReuseForEach(output, reuseForEachToken, context, run, ref vars);
                         break;
 
                     case WithToken withToken:
-                        this.ProcessWith(output, withToken, context, parentContext, ref vars);
+                        this.ProcessWith(output, withToken, context, run, ref vars);
                         break;
 
                     case RemovePreviousNewLineToken:
@@ -177,7 +180,7 @@ namespace Toshal.Template
                         break;
 
                     case ProcessTemplateToken processTemplateToken:
-                        this.ProcessTemplate(output, processTemplateToken, context, parentContext, ref vars);
+                        this.ProcessTemplate(output, processTemplateToken, context, run, ref vars);
                         break;
 
                     case ContextAsStringToken:
@@ -186,14 +189,14 @@ namespace Toshal.Template
 
                     case SetToken setToken:
                         var valueOutput = new StringBuilder();
-                        this.Process(valueOutput, setToken.InnerTokens, context, parentContext, ref vars);
+                        this.Process(valueOutput, setToken.InnerTokens, context, run, ref vars);
                         vars.Set(setToken.Name, valueOutput.ToString());
                         break;
                 }
             }
         }
 
-        private void ProcessNamed(StringBuilder output, NamedToken namedToken, object? context, List<object?> parentContext, ref Variables vars)
+        private void ProcessNamed(StringBuilder output, NamedToken namedToken, object? context, Run run, ref Variables vars)
         {
             if (vars.TryGet(namedToken.Name, out var value))
             {
@@ -204,32 +207,32 @@ namespace Toshal.Template
             var tokenValueProvider = this.TokenValueProvider;
             if (tokenValueProvider == null) return; //skip as there is no value provider
 
-            var val = tokenValueProvider(new TokenArgs(namedToken, context, parentContext));
+            var val = tokenValueProvider(run.TokenArgs(namedToken, context));
             if (!string.IsNullOrEmpty(val))
             {
                 output.Append(val);
             }
         }
 
-        private void ProcessCondition(StringBuilder output, ConditionToken conditionToken, object? context, List<object?> parentContext, ref Variables vars)
+        private void ProcessCondition(StringBuilder output, ConditionToken conditionToken, object? context, Run run, ref Variables vars)
         {
-            var val = this.ConditionValueProvider!(new ConditionArgs(conditionToken, context, parentContext));
+            var val = this.ConditionValueProvider!(run.ConditionArgs(conditionToken, context));
 
             if (conditionToken.IsPositive == val)
             {
-                this.Process(output, conditionToken.InnerTokens, context, parentContext, ref vars);
+                this.Process(output, conditionToken.InnerTokens, context, run, ref vars);
             }
             else if (conditionToken.FalsePart is ElseToken elseToken)
             {
-                this.Process(output, elseToken.InnerTokens, context, parentContext, ref vars);
+                this.Process(output, elseToken.InnerTokens, context, run, ref vars);
             }
             else if (conditionToken.FalsePart is ConditionToken elseIfToken)
             {
-                this.ProcessCondition(output, elseIfToken, context, parentContext, ref vars);
+                this.ProcessCondition(output, elseIfToken, context, run, ref vars);
             }
         }
 
-        private void ProcessReuseForEach(StringBuilder output, ReuseForEachToken reuseForEachToken, object? context, List<object?> parentContext, ref Variables vars)
+        private void ProcessReuseForEach(StringBuilder output, ReuseForEachToken reuseForEachToken, object? context, Run run, ref Variables vars)
         {
             var loopValueProvider = this.LoopValueProvider;
             if (loopValueProvider == null) return;
@@ -238,35 +241,35 @@ namespace Toshal.Template
             var existing = reuseForEachToken.ExistingForEachToken
                 ?? throw new InvalidOperationException("REUSE_FOREACH " + reuseForEachToken.Name + " is not linked to a FOREACH. Create tokens with Parser.Parse.");
 
-            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, existing.Attributes);
-            this.ProcessForEach(output, context, args, existing, loopValueProvider, ref vars);
+            var args = new LoopArgs(reuseForEachToken.Name, context, run.ParentContext, existing.Attributes);
+            this.ProcessForEach(output, context, args, existing, loopValueProvider, run, ref vars);
         }
 
-        private void ProcessWith(StringBuilder output, WithToken withToken, object? context, List<object?> parentContext, ref Variables vars)
+        private void ProcessWith(StringBuilder output, WithToken withToken, object? context, Run run, ref Variables vars)
         {
             var withValueProvider = this.WithValueProvider;
             if (withValueProvider == null) return; //skip as there is no value provider
 
-            var val = withValueProvider(new TokenArgs(withToken, context, parentContext));
+            var val = withValueProvider(run.TokenArgs(withToken, context));
             if (val != null)
             {
-                parentContext.Add(val);
+                run.ParentContext.Add(val);
                 var withVars = Variables.Child(vars);
-                this.Process(output, withToken.InnerTokens, val, parentContext, ref withVars);
-                RemoveLast(parentContext, val);
+                this.Process(output, withToken.InnerTokens, val, run, ref withVars);
+                RemoveLast(run.ParentContext, val);
             }
         }
 
-        private void ProcessTemplate(StringBuilder output, ProcessTemplateToken processTemplateToken, object? context, List<object?> parentContext, ref Variables vars)
+        private void ProcessTemplate(StringBuilder output, ProcessTemplateToken processTemplateToken, object? context, Run run, ref Variables vars)
         {
             var processTemplateValueProvider = this.ProcessTemplateValueProvider;
             if (processTemplateValueProvider == null) return; //skip as there is no value provider
 
-            var val = processTemplateValueProvider(new ProcessTemplateArgs(processTemplateToken, context, parentContext));
+            var val = processTemplateValueProvider(new ProcessTemplateArgs(processTemplateToken, context, run.ParentContext));
             if (val != null)
             {
                 var templateVars = Variables.Child(vars);
-                this.Process(output, val, context, parentContext, ref templateVars);
+                this.Process(output, val, context, run, ref templateVars);
             }
         }
 
@@ -281,7 +284,7 @@ namespace Toshal.Template
                 output.Remove(output.Length - 1, 1);
         }
 
-        private void ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, ref Variables vars)
+        private void ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, Run run, ref Variables vars)
         {
             var val = loopValueProvider(args);
             if (val == null || val.Count == 0)
@@ -289,7 +292,7 @@ namespace Toshal.Template
                 if (forEachToken.NoRecordTokens.Count > 0)
                 {
                     var noRecordVars = Variables.Child(vars);
-                    this.Process(output, forEachToken.NoRecordTokens, context, args.ParentContext, ref noRecordVars);
+                    this.Process(output, forEachToken.NoRecordTokens, context, run, ref noRecordVars);
                 }
 
                 return;
@@ -298,12 +301,12 @@ namespace Toshal.Template
             // The rows share one scope: a SET in a row is seen by the next rows, but not after the loop.
             var rowVars = Variables.Child(vars);
 
-            args.ParentContext.Add(val);
+            run.ParentContext.Add(val);
 
             if (forEachToken.HeaderTokens.Count > 0)
             {
                 var headerVars = Variables.Child(vars);
-                this.Process(output, forEachToken.HeaderTokens, val, args.ParentContext, ref headerVars);
+                this.Process(output, forEachToken.HeaderTokens, val, run, ref headerVars);
             }
 
             for (var i = 0; i < val.Count; i++)
@@ -311,7 +314,7 @@ namespace Toshal.Template
                 var item = val[i];
                 var isAlt = i % 2 == 1;
 
-                args.ParentContext.Add(item);
+                run.ParentContext.Add(item);
 
                 var beforeTokens = (isAlt && forEachToken.BeforeAltRowTokens.Count > 0)
                                        ? forEachToken.BeforeAltRowTokens
@@ -357,30 +360,30 @@ namespace Toshal.Template
                 if (beforeTokens.Count > 0)
                 {
                     var beforeVars = Variables.Child(rowVars);
-                    this.Process(output, beforeTokens, item, args.ParentContext, ref beforeVars);
+                    this.Process(output, beforeTokens, item, run, ref beforeVars);
                 }
 
                 if (rowTokens.Count > 0)
                 {
-                    this.Process(output, rowTokens, item, args.ParentContext, ref rowVars);
+                    this.Process(output, rowTokens, item, run, ref rowVars);
                 }
 
                 if (afterTokens.Count > 0)
                 {
                     var afterVars = Variables.Child(rowVars);
-                    this.Process(output, afterTokens, item, args.ParentContext, ref afterVars);
+                    this.Process(output, afterTokens, item, run, ref afterVars);
                 }
 
-                RemoveLast(args.ParentContext, item);
+                RemoveLast(run.ParentContext, item);
             }
 
             if (forEachToken.FooterTokens.Count > 0)
             {
                 var footerVars = Variables.Child(vars);
-                this.Process(output, forEachToken.FooterTokens, val, args.ParentContext, ref footerVars);
+                this.Process(output, forEachToken.FooterTokens, val, run, ref footerVars);
             }
 
-            RemoveLast(args.ParentContext, val);
+            RemoveLast(run.ParentContext, val);
         }
 
         // The parent context is a stack, so the entry a block added is the last one equal to it.
@@ -390,6 +393,42 @@ namespace Toshal.Template
             if (index >= 0)
             {
                 parentContext.RemoveAt(index);
+            }
+        }
+
+        // The state of one call of Process: the stack of parent contexts, and one TokenArgs and one ConditionArgs that every provider call reuses.
+        // A new Run per call keeps one Processor safe to use from many threads, and lets a provider call Process again.
+        private sealed class Run
+        {
+            private TokenArgs? tokenArgs;
+            private ConditionArgs? conditionArgs;
+
+            public Run(List<object?> parentContext)
+            {
+                this.ParentContext = parentContext;
+            }
+
+            public List<object?> ParentContext { get; }
+
+            public TokenArgs TokenArgs(NamedToken token, object? context)
+            {
+                return this.tokenArgs == null
+                    ? this.tokenArgs = new TokenArgs(token, context, this.ParentContext)
+                    : this.tokenArgs.Reuse(token.Name, token.Attributes, context);
+            }
+
+            public TokenArgs TokenArgs(WithToken token, object? context)
+            {
+                return this.tokenArgs == null
+                    ? this.tokenArgs = new TokenArgs(token, context, this.ParentContext)
+                    : this.tokenArgs.Reuse(token.Name, token.Attributes, context);
+            }
+
+            public ConditionArgs ConditionArgs(ConditionToken token, object? context)
+            {
+                return this.conditionArgs == null
+                    ? this.conditionArgs = new ConditionArgs(token, context, this.ParentContext)
+                    : this.conditionArgs.Reuse(token, context);
             }
         }
 

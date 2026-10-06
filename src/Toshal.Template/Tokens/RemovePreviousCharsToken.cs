@@ -15,7 +15,7 @@ namespace Toshal.Template.Tokens
     /// // &lt;%FOREACH tags%&gt;&lt;%CONTEXT_AS_STRING%&gt;, &lt;%ENDFOR%&gt;&lt;%REMOVE_PREVIOUS 2%&gt;   writes   a, b
     /// </code>
     /// </example>
-    public class RemovePreviousCharsToken : Token
+    public sealed class RemovePreviousCharsToken : Token
     {
         /// <summary>
         /// Reads the number of characters from the tag. The parser calls it.

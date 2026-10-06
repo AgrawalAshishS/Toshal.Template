@@ -14,7 +14,7 @@ namespace Toshal.Template.Tokens
     /// // "Hello\r\n&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;World"   writes   HelloWorld
     /// </code>
     /// </example>
-    public class RemovePreviousNewLineToken : Token
+    public sealed class RemovePreviousNewLineToken : Token
     {
         /// <summary>
         /// Creates the token. The parser calls it.

@@ -28,7 +28,7 @@ namespace Toshal.Template.Tokens
     /// &lt;%ENDFOR%&gt;
     /// </code>
     /// </example>
-    public class ForEachToken : Token
+    public sealed class ForEachToken : Token
     {
         /// <summary>
         /// Reads the name and attributes of a FOREACH tag and creates empty part lists. The parser calls it and then fills the parts.

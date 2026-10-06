@@ -12,6 +12,8 @@
 <h1>TokenArgs</h1>
 <p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
 <p>The arguments of <a href="Processor.html"><code>TokenValueProvider</code></a> for a <code>&lt;%=name%&gt;</code> tag, and of <a href="Processor.html"><code>WithValueProvider</code></a> for a <code>&lt;%WITH name%&gt;</code> tag.</p>
+<h4>Remarks</h4><p class="warning"><strong>Warning:</strong> within one <a href="Processor.html"><code>Process</code></a> call the processor reuses one <a href="TokenArgs.html"><code>TokenArgs</code></a> object for every value and WITH tag, so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</p>
+
 <h4>Example</h4>
 <pre><code class="lang-csharp">processor.TokenValueProvider = args =&gt; args.Name switch
 {

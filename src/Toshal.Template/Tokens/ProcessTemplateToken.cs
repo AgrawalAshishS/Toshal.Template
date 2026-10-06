@@ -18,7 +18,7 @@ namespace Toshal.Template.Tokens
     /// // token.Name == "footer", token.GetAttribute("lang", "") == "en"
     /// </code>
     /// </example>
-    public class ProcessTemplateToken : Token
+    public sealed class ProcessTemplateToken : Token
     {
         /// <summary>
         /// Reads the name and attributes of the tag. The parser calls it.

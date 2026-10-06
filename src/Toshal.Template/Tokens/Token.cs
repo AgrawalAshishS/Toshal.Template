@@ -10,6 +10,10 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// The base class of all tokens. It holds the position of the token in the template.
     /// </summary>
+    /// <remarks>
+    /// <para>The token classes are sealed, so the processor needs only one type check per token. The processor skips a token of a class
+    /// that you derive from <see cref="Token"/> yourself; it writes nothing for it.</para>
+    /// </remarks>
     /// <example>
     /// <code>
     /// Token token = new ContentToken(new Split { Content = "Hi", LineNumber = 1, StartingPosition = 1 });

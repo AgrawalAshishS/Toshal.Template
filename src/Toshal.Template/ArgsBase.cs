@@ -74,6 +74,13 @@ namespace Toshal.Template
         /// </example>
         public List<object?> ParentContext { get; private set; }
 
+        // The processor reuses one args object for many provider calls; this points it to the next tag.
+        private protected void Reuse(string name, object? context)
+        {
+            this.Name = name;
+            this.Context = context;
+        }
+
         /// <summary>
         /// Finds the nearest entry of type <typeparamref name="T"/> in <see cref="ParentContext"/>, searching from the inside (the last entry) out.
         /// The current context is normally the last entry, so it is found first when it matches.

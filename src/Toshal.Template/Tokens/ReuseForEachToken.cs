@@ -19,7 +19,7 @@ namespace Toshal.Template.Tokens
     /// // &lt;%FOREACH open%&gt;- &lt;%=Title%&gt;&lt;%ENDFOR%&gt;  Done: &lt;%REUSE_FOREACH open done%&gt;
     /// </code>
     /// </example>
-    public class ReuseForEachToken : Token
+    public sealed class ReuseForEachToken : Token
     {
         /// <summary>
         /// Reads the existing FOREACH name and the new name from the tag. The parser calls it and later sets <see cref="ExistingForEachToken"/>.

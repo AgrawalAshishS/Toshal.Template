@@ -9,6 +9,10 @@ namespace Toshal.Template
     /// The arguments of <see cref="Processor.TokenValueProvider"/> for a <c>&lt;%=name%&gt;</c> tag, and of
     /// <see cref="Processor.WithValueProvider"/> for a <c>&lt;%WITH name%&gt;</c> tag.
     /// </summary>
+    /// <remarks>
+    /// <para><b>Warning:</b> within one <see cref="Processor.Process(ProcessorArgs)"/> call the processor reuses one <see cref="TokenArgs"/> object for every value and WITH tag,
+    /// so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</para>
+    /// </remarks>
     /// <example>
     /// <code>
     /// processor.TokenValueProvider = args =&gt; args.Name switch
@@ -85,6 +89,13 @@ namespace Toshal.Template
         /// </code>
         /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
+
+        internal TokenArgs Reuse(string name, TokenAttributeDictionary attributes, object? context)
+        {
+            this.Reuse(name, context);
+            this.Attributes = attributes;
+            return this;
+        }
 
         /// <summary>
         /// Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.

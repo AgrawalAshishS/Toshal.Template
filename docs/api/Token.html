@@ -12,6 +12,8 @@
 <h1>Token</h1>
 <p class="muted">abstract class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
 <p>The base class of all tokens. It holds the position of the token in the template.</p>
+<h4>Remarks</h4><p>The token classes are sealed, so the processor needs only one type check per token. The processor skips a token of a class that you derive from <a href="Token.html"><code>Token</code></a> yourself; it writes nothing for it.</p>
+
 <h4>Example</h4>
 <pre><code class="lang-csharp">Token token = new ContentToken(new Split { Content = &quot;Hi&quot;, LineNumber = 1, StartingPosition = 1 });</code></pre>
 

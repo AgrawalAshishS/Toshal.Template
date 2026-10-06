@@ -14,7 +14,7 @@ namespace Toshal.Template.Tokens
     /// // &lt;%FOREACH tags%&gt;#&lt;%CONTEXT_AS_STRING%&gt; &lt;%ENDFOR%&gt;   writes   #a #b
     /// </code>
     /// </example>
-    public class ContextAsStringToken : Token
+    public sealed class ContextAsStringToken : Token
     {
         /// <summary>
         /// Creates the token. The parser calls it.

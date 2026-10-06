@@ -12,7 +12,7 @@ namespace Toshal.Template.Tokens
     /// var text = (ContentToken)new Parser().Parse("Hello &lt;%=Name%&gt;")[0];   // text.Content == "Hello "
     /// </code>
     /// </example>
-    public class ContentToken : Token
+    public sealed class ContentToken : Token
     {
         /// <summary>
         /// Creates the token from a piece of plain text. The parser calls it.

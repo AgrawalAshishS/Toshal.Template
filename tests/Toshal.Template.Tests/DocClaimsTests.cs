@@ -311,6 +311,90 @@ namespace Toshal.Template.Tests
         private static readonly IToken ConditionTokenInstance = new Parser().Parse("<%IF a%><%ENDIF%>")[0];
 
         [Fact]
+        public void OneProcessCallReusesOneTokenArgsAndOneConditionArgs()
+        {
+            var tokenArgs = new List<TokenArgs>();
+            var conditionArgs = new List<ConditionArgs>();
+            var processor = new Processor
+            {
+                TokenValueProvider = args => { tokenArgs.Add(args); return args.Name; },
+                WithValueProvider = args => { tokenArgs.Add(args); return "w"; },
+                ConditionValueProvider = args => { conditionArgs.Add(args); return true; },
+            };
+
+            Assert.Equal("ab", Run("<%=a%><%WITH w%><%=b%><%ENDWITH%><%IF c%><%ENDIF%><%IF d%><%ENDIF%>", processor));
+
+            Assert.Equal(3, tokenArgs.Count);
+            Assert.All(tokenArgs, args => Assert.Same(tokenArgs[0], args));
+            Assert.Same(conditionArgs[0], conditionArgs[1]);
+
+            // A kept args object shows the last tag, not the one it was made for.
+            Assert.Equal("b", tokenArgs[0].Name);
+            Assert.Equal("d", conditionArgs[0].Name);
+        }
+
+        [Fact]
+        public void EachProcessCallGetsItsOwnArgs()
+        {
+            var seen = new List<TokenArgs>();
+            var processor = new Processor { TokenValueProvider = args => { seen.Add(args); return null; } };
+
+            Run("<%=a%>", processor);
+            Run("<%=a%>", processor);
+
+            Assert.NotSame(seen[0], seen[1]);
+        }
+
+        [Fact]
+        public void OneProcessorCanProcessFromManyThreadsAtOnce()
+        {
+            var processor = new Processor
+            {
+                TokenValueProvider = args => args.Name == "n" ? (string?)args.Context : null,
+                ConditionValueProvider = args => ((string)args.Context!).Length % 2 == 0,
+                WithValueProvider = args => args.Context + "!",
+            };
+            var tokens = new Parser().Parse("<%=n%><%IF even%>E<%ELSE%>O<%ENDIF%><%WITH x%><%=n%><%ENDWITH%>");
+
+            System.Threading.Tasks.Parallel.For(0, 2000, i =>
+            {
+                var context = new string('x', i % 7 + 1);
+                var expected = context + (context.Length % 2 == 0 ? "E" : "O") + context + "!";
+                Assert.Equal(expected, processor.Process(new ProcessorArgs(tokens) { Context = context }).ToString());
+            });
+        }
+
+        [Fact]
+        public void AProviderCanCallProcessAgain()
+        {
+            var inner = new Parser().Parse("[<%=b%>]");
+            Processor processor = null!;
+            processor = new Processor
+            {
+                TokenValueProvider = args => args.Name == "a"
+                    ? processor.Process(new ProcessorArgs(inner) { Context = "in" }).ToString() + args.Name
+                    : args.Name + args.Context,
+            };
+
+            Assert.Equal("[bin]a", Run("<%=a%>", processor, "out"));
+        }
+
+        [Fact]
+        public void TokenClassesAreSealedAndOwnTokensAreSkipped()
+        {
+            var tokenTypes = typeof(Token).Assembly.GetTypes().Where(t => typeof(Token).IsAssignableFrom(t) && !t.IsAbstract);
+            Assert.All(tokenTypes, t => Assert.True(t.IsSealed, t.Name));
+
+            var tokens = new Parser().Parse("a<%=b%>c");
+            tokens.Insert(1, new OwnToken());
+            var processor = new Processor { TokenValueProvider = args => "B" };
+
+            Assert.Equal("aBc", processor.Process(new ProcessorArgs(tokens)).ToString());
+        }
+
+        private sealed class OwnToken : Token { }
+
+        [Fact]
         public void GlobalProvidersComeAfterTypedProvidersByDefault()
         {
             var registry = new ContextProviderRegistry().Register(new NameOfString()).RegisterGlobal(new NameGlobal());
