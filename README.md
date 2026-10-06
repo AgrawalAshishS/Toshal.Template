@@ -21,7 +21,7 @@ string text = processor.Process(new ProcessorArgs(tokens)).ToString();   // Hell
 
 ## Tags
 
-`<%=Name%>` values (with attributes such as `format="0.00"`), `IF` / `ELSEIF` / `ELSE` / `not`, `FOREACH` with header, footer, alternating, first, last and "no rows" parts, `REUSE_FOREACH`, `WITH`, `SET` variables, `PROCESS_TEMPLATE` sub templates, `CONTEXT_AS_STRING`, and `REMOVE_PREVIOUS` / `REMOVE_PREVIOUS_NEW_LINE` for whitespace control.
+`<%=Name%>` values (with attributes such as `format="0.00"`), `IF` / `ELSEIF` / `ELSE` / `not`, `FOREACH` with header, footer, alternating, first, last and "no rows" parts, `REUSE_FOREACH`, `WITH`, `SET` variables, `PROCESS_TEMPLATE` sub templates, `CONTEXT_AS_STRING`, `REMOVE_PREVIOUS` / `REMOVE_PREVIOUS_NEW_LINE` for whitespace control, `<%-- comments --%>`, and `\<\%` / `\%\>` to write `<%` and `%>` as text.
 
 ## Compiled templates
 

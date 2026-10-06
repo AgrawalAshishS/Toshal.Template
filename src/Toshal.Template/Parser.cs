@@ -38,16 +38,19 @@ namespace Toshal.Template
         /// </summary>
         /// <remarks>
         /// <para>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR,
-        /// ENDSEPARATOR) and spaces
+        /// ENDSEPARATOR, comments) and spaces
         /// or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that
         /// writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</para>
         /// <para>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <see cref="ProcessTemplateToken.Indent"/>.</para>
+        /// <para>A comment <c>&lt;%-- ... --%&gt;</c> gives no token. It may span lines and hold tags; it ends at the first <c>--%&gt;</c>.
+        /// For the line rule above it counts as a control tag. In plain text, <c>\&lt;\%</c> and <c>\%\&gt;</c> become <c>&lt;%</c> and
+        /// <c>%&gt;</c> in the <see cref="ContentToken"/>.</para>
         /// </remarks>
         /// <param name="templateText">The template. An empty string gives an empty list.</param>
         /// <returns>The top level tokens, in template order.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="templateText"/> is null.</exception>
         /// <exception cref="TokenMissingNameException">A tag that needs a name has none, for example <c>&lt;%=%&gt;</c>.</exception>
-        /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
+        /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF, or a comment has no <c>--%&gt;</c>.</exception>
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
         /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is nowhere in the template.</exception>
         /// <exception cref="ParserException">An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number,
@@ -133,6 +136,37 @@ namespace Toshal.Template
 
                     split = new Split { StartingPosition = column, LineNumber = lineNumber };
                     start = i;
+
+                    // A comment "<%--" ... "--%>" is one split, whatever it holds: tags, "%>" and line breaks too.
+                    if (i + 3 < length && templateText[i + 2] == '-' && templateText[i + 3] == '-')
+                    {
+                        int close = templateText.IndexOf("--%>", i + 4, StringComparison.Ordinal);
+                        if (close < 0)
+                        {
+                            split.Content = templateText.Substring(start);
+                            throw new TokenNotClosedException(split, "comment", "<%-- not closed with --%>");
+                        }
+
+                        var comment = templateText.AsSpan(i, close + 4 - i);
+                        int commentNewLine = comment.LastIndexOf('\n');
+                        if (commentNewLine < 0)
+                        {
+                            column += comment.Length;
+                        }
+                        else
+                        {
+                            lineNumber += comment.Count('\n');
+                            column = comment.Length - commentNewLine;
+                        }
+
+                        i = close + 4;
+                        split.Content = templateText.Substring(start, i - start);
+                        retList.Add(split);
+                        split = new Split { StartingPosition = column, LineNumber = lineNumber };
+                        start = i;
+                        continue;
+                    }
+
                     i += 2;
                     column += 2;
                     continue;
@@ -413,7 +447,7 @@ namespace Toshal.Template
             OtherTag,
         }
 
-        // Control tags only steer the output: blocks, their parts and their ends. The third character picks the few checks to make.
+        // Control tags only steer the output: blocks, their parts, their ends and comments. The third character picks the few checks to make.
         private static SplitKind Classify(string content)
         {
             if (content.Length < 2 || content[0] != '<' || content[1] != '%')
@@ -434,6 +468,7 @@ namespace Toshal.Template
                 'S' => content.StartsWith("<%SET ", StringComparison.Ordinal) || ControlTags.Contains(content),
                 'E' => content.StartsWith("<%ELSEIF ", StringComparison.Ordinal) || ControlTags.Contains(content),
                 'N' or 'H' or 'B' or 'R' or 'A' or 'L' => ControlTags.Contains(content),
+                '-' => content.StartsWith("<%--", StringComparison.Ordinal),
                 _ => false,
             };
 
@@ -549,8 +584,21 @@ namespace Toshal.Template
                 return false;
             }
 
+            // \<\% and \%\> write <% and %>. The splitter already took them as text; only the content changes.
+            if (split.Content.IndexOf('\\') >= 0)
+            {
+                string content = split.Content.Replace(@"\<\%", "<%").Replace(@"\%\>", "%>");
+                split = new Split { Content = content, LineNumber = split.LineNumber, StartingPosition = split.StartingPosition };
+            }
+
             tokenList.Add(new ContentToken(split));
             return true;
+        }
+
+        // <%-- ... --%> writes nothing and gives no token.
+        private static bool HandledAsComment(Split split)
+        {
+            return split.Content.StartsWith("<%--", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -927,6 +975,11 @@ namespace Toshal.Template
                 }
 
                 if (this.HandledAsNamedToken(split, tokenList))
+                {
+                    continue;
+                }
+
+                if (HandledAsComment(split))
                 {
                     continue;
                 }

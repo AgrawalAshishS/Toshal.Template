@@ -58,6 +58,10 @@ namespace Toshal.Template.Compiled.Tests
             "<%CONTEXT_AS_STRING%>",
             "<%=empty%>|<%=null%>|<%=a q=\"Mixed Case\" r=\"x\"%>",
             "Quotes \" and \\ and \t tab\r\n<%=x%>",
+
+            // Comments write nothing, and a line with only a comment is dropped; \<\% and \%\> write <% and %>
+            "a<%-- <%=x%> 50%> --%>b\r\n  <%-- one\r\n  two --%>\r\n<%FOREACH rows%><%-- row --%><%=name%><%ENDFOR%>",
+            "\\<\\%=name\\%\\> is <%=name%>\r\n\\<\\%IF a\\%\\>\r\n",
         };
 
         private static readonly Lazy<CompiledHarness.Compiled> Built = new Lazy<CompiledHarness.Compiled>(() =>

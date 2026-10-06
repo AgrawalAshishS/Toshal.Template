@@ -1753,8 +1753,25 @@ namespace Stubs
 
 namespace Stubs
 {
+    using System.Collections;
+
+    using Toshal.Template;
+
     public partial class S35
     {
+        // The text of <%=name%>. Null or empty writes nothing.
+        private partial string? TokenValue(TokenArgs args) => args.Name switch
+        {
+            "name" => null, // TODO
+            _ => null,
+        };
+
+        // The rows of <%FOREACH name%>. Null or an empty list writes the NORECORD part.
+        private partial IList? Loop(LoopArgs args) => args.Name switch
+        {
+            "rows" => null, // TODO
+            _ => null,
+        };
     }
 }
 ==== 35 namespace writer ====
@@ -1765,27 +1782,31 @@ namespace Stubs
 
 namespace Stubs
 {
+    using System.Collections;
+    using System.Text;
+
+    using Toshal.Template;
+
     public partial class S35
     {
+        // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
+        private partial void WriteToken(TokenArgs args, StringBuilder output)
+        {
+            switch (args.Name)
+            {
+                case "name":
+                    // output.Append(...);
+                    break;
+            }
+        }
+
+        // The rows of <%FOREACH name%>. Null or an empty list writes the NORECORD part.
+        private partial IList? Loop(LoopArgs args) => args.Name switch
+        {
+            "rows" => null, // TODO
+            _ => null,
+        };
     }
-}
-==== 35 global value ====
-// Made once by Toshal.Template from T35.ctt. This file is yours: give the values here.
-// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
-
-#nullable enable
-
-public partial class S35
-{
-}
-==== 35 global writer ====
-// Made once by Toshal.Template from T35.ctt. This file is yours: give the values here.
-// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
-
-#nullable enable
-
-public partial class S35
-{
 }
 ==== 36 namespace value ====
 // Made once by Toshal.Template from T36.ctt. This file is yours: give the values here.
@@ -1802,7 +1823,7 @@ namespace Stubs
         // The text of <%=name%>. Null or empty writes nothing.
         private partial string? TokenValue(TokenArgs args) => args.Name switch
         {
-            "product" => null, // TODO
+            "name" => null, // TODO
             _ => null,
         };
     }
@@ -1826,6 +1847,94 @@ namespace Stubs
         {
             switch (args.Name)
             {
+                case "name":
+                    // output.Append(...);
+                    break;
+            }
+        }
+    }
+}
+==== 37 namespace value ====
+// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+namespace Stubs
+{
+    public partial class S37
+    {
+    }
+}
+==== 37 namespace writer ====
+// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+namespace Stubs
+{
+    public partial class S37
+    {
+    }
+}
+==== 37 global value ====
+// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+public partial class S37
+{
+}
+==== 37 global writer ====
+// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+public partial class S37
+{
+}
+==== 38 namespace value ====
+// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+namespace Stubs
+{
+    using Toshal.Template;
+
+    public partial class S38
+    {
+        // The text of <%=name%>. Null or empty writes nothing.
+        private partial string? TokenValue(TokenArgs args) => args.Name switch
+        {
+            "product" => null, // TODO
+            _ => null,
+        };
+    }
+}
+==== 38 namespace writer ====
+// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+namespace Stubs
+{
+    using System.Text;
+
+    using Toshal.Template;
+
+    public partial class S38
+    {
+        // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
+        private partial void WriteToken(TokenArgs args, StringBuilder output)
+        {
+            switch (args.Name)
+            {
                 case "product":
                     // output.Append(...);
                     break;
@@ -1833,15 +1942,15 @@ namespace Stubs
         }
     }
 }
-==== 36 global value ====
-// Made once by Toshal.Template from T36.ctt. This file is yours: give the values here.
+==== 38 global value ====
+// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
 
 using Toshal.Template;
 
-public partial class S36
+public partial class S38
 {
     // The text of <%=name%>. Null or empty writes nothing.
     private partial string? TokenValue(TokenArgs args) => args.Name switch
@@ -1850,8 +1959,8 @@ public partial class S36
         _ => null,
     };
 }
-==== 36 global writer ====
-// Made once by Toshal.Template from T36.ctt. This file is yours: give the values here.
+==== 38 global writer ====
+// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -1860,7 +1969,7 @@ using System.Text;
 
 using Toshal.Template;
 
-public partial class S36
+public partial class S38
 {
     // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
     private partial void WriteToken(TokenArgs args, StringBuilder output)
@@ -1873,8 +1982,8 @@ public partial class S36
         }
     }
 }
-==== 37 namespace value ====
-// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+==== 39 namespace value ====
+// Made once by Toshal.Template from T39.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -1886,7 +1995,7 @@ namespace Stubs
     using Toshal.Template;
     using Toshal.Template.Compiled;
 
-    public partial class S37
+    public partial class S39
     {
         // The text of <%=name%>. Null or empty writes nothing.
         private partial string? TokenValue(TokenArgs args) => args.Name switch
@@ -1926,8 +2035,8 @@ namespace Stubs
         };
     }
 }
-==== 37 namespace writer ====
-// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+==== 39 namespace writer ====
+// Made once by Toshal.Template from T39.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -1940,7 +2049,7 @@ namespace Stubs
     using Toshal.Template;
     using Toshal.Template.Compiled;
 
-    public partial class S37
+    public partial class S39
     {
         // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
         private partial void WriteToken(TokenArgs args, StringBuilder output)
@@ -1986,8 +2095,8 @@ namespace Stubs
         };
     }
 }
-==== 37 global value ====
-// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+==== 39 global value ====
+// Made once by Toshal.Template from T39.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -1997,7 +2106,7 @@ using System.Collections;
 using Toshal.Template;
 using Toshal.Template.Compiled;
 
-public partial class S37
+public partial class S39
 {
     // The text of <%=name%>. Null or empty writes nothing.
     private partial string? TokenValue(TokenArgs args) => args.Name switch
@@ -2036,8 +2145,8 @@ public partial class S37
         _ => null,
     };
 }
-==== 37 global writer ====
-// Made once by Toshal.Template from T37.ctt. This file is yours: give the values here.
+==== 39 global writer ====
+// Made once by Toshal.Template from T39.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -2048,7 +2157,7 @@ using System.Text;
 using Toshal.Template;
 using Toshal.Template.Compiled;
 
-public partial class S37
+public partial class S39
 {
     // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
     private partial void WriteToken(TokenArgs args, StringBuilder output)
@@ -2093,8 +2202,8 @@ public partial class S37
         _ => null,
     };
 }
-==== 38 namespace value ====
-// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+==== 40 namespace value ====
+// Made once by Toshal.Template from T40.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -2106,7 +2215,7 @@ namespace Stubs
     using Toshal.Template;
     using Toshal.Template.Compiled;
 
-    public partial class S38
+    public partial class S40
     {
         // The text of <%=name%>. Null or empty writes nothing.
         private partial string? TokenValue(TokenArgs args) => args.Name switch
@@ -2131,8 +2240,8 @@ namespace Stubs
         };
     }
 }
-==== 38 namespace writer ====
-// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+==== 40 namespace writer ====
+// Made once by Toshal.Template from T40.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -2145,7 +2254,7 @@ namespace Stubs
     using Toshal.Template;
     using Toshal.Template.Compiled;
 
-    public partial class S38
+    public partial class S40
     {
         // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
         private partial void WriteToken(TokenArgs args, StringBuilder output)
@@ -2176,8 +2285,8 @@ namespace Stubs
         };
     }
 }
-==== 38 global value ====
-// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+==== 40 global value ====
+// Made once by Toshal.Template from T40.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -2187,7 +2296,7 @@ using System.Collections;
 using Toshal.Template;
 using Toshal.Template.Compiled;
 
-public partial class S38
+public partial class S40
 {
     // The text of <%=name%>. Null or empty writes nothing.
     private partial string? TokenValue(TokenArgs args) => args.Name switch
@@ -2211,8 +2320,8 @@ public partial class S38
         _ => null,
     };
 }
-==== 38 global writer ====
-// Made once by Toshal.Template from T38.ctt. This file is yours: give the values here.
+==== 40 global writer ====
+// Made once by Toshal.Template from T40.ctt. This file is yours: give the values here.
 // It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
 
 #nullable enable
@@ -2223,7 +2332,7 @@ using System.Text;
 using Toshal.Template;
 using Toshal.Template.Compiled;
 
-public partial class S38
+public partial class S40
 {
     // Appends the value of <%=name%> to the output. Only append; do not change text that is already there.
     private partial void WriteToken(TokenArgs args, StringBuilder output)

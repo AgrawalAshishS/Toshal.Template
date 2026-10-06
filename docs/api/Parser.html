@@ -29,13 +29,14 @@
 <h4>Exceptions</h4><dl>
 <dt><code>ArgumentNullException</code></dt><dd><code>templateText</code> is null.</dd>
 <dt><code>TokenMissingNameException</code></dt><dd>A tag that needs a name has none, for example <code>&lt;%=%&gt;</code>.</dd>
-<dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF.</dd>
+<dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF, or a comment has no <code>--%&gt;</code>.</dd>
 <dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>
 <dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is nowhere in the template.</dd>
 <dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</dd>
 </dl>
-<h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
+<h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR, comments) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
 <p>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <a href="ProcessTemplateToken.html"><code>Indent</code></a>.</p>
+<p>A comment <code>&lt;%-- ... --%&gt;</code> gives no token. It may span lines and hold tags; it ends at the first <code>--%&gt;</code>. For the line rule above it counts as a control tag. In plain text, <code>\&lt;\%</code> and <code>\%\&gt;</code> become <code>&lt;%</code> and <code>%&gt;</code> in the <a href="ContentToken.html"><code>ContentToken</code></a>.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">var parser = new Parser();

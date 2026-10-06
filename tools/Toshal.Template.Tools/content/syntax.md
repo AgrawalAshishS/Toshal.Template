@@ -20,6 +20,8 @@ Text outside tags is written as it is, including spaces and line breaks, with on
 | `<%CONTEXT_AS_STRING%>` | Writes `ToString()` of the current context. | none |
 | `<%REMOVE_PREVIOUS n%>` | Removes the last n characters written so far. For a separator between rows, SEPARATOR is simpler and does not depend on the line breaks. | none |
 | `<%REMOVE_PREVIOUS_NEW_LINE%>` | Removes a `\n` at the end of the output, then a `\r` at the end. | none |
+| `<%-- note --%>` | A comment. Writes nothing. It may span lines and hold tags and `%>`; it ends at the first `--%>`. | none |
+| `\<\%`, `\%\>` | Write `<%` and `%>` as plain text, so `\<\%=Name\%\>` writes `<%=Name%>`. Other backslashes are written as they are. | none |
 
 ## Lines with only control tags
 
@@ -27,10 +29,10 @@ A line that holds only control tags and spaces or tabs writes nothing: not its i
 So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.
 
 Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET, ENDSET,
-SEPARATOR and ENDSEPARATOR.
+SEPARATOR, ENDSEPARATOR and comments.
 A line with any text, or with a tag that writes something (`<%=Name%>`, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with
 REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both `
-` and `
+` and `
 ` line breaks work.
 
 ```text

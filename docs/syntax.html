@@ -27,10 +27,12 @@
 <tr><td><code>&lt;%CONTEXT_AS_STRING%&gt;</code></td><td>Writes <code>ToString()</code> of the current context.</td><td>none</td></tr>
 <tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far. For a separator between rows, SEPARATOR is simpler and does not depend on the line breaks.</td><td>none</td></tr>
 <tr><td><code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code></td><td>Removes a <code>\n</code> at the end of the output, then a <code>\r</code> at the end.</td><td>none</td></tr>
+<tr><td><code>&lt;%-- note --%&gt;</code></td><td>A comment. Writes nothing. It may span lines and hold tags and <code>%&gt;</code>; it ends at the first <code>--%&gt;</code>.</td><td>none</td></tr>
+<tr><td><code>\&lt;\%</code>, <code>\%\&gt;</code></td><td>Write <code>&lt;%</code> and <code>%&gt;</code> as plain text, so <code>\&lt;\%=Name\%\&gt;</code> writes <code>&lt;%=Name%&gt;</code>. Other backslashes are written as they are.</td><td>none</td></tr>
 </table></div>
 <h2>Lines with only control tags</h2>
 <p>A line that holds only control tags and spaces or tabs writes nothing: not its indent, not the spaces between the tags, not its line break. So you can put each control tag on its own line and indent it like code, and the output has no extra blank lines or spaces.</p>
-<p>Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET, ENDSET, SEPARATOR and ENDSEPARATOR. A line with any text, or with a tag that writes something (<code>&lt;%=Name%&gt;</code>, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both <code> </code> and <code> </code> line breaks work.</p>
+<p>Control tags are IF, ELSEIF, ELSE, ENDIF, FOREACH, ENDFOR, every FOREACH part and its end (ROW, ENDROW, HEADER, ...), WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR and comments. A line with any text, or with a tag that writes something (<code>&lt;%=Name%&gt;</code>, CONTEXT_AS_STRING, PROCESS_TEMPLATE, REUSE_FOREACH), or with REMOVE_PREVIOUS or REMOVE_PREVIOUS_NEW_LINE, is written as it is. The first and the last line of the template count too. Both <code> </code> and <code> </code> line breaks work.</p>
 <pre><code class="lang-text">public class &lt;%=Name%&gt;
 {
     &lt;%FOREACH Columns%&gt;
