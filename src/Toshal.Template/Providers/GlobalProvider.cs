@@ -3,6 +3,7 @@
 namespace Toshal.Template.Providers
 {
     using System.Collections;
+    using System.Text;
 
     /// <summary>
     /// Answers names that do not depend on the type of the current context, such as a project name, a version or today's date.
@@ -58,6 +59,36 @@ namespace Toshal.Template.Providers
         {
             value = null;
             return false;
+        }
+
+        /// <summary>
+        /// Answers <c>&lt;%=name%&gt;</c> by appending the value straight to the output. The default calls <see cref="TryToken"/> and appends its value.
+        /// </summary>
+        /// <param name="args">The name, the attributes, the context (it can be null) and the parent contexts of the tag.</param>
+        /// <param name="output">The text written so far. Append to it.</param>
+        /// <returns><c>true</c> when this provider handled the name; <c>false</c> to let the next provider try.</returns>
+        /// <remarks>
+        /// <para><b>Warning:</b> return <c>false</c> only when you wrote nothing, and never remove text that is already in <paramref name="output"/>.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// public override bool TryWrite(TokenArgs args, StringBuilder output)
+        /// {
+        ///     switch (args.Name)
+        ///     {
+        ///         case "current_year": output.Append(DateTime.Now.Year); return true;
+        ///     }
+        ///
+        ///     return base.TryWrite(args, output);
+        /// }
+        /// </code>
+        /// </example>
+        public virtual bool TryWrite(TokenArgs args, StringBuilder output)
+        {
+            if (!this.TryToken(args, out var value)) return false;
+
+            output.Append(value);
+            return true;
         }
 
         /// <summary>

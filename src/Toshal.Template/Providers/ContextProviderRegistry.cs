@@ -6,6 +6,7 @@ namespace Toshal.Template.Providers
     using System.Collections;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Text;
     using System.Threading;
 
     /// <summary>
@@ -54,6 +55,9 @@ namespace Toshal.Template.Providers
         // Never changed after it is published; a new type makes a copy. So reads need no lock.
         private Dictionary<Type, ProviderEntry[]> cache = new Dictionary<Type, ProviderEntry[]>();
         private volatile bool locked;
+
+        [ThreadStatic]
+        private static StringBuilder? cachedBuilder;
 
         /// <summary>
         /// Adds a provider for contexts of type <typeparamref name="T"/> and of every type that derives from it or implements it.
@@ -116,8 +120,9 @@ namespace Toshal.Template.Providers
         }
 
         /// <summary>
-        /// Sets <see cref="Processor.TokenValueProvider"/>, <see cref="Processor.ConditionValueProvider"/>, <see cref="Processor.LoopValueProvider"/>
-        /// and <see cref="Processor.WithValueProvider"/> to this registry. <see cref="Processor.ProcessTemplateValueProvider"/> is not changed.
+        /// Sets <see cref="Processor.TokenWriter"/>, <see cref="Processor.TokenValueProvider"/>, <see cref="Processor.ConditionValueProvider"/>,
+        /// <see cref="Processor.LoopValueProvider"/> and <see cref="Processor.WithValueProvider"/> to this registry.
+        /// <see cref="Processor.ProcessTemplateValueProvider"/> is not changed. The processor uses the writer, so values are appended straight to the output.
         /// </summary>
         /// <param name="processor">The processor to set.</param>
         /// <exception cref="ArgumentNullException"><paramref name="processor"/> is null.</exception>
@@ -131,6 +136,7 @@ namespace Toshal.Template.Providers
         {
             ArgumentNullException.ThrowIfNull(processor);
 
+            processor.TokenWriter = this.Write;
             processor.TokenValueProvider = this.Token;
             processor.ConditionValueProvider = this.Condition;
             processor.LoopValueProvider = this.Loop;
@@ -139,10 +145,16 @@ namespace Toshal.Template.Providers
 
         /// <summary>
         /// Answers <c>&lt;%=name%&gt;</c> with the first provider that handles the name. It fits <see cref="Processor.TokenValueProvider"/>.
+        /// Each provider is asked with <see cref="ContextProvider{T}.TryToken"/> first, which makes no copy, and then with
+        /// <see cref="ContextProvider{T}.TryWrite"/>, so a name that a provider only writes is answered too, with the same text as <see cref="Write"/>.
         /// </summary>
         /// <param name="args">The arguments from the processor.</param>
         /// <returns>The text, or null when no provider handled the name.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="args"/> is null.</exception>
+        /// <remarks>
+        /// <para><see cref="AttachTo(Processor)"/> sets <see cref="Processor.TokenWriter"/> too, and the processor then uses <see cref="Write"/>,
+        /// which makes no string. Use this method when you need the value as a string.</para>
+        /// </remarks>
         /// <example>
         /// <code>
         /// processor.TokenValueProvider = registry.Token;
@@ -158,6 +170,7 @@ namespace Toshal.Template.Providers
             for (var i = 0; i < globals.Length; i++)
             {
                 if (globals[i].TryToken(args, out value)) return value;
+                if (WrittenText(globals[i], args, out value)) return value;
             }
 
             var context = args.Context;
@@ -167,6 +180,7 @@ namespace Toshal.Template.Providers
                 for (var i = 0; i < entries.Length; i++)
                 {
                     if (entries[i].TryToken(context, args, out value)) return value;
+                    if (entries[i].WrittenText(context, args, out value)) return value;
                 }
             }
 
@@ -174,9 +188,84 @@ namespace Toshal.Template.Providers
             for (var i = 0; i < globals.Length; i++)
             {
                 if (globals[i].TryToken(args, out value)) return value;
+                if (WrittenText(globals[i], args, out value)) return value;
             }
 
             return null;
+        }
+
+        // Asks a global provider to write, and returns the text it wrote.
+        private static bool WrittenText(GlobalProvider provider, TokenArgs args, out string? value)
+        {
+            var builder = RentBuilder();
+            var handled = provider.TryWrite(args, builder);
+            value = handled ? builder.ToString() : null;
+            ReturnBuilder(builder);
+            return handled;
+        }
+
+        // One builder per thread. A provider that calls Token again while a builder is in use finds the slot empty and gets its own.
+        private static StringBuilder RentBuilder()
+        {
+            var builder = cachedBuilder ?? new StringBuilder();
+            cachedBuilder = null;
+            return builder;
+        }
+
+        private static void ReturnBuilder(StringBuilder builder)
+        {
+            builder.Clear();
+            cachedBuilder = builder;
+        }
+
+        /// <summary>
+        /// Answers <c>&lt;%=name%&gt;</c> by appending the value of the first provider that handles the name, with the providers'
+        /// <see cref="ContextProvider{T}.TryWrite"/> methods. It fits <see cref="Processor.TokenWriter"/>. When no provider handles the name, nothing is written.
+        /// </summary>
+        /// <param name="args">The arguments from the processor.</param>
+        /// <param name="output">The text written so far.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> or <paramref name="output"/> is null.</exception>
+        /// <example>
+        /// <code>
+        /// processor.TokenWriter = registry.Write;
+        /// </code>
+        /// </example>
+        public void Write(TokenArgs args, StringBuilder output)
+        {
+            ArgumentNullException.ThrowIfNull(args);
+            ArgumentNullException.ThrowIfNull(output);
+
+            this.WriteCore(args, output);
+        }
+
+        // Writes the value of the first provider that handles the name; false when none does.
+        private bool WriteCore(TokenArgs args, StringBuilder output)
+        {
+            if (!this.locked) this.Lock();
+
+            var globals = this.before;
+            for (var i = 0; i < globals.Length; i++)
+            {
+                if (globals[i].TryWrite(args, output)) return true;
+            }
+
+            var context = args.Context;
+            if (context != null)
+            {
+                var entries = this.Resolve(context.GetType());
+                for (var i = 0; i < entries.Length; i++)
+                {
+                    if (entries[i].TryWrite(context, args, output)) return true;
+                }
+            }
+
+            globals = this.after;
+            for (var i = 0; i < globals.Length; i++)
+            {
+                if (globals[i].TryWrite(args, output)) return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -362,6 +451,18 @@ namespace Toshal.Template.Providers
         {
             public abstract bool TryToken(object context, TokenArgs args, out string? value);
 
+            public abstract bool TryWrite(object context, TokenArgs args, StringBuilder output);
+
+            // Asks the provider to write, and returns the text it wrote.
+            public bool WrittenText(object context, TokenArgs args, out string? value)
+            {
+                var builder = RentBuilder();
+                var handled = this.TryWrite(context, args, builder);
+                value = handled ? builder.ToString() : null;
+                ReturnBuilder(builder);
+                return handled;
+            }
+
             public abstract bool TryCondition(object context, ConditionArgs args, out bool value);
 
             public abstract bool TryLoop(object context, LoopArgs args, out IList? value);
@@ -381,6 +482,8 @@ namespace Toshal.Template.Providers
             }
 
             public override bool TryToken(object context, TokenArgs args, out string? value) => this.provider.TryToken(Unsafe.As<T>(context), args, out value);
+
+            public override bool TryWrite(object context, TokenArgs args, StringBuilder output) => this.provider.TryWrite(Unsafe.As<T>(context), args, output);
 
             public override bool TryCondition(object context, ConditionArgs args, out bool value) => this.provider.TryCondition(Unsafe.As<T>(context), args, out value);
 

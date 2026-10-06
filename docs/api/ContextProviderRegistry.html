@@ -30,7 +30,7 @@ string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }
 <h2>Methods</h2>
 <section class="member">
 <pre class="sig"><code>void AttachTo(Processor processor)</code></pre>
-<p>Sets <a href="Processor.html"><code>TokenValueProvider</code></a>, <a href="Processor.html"><code>ConditionValueProvider</code></a>, <a href="Processor.html"><code>LoopValueProvider</code></a> and <a href="Processor.html"><code>WithValueProvider</code></a> to this registry. <a href="Processor.html"><code>ProcessTemplateValueProvider</code></a> is not changed.</p>
+<p>Sets <a href="Processor.html"><code>TokenWriter</code></a>, <a href="Processor.html"><code>TokenValueProvider</code></a>, <a href="Processor.html"><code>ConditionValueProvider</code></a>, <a href="Processor.html"><code>LoopValueProvider</code></a> and <a href="Processor.html"><code>WithValueProvider</code></a> to this registry. <a href="Processor.html"><code>ProcessTemplateValueProvider</code></a> is not changed. The processor uses the writer, so values are appended straight to the output.</p>
 <h4>Parameters</h4><dl>
 <dt><code>processor</code></dt><dd>The processor to set.</dd>
 </dl>
@@ -98,7 +98,7 @@ registry.AttachTo(processor);</code></pre>
 </section>
 <section class="member">
 <pre class="sig"><code>string Token(TokenArgs args)</code></pre>
-<p>Answers <code>&lt;%=name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>TokenValueProvider</code></a>.</p>
+<p>Answers <code>&lt;%=name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>TokenValueProvider</code></a>. Each provider is asked with <a href="ContextProvider.html"><code>TryToken</code></a> first, which makes no copy, and then with <a href="ContextProvider.html"><code>TryWrite</code></a>, so a name that a provider only writes is answered too, with the same text as <a href="ContextProviderRegistry.html"><code>Write</code></a>.</p>
 <h4>Parameters</h4><dl>
 <dt><code>args</code></dt><dd>The arguments from the processor.</dd>
 </dl>
@@ -106,6 +106,8 @@ registry.AttachTo(processor);</code></pre>
 <h4>Exceptions</h4><dl>
 <dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
 </dl>
+<h4>Remarks</h4><p><a href="ContextProviderRegistry.html"><code>AttachTo</code></a> sets <a href="Processor.html"><code>TokenWriter</code></a> too, and the processor then uses <a href="ContextProviderRegistry.html"><code>Write</code></a>, which makes no string. Use this method when you need the value as a string.</p>
+
 <h4>Example</h4>
 <pre><code class="lang-csharp">processor.TokenValueProvider = registry.Token;</code></pre>
 </section>
@@ -121,6 +123,19 @@ registry.AttachTo(processor);</code></pre>
 </dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">processor.WithValueProvider = registry.With;</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void Write(TokenArgs args, StringBuilder output)</code></pre>
+<p>Answers <code>&lt;%=name%&gt;</code> by appending the value of the first provider that handles the name, with the providers&#39; <a href="ContextProvider.html"><code>TryWrite</code></a> methods. It fits <a href="Processor.html"><code>TokenWriter</code></a>. When no provider handles the name, nothing is written.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments from the processor.</dd>
+<dt><code>output</code></dt><dd>The text written so far.</dd>
+</dl>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> or <code>output</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.TokenWriter = registry.Write;</code></pre>
 </section>
 
 </main>

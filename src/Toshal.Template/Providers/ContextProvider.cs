@@ -3,6 +3,7 @@
 namespace Toshal.Template.Providers
 {
     using System.Collections;
+    using System.Text;
 
     /// <summary>
     /// Answers the tags for one type of context. Register it with <see cref="ContextProviderRegistry.Register{T}(ContextProvider{T})"/>.
@@ -60,6 +61,40 @@ namespace Toshal.Template.Providers
         {
             value = null;
             return false;
+        }
+
+        /// <summary>
+        /// Answers <c>&lt;%=name%&gt;</c> by appending the value straight to the output, so no string is made for numbers, dates or text joined
+        /// from parts. The default calls <see cref="TryToken"/> and appends its value. The processor uses this method through
+        /// <see cref="ContextProviderRegistry.Write"/>; <see cref="ContextProviderRegistry.Token"/> uses it too and returns the text.
+        /// </summary>
+        /// <param name="context">The current context, already of type <typeparamref name="T"/>. Never null.</param>
+        /// <param name="args">The name, the attributes and the parent contexts of the tag.</param>
+        /// <param name="output">The text written so far. Append to it.</param>
+        /// <returns><c>true</c> when this provider handled the name; <c>false</c> to let the next provider try.</returns>
+        /// <remarks>
+        /// <para><b>Warning:</b> return <c>false</c> only when you wrote nothing, and never remove text that is already in <paramref name="output"/>.
+        /// Override it for the names you can append directly and call <c>base.TryWrite</c> for the rest, so <see cref="TryToken"/> still answers them.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// public override bool TryWrite(Order context, TokenArgs args, StringBuilder output)
+        /// {
+        ///     switch (args.Name)
+        ///     {
+        ///         case "line_count": output.Append(context.Lines.Count); return true;
+        ///     }
+        ///
+        ///     return base.TryWrite(context, args, output);
+        /// }
+        /// </code>
+        /// </example>
+        public virtual bool TryWrite(T context, TokenArgs args, StringBuilder output)
+        {
+            if (!this.TryToken(context, args, out var value)) return false;
+
+            output.Append(value);
+            return true;
         }
 
         /// <summary>

@@ -96,16 +96,16 @@ public static class ContextProvidersExample
     // Hand written rules. Registered before ColumnProvider, so they win.
     private sealed class ColumnProviderCustom : ContextProvider&lt;Column&gt;
     {
-        public override bool TryToken(Column context, TokenArgs args, out string? value)
+        // TryWrite appends straight to the output, so &quot;Table.Column&quot; is written without making a new string.
+        public override bool TryWrite(Column context, TokenArgs args, System.Text.StringBuilder output)
         {
             switch (args.Name)
             {
                 // Uses the table around the column.
-                case &quot;full_name&quot;: value = args.FindParent&lt;Table&gt;()?.Name + &quot;.&quot; + context.Name; return true;
+                case &quot;full_name&quot;: output.Append(args.FindParent&lt;Table&gt;()?.Name).Append(&#39;.&#39;).Append(context.Name); return true;
             }
 
-            value = null;
-            return false;
+            return base.TryWrite(context, args, output);
         }
 
         public override bool TryCondition(Column context, ConditionArgs args, out bool value)

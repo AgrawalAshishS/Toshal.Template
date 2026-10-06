@@ -14,6 +14,7 @@ public class ProcessBenchmarks
     private Processor chain = null!;
     private Processor registry = null!;
     private Processor floor = null!;
+    private Processor registryWriters = null!;
 
     [GlobalSetup]
     public void Setup()
@@ -31,6 +32,8 @@ public class ProcessBenchmarks
 
         this.registry = new Processor();
         RegistrySetup.Build().AttachTo(this.registry);
+        this.registryWriters = new Processor();
+        RegistrySetup.Build(writers: true).AttachTo(this.registryWriters);
 
         // The lower bound: a provider that knows the three types in use and nothing else. No real consumer can do this.
         this.floor = new Processor
@@ -52,7 +55,7 @@ public class ProcessBenchmarks
             throw new InvalidOperationException("The chain style wrote wrong text:\r\n" + Expected);
         }
 
-        if (this.Registry() != Expected || this.Floor() != Expected)
+        if (this.Registry() != Expected || this.Floor() != Expected || this.registryWriters.Process(new ProcessorArgs(this.tokens) { Context = this.root }).ToString() != Expected)
         {
             throw new InvalidOperationException("The styles write different text.");
         }
@@ -77,6 +80,14 @@ public class ProcessBenchmarks
     {
         this.output.Clear();
         this.registry.Process(new ProcessorArgs(this.tokens) { Context = this.root }, this.output);
+        return this.output.Length;
+    }
+
+    [Benchmark]
+    public int RegistryWritersIntoBuilder()
+    {
+        this.output.Clear();
+        this.registryWriters.Process(new ProcessorArgs(this.tokens) { Context = this.root }, this.output);
         return this.output.Length;
     }
 

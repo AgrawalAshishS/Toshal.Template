@@ -137,6 +137,24 @@ namespace Toshal.Template
         public Func<TokenArgs, string?>? TokenValueProvider { get; set; }
 
         /// <summary>
+        /// Gets or sets a writer for <c>&lt;%=name%&gt;</c> that appends the value straight to the output, so no string is made for numbers,
+        /// dates or text joined from parts. When it is set, it is used instead of <see cref="TokenValueProvider"/>. The default is null.
+        /// </summary>
+        /// <remarks>
+        /// <para>A SET variable with the name still wins: the writer is not called for it. Inside a SET block the writer appends to the value of the SET.</para>
+        /// <para><b>Warning:</b> only append. Do not remove or change text that is already in the builder; it belongs to the template.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// processor.TokenWriter = (args, output) =&gt;
+        /// {
+        ///     if (args.Name == "count") output.Append(((Order)args.Context!).Lines.Count);
+        /// };
+        /// </code>
+        /// </example>
+        public Action<TokenArgs, StringBuilder>? TokenWriter { get; set; }
+
+        /// <summary>
         /// Gets or sets the provider for <c>&lt;%WITH name%&gt;</c>. It returns the object that is the context inside the block; null skips the block.
         /// The default is null.
         /// </summary>
@@ -236,6 +254,13 @@ namespace Toshal.Template
             if (vars.TryGet(namedToken.Name, out var value))
             {
                 output.Append(value);
+                return;
+            }
+
+            var tokenWriter = this.TokenWriter;
+            if (tokenWriter != null)
+            {
+                tokenWriter(run.TokenArgs(namedToken, context), output);
                 return;
             }
 

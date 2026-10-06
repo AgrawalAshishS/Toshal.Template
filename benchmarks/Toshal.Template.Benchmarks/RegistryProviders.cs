@@ -30,6 +30,34 @@ public sealed class CustomProvider<TTag> : ContextProvider<Node<TTag>> where TTa
     }
 }
 
+// Like CustomProvider, but appends "TypeName?" straight to the output instead of making a new string.
+public sealed class CustomWriteProvider<TTag> : ContextProvider<Node<TTag>> where TTag : struct
+{
+    public override bool TryWrite(Node<TTag> n, TokenArgs a, System.Text.StringBuilder output)
+    {
+        switch (a.Name)
+        {
+            case "nullable_type_name":
+                output.Append(n.TypeName);
+                if (n.IsNullable) output.Append('?');
+                return true;
+        }
+
+        return false;
+    }
+
+    public override bool TryCondition(Node<TTag> n, ConditionArgs a, out bool value)
+    {
+        switch (a.Name)
+        {
+            case "is_string": value = n.TypeName == "string"; return true;
+        }
+
+        value = false;
+        return false;
+    }
+}
+
 public sealed class GeneratedProvider<TTag> : ContextProvider<Node<TTag>> where TTag : struct
 {
     public override bool TryToken(Node<TTag> n, TokenArgs a, out string? value)
@@ -96,8 +124,11 @@ public sealed class GlobalNames : GlobalProvider
 public static class RegistrySetup
 {
     // All 30 types, Custom then Generated, like the chain.
-    public static ContextProviderRegistry Build()
+    public static ContextProviderRegistry Build() => Build(writers: false);
+
+    public static ContextProviderRegistry Build(bool writers)
     {
+        useWriters = writers;
         var r = new ContextProviderRegistry().RegisterGlobal(new GlobalNames(), GlobalOrder.BeforeTyped);
         Add<T00>(r); Add<T01>(r); Add<T02>(r); Add<T03>(r); Add<T04>(r); Add<T05>(r); Add<T06>(r); Add<T07>(r); Add<T08>(r); Add<T09>(r);
         Add<T10>(r); Add<T11>(r); Add<T12>(r); Add<T13>(r); Add<T14>(r); Add<T15>(r); Add<T16>(r); Add<T17>(r); Add<T18>(r); Add<T19>(r);
@@ -105,8 +136,12 @@ public static class RegistrySetup
         return r;
     }
 
+    private static bool useWriters;
+
     private static void Add<TTag>(ContextProviderRegistry r) where TTag : struct
     {
-        r.Register(new CustomProvider<TTag>()).Register(new GeneratedProvider<TTag>());
+        if (useWriters) r.Register(new CustomWriteProvider<TTag>());
+        else r.Register(new CustomProvider<TTag>());
+        r.Register(new GeneratedProvider<TTag>());
     }
 }
