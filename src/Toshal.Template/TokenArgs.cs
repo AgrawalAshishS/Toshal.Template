@@ -90,6 +90,13 @@ namespace Toshal.Template
         /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
 
+        // Made by compiled templates, which have no token objects.
+        internal TokenArgs(string name, TokenAttributeDictionary attributes, object? context, List<object?> parentContext)
+            : base(name, context, parentContext)
+        {
+            this.Attributes = attributes;
+        }
+
         internal TokenArgs Reuse(string name, TokenAttributeDictionary attributes, object? context)
         {
             this.Reuse(name, context);

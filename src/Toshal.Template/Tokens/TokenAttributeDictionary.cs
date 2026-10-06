@@ -97,6 +97,19 @@ namespace Toshal.Template.Tokens
         /// <param name="attributes">The dictionary to fill.</param>
         /// <returns>The name, trimmed and in lower case. Attribute names are lower cased, attribute values keep their case.</returns>
         /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
+        // Adds an attribute and its lower case copy, made once here: at parse time, or when a compiled template is loaded.
+        // The key must already be lower case. Returns false when the key is already there.
+        internal bool TryAddAttribute(string key, string value)
+        {
+            if (this.TryAdd(key, value) == false)
+            {
+                return false;
+            }
+
+            (this.lowerCaseValues ??= new Dictionary<string, string>()).Add(key, value.ToLowerInvariant());
+            return true;
+        }
+
         internal static string GetNameAndAttributes(
             Split split,
             string nameString,
@@ -129,13 +142,11 @@ namespace Toshal.Template.Tokens
                     // The same attribute twice is an error, not a choice between the two values.
                     string key = nameString.Substring(keyStart, p - keyStart).ToLower();
                     string value = nameString.Substring(valueStart, valueEnd - valueStart);
-                    if (attributes.TryAdd(key, value) == false)
+                    if (attributes.TryAddAttribute(key, value) == false)
                     {
                         throw new InvalidTokenAttributeException(split);
                     }
 
-                    // The lower case copy is made once here, at parse time.
-                    (attributes.lowerCaseValues ??= new Dictionary<string, string>()).Add(key, value.ToLowerInvariant());
                     position = valueEnd + 1;
                     any = true;
                 }

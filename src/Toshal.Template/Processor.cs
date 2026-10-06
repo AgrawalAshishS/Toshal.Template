@@ -5,9 +5,9 @@ namespace Toshal.Template
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
+    using Toshal.Template.Processing;
     using Toshal.Template.Tokens;
 
     /// <summary>
@@ -95,8 +95,8 @@ namespace Toshal.Template
             var parentContext = new List<object?>();
             if (args.Context != null) { parentContext.Add(args.Context); }
 
-            var vars = default(Variables);
-            this.Process(output, args.TokenList, args.Context, new Run(parentContext, output), ref vars);
+            var vars = default(TemplateVariables);
+            this.Process(output, args.TokenList, args.Context, new ProcessRun(parentContext, output), ref vars);
         }
 
         /// <summary>
@@ -178,8 +178,8 @@ namespace Toshal.Template
         public Func<ProcessTemplateArgs, List<IToken>?>? ProcessTemplateValueProvider { get; set; }
 
         // Runs the tokens of one block. vars is the scope of SET variables: a block that shares the scope of its parent (IF, ELSE, a SET value,
-        // the rows of one FOREACH) gets the same ref; a block with its own scope gets Variables.Child, which copies only when a SET writes.
-        private void Process(StringBuilder output, List<IToken> tokenList, object? context, Run run, ref Variables vars)
+        // the rows of one FOREACH) gets the same ref; a block with its own scope gets TemplateVariables.Child, which copies only when a SET writes.
+        private void Process(StringBuilder output, List<IToken> tokenList, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             for (var i = 0; i < tokenList.Count; i++)
             {
@@ -221,14 +221,11 @@ namespace Toshal.Template
                         break;
 
                     case RemovePreviousNewLineToken:
-                        RemovePreviousNewLine(output, run.StartOf(output));
+                        run.RemovePreviousNewLine(output);
                         break;
 
                     case RemovePreviousCharsToken removeToken:
-                        var count = removeToken.CharCount;
-                        var written = output.Length - run.StartOf(output);
-                        if (written < count) count = written;
-                        output.Remove(output.Length - count, count);
+                        run.RemovePrevious(output, removeToken.CharCount);
                         break;
 
                     case ProcessTemplateToken processTemplateToken:
@@ -257,7 +254,7 @@ namespace Toshal.Template
             }
         }
 
-        private void ProcessNamed(StringBuilder output, NamedToken namedToken, object? context, Run run, ref Variables vars)
+        private void ProcessNamed(StringBuilder output, NamedToken namedToken, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             if (vars.TryGet(namedToken.Name, out var value))
             {
@@ -282,7 +279,7 @@ namespace Toshal.Template
             }
         }
 
-        private void ProcessCondition(StringBuilder output, ConditionToken conditionToken, object? context, Run run, ref Variables vars)
+        private void ProcessCondition(StringBuilder output, ConditionToken conditionToken, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             var val = this.ConditionValueProvider!(run.ConditionArgs(conditionToken, context));
 
@@ -300,7 +297,7 @@ namespace Toshal.Template
             }
         }
 
-        private void ProcessReuseForEach(StringBuilder output, ReuseForEachToken reuseForEachToken, object? context, Run run, ref Variables vars)
+        private void ProcessReuseForEach(StringBuilder output, ReuseForEachToken reuseForEachToken, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             var loopValueProvider = this.LoopValueProvider;
             if (loopValueProvider == null) return;
@@ -313,7 +310,7 @@ namespace Toshal.Template
             this.ProcessForEach(output, context, args, existing, loopValueProvider, run, ref vars);
         }
 
-        private void ProcessWith(StringBuilder output, WithToken withToken, object? context, Run run, ref Variables vars)
+        private void ProcessWith(StringBuilder output, WithToken withToken, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             var withValueProvider = this.WithValueProvider;
             if (withValueProvider == null) return; //skip as there is no value provider
@@ -322,13 +319,13 @@ namespace Toshal.Template
             if (val != null)
             {
                 run.ParentContext.Add(val);
-                var withVars = Variables.Child(vars);
+                var withVars = TemplateVariables.Child(vars);
                 this.Process(output, withToken.InnerTokens, val, run, ref withVars);
-                RemoveLast(run.ParentContext, val);
+                run.RemoveParent(val);
             }
         }
 
-        private void ProcessTemplate(StringBuilder output, ProcessTemplateToken processTemplateToken, object? context, Run run, ref Variables vars)
+        private void ProcessTemplate(StringBuilder output, ProcessTemplateToken processTemplateToken, object? context, ProcessRun run, ref TemplateVariables vars)
         {
             var processTemplateValueProvider = this.ProcessTemplateValueProvider;
             if (processTemplateValueProvider == null) return; //skip as there is no value provider
@@ -336,7 +333,7 @@ namespace Toshal.Template
             var val = processTemplateValueProvider(new ProcessTemplateArgs(processTemplateToken, context, run.ParentContext));
             if (val != null)
             {
-                var templateVars = Variables.Child(vars);
+                var templateVars = TemplateVariables.Child(vars);
                 var indent = processTemplateToken.Indent;
                 if (string.IsNullOrEmpty(indent))
                 {
@@ -347,64 +344,19 @@ namespace Toshal.Template
                 // Write the sub template into its own builder, then copy it with the indent after each line break.
                 var subOutput = run.RentBuilder();
                 this.Process(subOutput, val, context, run, ref templateVars);
-                AppendIndented(output, subOutput, indent);
+                ProcessRun.AppendIndented(output, subOutput, indent);
                 run.ReturnBuilder(subOutput);
             }
         }
 
-        // Copies text and writes the indent at the start of every line after the first, except before an empty line and after the last line break,
-        // so no line gets trailing spaces.
-        private static void AppendIndented(StringBuilder output, StringBuilder text, string indent)
-        {
-            bool lineStart = false;
-            foreach (var chunk in text.GetChunks())
-            {
-                var span = chunk.Span;
-                while (!span.IsEmpty)
-                {
-                    if (lineStart)
-                    {
-                        lineStart = false;
-                        if (span[0] != '\n' && span[0] != '\r')
-                        {
-                            output.Append(indent);
-                        }
-                    }
-
-                    int newLine = span.IndexOf('\n');
-                    if (newLine < 0)
-                    {
-                        output.Append(span);
-                        break;
-                    }
-
-                    output.Append(span.Slice(0, newLine + 1));
-                    span = span.Slice(newLine + 1);
-                    lineStart = true;
-                }
-            }
-        }
-
-        // start: where the text written by this call begins; nothing before it is removed.
-        private static void RemovePreviousNewLine(StringBuilder output, int start)
-        {
-            if (output.Length <= start) return;
-
-            if (output[output.Length - 1] == '\n')
-                output.Remove(output.Length - 1, 1);
-
-            if (output.Length > start && output[output.Length - 1] == '\r')
-                output.Remove(output.Length - 1, 1);
-        }
-
-        private void ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, Run run, ref Variables vars)
+        private void ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, ProcessRun run, ref TemplateVariables vars)
         {
             var val = loopValueProvider(args);
             if (val == null || val.Count == 0)
             {
                 if (forEachToken.NoRecordTokens.Count > 0)
                 {
-                    var noRecordVars = Variables.Child(vars);
+                    var noRecordVars = TemplateVariables.Child(vars);
                     run.EnterLoop();
                     this.Process(output, forEachToken.NoRecordTokens, context, run, ref noRecordVars);
                     run.ExitLoop();
@@ -416,13 +368,13 @@ namespace Toshal.Template
             run.EnterLoop();
 
             // The rows share one scope: a SET in a row is seen by the next rows, but not after the loop.
-            var rowVars = Variables.Child(vars);
+            var rowVars = TemplateVariables.Child(vars);
 
             run.ParentContext.Add(val);
 
             if (forEachToken.HeaderTokens.Count > 0)
             {
-                var headerVars = Variables.Child(vars);
+                var headerVars = TemplateVariables.Child(vars);
                 this.Process(output, forEachToken.HeaderTokens, val, run, ref headerVars);
             }
 
@@ -477,7 +429,7 @@ namespace Toshal.Template
 
                 if (beforeTokens.Count > 0)
                 {
-                    var beforeVars = Variables.Child(rowVars);
+                    var beforeVars = TemplateVariables.Child(rowVars);
                     this.Process(output, beforeTokens, item, run, ref beforeVars);
                 }
 
@@ -488,165 +440,23 @@ namespace Toshal.Template
 
                 if (afterTokens.Count > 0)
                 {
-                    var afterVars = Variables.Child(rowVars);
+                    var afterVars = TemplateVariables.Child(rowVars);
                     this.Process(output, afterTokens, item, run, ref afterVars);
                 }
 
-                RemoveLast(run.ParentContext, item);
+                run.RemoveParent(item);
             }
 
             run.LeaveRow();
 
             if (forEachToken.FooterTokens.Count > 0)
             {
-                var footerVars = Variables.Child(vars);
+                var footerVars = TemplateVariables.Child(vars);
                 this.Process(output, forEachToken.FooterTokens, val, run, ref footerVars);
             }
 
-            RemoveLast(run.ParentContext, val);
+            run.RemoveParent(val);
             run.ExitLoop();
-        }
-
-        // The parent context is a stack, so the entry a block added is the last one equal to it.
-        private static void RemoveLast(List<object?> parentContext, object? value)
-        {
-            // Normally the entry is the last one. Checking the reference first skips Equals, which a record type runs over all its fields.
-            int last = parentContext.Count - 1;
-            if (last >= 0 && ReferenceEquals(parentContext[last], value))
-            {
-                parentContext.RemoveAt(last);
-                return;
-            }
-
-            int index = parentContext.LastIndexOf(value);
-            if (index >= 0)
-            {
-                parentContext.RemoveAt(index);
-            }
-        }
-
-        // The state of one call of Process: the stack of parent contexts, and one TokenArgs and one ConditionArgs that every provider call reuses.
-        // A new Run per call keeps one Processor safe to use from many threads, and lets a provider call Process again.
-        private sealed class Run
-        {
-            private TokenArgs? tokenArgs;
-            private ConditionArgs? conditionArgs;
-
-            // Builders for SET values. A SET inside a SET value needs its own, so they are kept as a stack.
-            private StringBuilder[] builders = Array.Empty<StringBuilder>();
-            private int buildersInUse;
-
-            private readonly StringBuilder output;
-            private readonly int outputStart;
-
-            public Run(List<object?> parentContext, StringBuilder output)
-            {
-                this.ParentContext = parentContext;
-                this.output = output;
-                this.outputStart = output.Length;
-            }
-
-            // Where the text of this call starts in a builder: after the text the caller had in the main output, at 0 in a SET value.
-            public int StartOf(StringBuilder builder) => ReferenceEquals(builder, this.output) ? this.outputStart : 0;
-
-            // One state per FOREACH being processed, the innermost last: not in a row, in a row before the last, or in the last row.
-            private const byte NotInRow = 0;
-            private const byte RowBeforeTheLast = 1;
-            private const byte LastRow = 2;
-            private byte[] loopStates = Array.Empty<byte>();
-            private int loopDepth;
-
-            // True while a row of the innermost FOREACH is processed and it is not the last row: SEPARATOR blocks are written.
-            public bool InRowBeforeTheLast => this.loopDepth > 0 && this.loopStates[this.loopDepth - 1] == RowBeforeTheLast;
-
-            public void EnterLoop()
-            {
-                if (this.loopDepth == this.loopStates.Length)
-                {
-                    Array.Resize(ref this.loopStates, this.loopStates.Length + 4);
-                }
-
-                this.loopStates[this.loopDepth++] = NotInRow;
-            }
-
-            public void SetRow(bool isLast) => this.loopStates[this.loopDepth - 1] = isLast ? LastRow : RowBeforeTheLast;
-
-            public void LeaveRow() => this.loopStates[this.loopDepth - 1] = NotInRow;
-
-            public void ExitLoop() => this.loopDepth--;
-
-            public List<object?> ParentContext { get; }
-
-            public TokenArgs TokenArgs(NamedToken token, object? context)
-            {
-                return this.tokenArgs == null
-                    ? this.tokenArgs = new TokenArgs(token, context, this.ParentContext)
-                    : this.tokenArgs.Reuse(token.Name, token.Attributes, context);
-            }
-
-            public TokenArgs TokenArgs(WithToken token, object? context)
-            {
-                return this.tokenArgs == null
-                    ? this.tokenArgs = new TokenArgs(token, context, this.ParentContext)
-                    : this.tokenArgs.Reuse(token.Name, token.Attributes, context);
-            }
-
-            public StringBuilder RentBuilder()
-            {
-                if (this.buildersInUse == this.builders.Length)
-                {
-                    Array.Resize(ref this.builders, this.builders.Length + 2);
-                }
-
-                var builder = this.builders[this.buildersInUse] ??= new StringBuilder();
-                this.buildersInUse++;
-                return builder;
-            }
-
-            public void ReturnBuilder(StringBuilder builder)
-            {
-                builder.Clear();
-                this.buildersInUse--;
-            }
-
-            public ConditionArgs ConditionArgs(ConditionToken token, object? context)
-            {
-                return this.conditionArgs == null
-                    ? this.conditionArgs = new ConditionArgs(token, context, this.ParentContext)
-                    : this.conditionArgs.Reuse(token, context);
-            }
-        }
-
-        // The SET variables of one scope. A child scope shares the dictionary of its parent and copies it only when a SET writes,
-        // so blocks without SET allocate nothing. The parent never runs while a child scope is in use, so the shared dictionary cannot change under it.
-        private struct Variables
-        {
-            private Dictionary<string, string>? map;
-            private bool owned;
-
-            public static Variables Child(Variables parent) => new Variables { map = parent.map };
-
-            public readonly bool TryGet(string name, [NotNullWhen(true)] out string? value)
-            {
-                if (this.map == null)
-                {
-                    value = null;
-                    return false;
-                }
-
-                return this.map.TryGetValue(name, out value);
-            }
-
-            public void Set(string name, string value)
-            {
-                if (!this.owned)
-                {
-                    this.map = this.map == null ? new Dictionary<string, string>() : new Dictionary<string, string>(this.map);
-                    this.owned = true;
-                }
-
-                this.map[name] = value;
-            }
         }
     }
 }

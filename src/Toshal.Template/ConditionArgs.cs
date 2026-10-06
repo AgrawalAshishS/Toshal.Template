@@ -69,10 +69,17 @@ namespace Toshal.Template
         /// </example>
         public TokenAttributeDictionary Attributes { get; private set; }
 
-        internal ConditionArgs Reuse(ConditionToken token, object? context)
+        // Made by compiled templates, which have no token objects.
+        internal ConditionArgs(string name, TokenAttributeDictionary attributes, object? context, List<object?> parentContext)
+            : base(name, context, parentContext)
         {
-            this.Reuse(token.Name, context);
-            this.Attributes = token.Attributes;
+            this.Attributes = attributes;
+        }
+
+        internal ConditionArgs Reuse(string name, TokenAttributeDictionary attributes, object? context)
+        {
+            this.Reuse(name, context);
+            this.Attributes = attributes;
             return this;
         }
     }

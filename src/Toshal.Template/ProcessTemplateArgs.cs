@@ -33,6 +33,13 @@ namespace Toshal.Template
             this.Attributes = token.Attributes;
         }
 
+        // Made by compiled templates, which have no token objects.
+        internal ProcessTemplateArgs(string name, TokenAttributeDictionary attributes, object? context, List<object?> parentContext)
+            : base(name, context, parentContext)
+        {
+            this.Attributes = attributes;
+        }
+
         /// <summary>
         /// Gets the attributes written in the tag, for example <c>lang</c> in <c>&lt;%PROCESS_TEMPLATE footer lang="en"%&gt;</c>.
         /// Keys are lower case, values are kept as written.

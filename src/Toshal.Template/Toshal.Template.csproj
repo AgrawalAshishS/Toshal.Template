@@ -11,4 +11,9 @@
     <Description>A text template engine with ASP style tags such as &lt;%=Name%&gt;, IF, FOREACH, WITH and SET. It produces any text: emails, reports, source code, project files.</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The compiled templates share the run state of Processor, so both write the same text. The two packages ship together. -->
+    <InternalsVisibleTo Include="Toshal.Template.Compiled" />
+  </ItemGroup>
+
 </Project>
