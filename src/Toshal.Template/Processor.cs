@@ -188,9 +188,10 @@ namespace Toshal.Template
                         break;
 
                     case SetToken setToken:
-                        var valueOutput = new StringBuilder();
+                        var valueOutput = run.RentBuilder();
                         this.Process(valueOutput, setToken.InnerTokens, context, run, ref vars);
                         vars.Set(setToken.Name, valueOutput.ToString());
+                        run.ReturnBuilder(valueOutput);
                         break;
                 }
             }
@@ -389,6 +390,14 @@ namespace Toshal.Template
         // The parent context is a stack, so the entry a block added is the last one equal to it.
         private static void RemoveLast(List<object?> parentContext, object? value)
         {
+            // Normally the entry is the last one. Checking the reference first skips Equals, which a record type runs over all its fields.
+            int last = parentContext.Count - 1;
+            if (last >= 0 && ReferenceEquals(parentContext[last], value))
+            {
+                parentContext.RemoveAt(last);
+                return;
+            }
+
             int index = parentContext.LastIndexOf(value);
             if (index >= 0)
             {
@@ -402,6 +411,10 @@ namespace Toshal.Template
         {
             private TokenArgs? tokenArgs;
             private ConditionArgs? conditionArgs;
+
+            // Builders for SET values. A SET inside a SET value needs its own, so they are kept as a stack.
+            private StringBuilder[] builders = Array.Empty<StringBuilder>();
+            private int buildersInUse;
 
             public Run(List<object?> parentContext)
             {
@@ -422,6 +435,24 @@ namespace Toshal.Template
                 return this.tokenArgs == null
                     ? this.tokenArgs = new TokenArgs(token, context, this.ParentContext)
                     : this.tokenArgs.Reuse(token.Name, token.Attributes, context);
+            }
+
+            public StringBuilder RentBuilder()
+            {
+                if (this.buildersInUse == this.builders.Length)
+                {
+                    Array.Resize(ref this.builders, this.builders.Length + 2);
+                }
+
+                var builder = this.builders[this.buildersInUse] ??= new StringBuilder();
+                this.buildersInUse++;
+                return builder;
+            }
+
+            public void ReturnBuilder(StringBuilder builder)
+            {
+                builder.Clear();
+                this.buildersInUse--;
             }
 
             public ConditionArgs ConditionArgs(ConditionToken token, object? context)

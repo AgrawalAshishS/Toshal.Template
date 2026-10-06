@@ -107,6 +107,18 @@ namespace Toshal.Template.Tests
         }
 
         [Fact]
+        public void SetInsideASetValueGetsItsOwnText()
+        {
+            Assert.Equal("[x(y(z)!)!][y(z)!][z]", Run("<%SET a%>x(<%SET b%>y(<%SET c%>z<%ENDSET%><%=c%>)!<%ENDSET%><%=b%>)!<%ENDSET%>[<%=a%>][<%=b%>][<%=c%>]"));
+        }
+
+        [Fact]
+        public void SetInALoopStartsEachValueEmpty()
+        {
+            Assert.Equal("[1][2][3]", Run("<%FOREACH l%><%ROW%><%SET v%><%CONTEXT_AS_STRING%><%ENDSET%>[<%=v%>]<%ENDROW%><%ENDFOR%>"));
+        }
+
+        [Fact]
         public void ProcessingTwiceStartsWithNoVariables()
         {
             var processor = new Processor();
