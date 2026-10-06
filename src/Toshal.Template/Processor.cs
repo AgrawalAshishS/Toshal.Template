@@ -403,6 +403,10 @@ namespace Toshal.Template
                                     ? forEachToken.AltRowTokens
                                     : forEachToken.RowTokens;
 
+                // Which parts a row uses. By design the LAST parts win over the FIRST parts:
+                // - the first row uses the FIRST parts only when the list has more than one row,
+                // - the last row uses the LAST parts, so a list with one row uses the LAST parts and never the FIRST parts.
+                // An empty part is ignored and the choice above stays (ALT parts on odd rows, else the normal parts).
                 if (i == 0 && val.Count > 1)
                 {
                     beforeTokens = (forEachToken.BeforeFirstRowTokens.Count > 0)
@@ -469,4 +473,4 @@ namespace Toshal.Template
             }
         }
     }
-}
+}

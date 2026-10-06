@@ -11,6 +11,7 @@ None at the moment.
 
 | Behavior | Test |
 |---|---|
+| A list with one row uses the LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) and never the FIRST parts: the last row template wins. | `KnownIssues/KnownIssueTests.OneRowUsesTheLastRowPart` |
 | IF, ELSEIF and FOREACH tags lower case their attribute values: `<%IF Weight unit="KG"%>` gives `kg`. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case. | `KnownIssues/KnownIssueTests.IfAndForEachAttributeValuesAreLowerCased` |
 
 ## Open questions
@@ -19,7 +20,6 @@ These are not clearly bugs. The owner has to decide what the template language s
 
 | Question | Today | Test |
 |---|---|---|
-| A list with one row: FIRSTROW, LASTROW or both? | The LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) are used; the FIRST parts are not. | `OneRowUsesTheLastRowPartToday` |
 | `<%REUSE_FOREACH a b%>` when two FOREACH blocks are named `a`. | `Parser.Parse` throws `ArgumentException` ("FOREACH name a is used more than once"). Should it be a `ParserException`, or should the first or last block win? | `ReuseOfADuplicateForEachNameFails` |
 
 ## Fixed in this version

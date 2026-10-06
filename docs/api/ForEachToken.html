@@ -13,7 +13,7 @@
 <p class="muted">class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
 <p>A parsed <code>&lt;%FOREACH name%&gt;</code> ... <code>&lt;%ENDFOR%&gt;</code> block. It has one token list for each part that a loop can have. Each part is written as <code>&lt;%PART%&gt;</code> ... <code>&lt;%ENDPART%&gt;</code> inside the block, for example <code>&lt;%HEADER%&gt;</code> ... <code>&lt;%ENDHEADER%&gt;</code>, and each part may appear once. Text and tags inside the block but outside every part belong to the ROW part.</p>
 <h4>Remarks</h4><p>For each row the processor picks the parts like this: on odd rows (the second, fourth, ...) the ALT parts are used when they are not empty. On the first row of a list with more than one row, the FIRST parts win. On the last row, the LAST parts win. An empty part is ignored and the earlier choice stays, so an odd last row with no LASTROW part uses ALTROW, or ROW when ALTROW is empty too.</p>
-<p class="warning"><strong>Warning:</strong> a list with one row uses the LAST parts, not the FIRST parts. See docs/known-issues.md.</p>
+<p class="warning"><strong>Warning:</strong> by design the LAST parts win: a list with one row uses BEFORELASTROW, LASTROW and AFTERLASTROW, and never the FIRST parts.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">&lt;%FOREACH lines%&gt;

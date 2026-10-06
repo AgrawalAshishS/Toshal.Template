@@ -31,7 +31,7 @@ Text outside every part belongs to ROW.
 | `BEFOREROW`, `ROW`, `AFTERROW` | For each row. | The row |
 | `BEFOREALTROW`, `ALTROW`, `AFTERALTROW` | Instead of the normal parts on the 2nd, 4th, ... row, when not empty. | The row |
 | `BEFOREFIRSTROW`, `FIRSTROW`, `AFTERFIRSTROW` | Instead of the normal parts on the first row, when the list has more than one row. | The row |
-| `BEFORELASTROW`, `LASTROW`, `AFTERLASTROW` | Instead of the normal parts on the last row. A list with one row uses these. | The row |
+| `BEFORELASTROW`, `LASTROW`, `AFTERLASTROW` | Instead of the normal parts on the last row. A list with one row uses these, by design: the last row template wins over the first row template. | The row |
 
 ## Where SET variables are visible
 

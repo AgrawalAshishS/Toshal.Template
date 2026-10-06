@@ -22,9 +22,9 @@ namespace Toshal.Template.Tests.KnownIssues
             Assert.Equal("name", loop.Attributes["sort"]);
         }
 
-        // Open question: should a list with one row use FIRSTROW, LASTROW, or both? Today it uses LASTROW.
+        // By design (owner decision): a list with one row uses the LAST parts; the last row template wins.
         [Fact]
-        public void OneRowUsesTheLastRowPartToday()
+        public void OneRowUsesTheLastRowPart()
         {
             var processor = new Processor { LoopValueProvider = args => new List<int> { 1 } };
             var tokens = new Parser().Parse("<%FOREACH a%><%FIRSTROW%>F<%ENDFIRSTROW%><%LASTROW%>L<%ENDLASTROW%><%ROW%>R<%ENDROW%><%ENDFOR%>");

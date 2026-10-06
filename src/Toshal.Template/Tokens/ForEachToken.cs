@@ -16,7 +16,7 @@ namespace Toshal.Template.Tokens
     /// <para>For each row the processor picks the parts like this: on odd rows (the second, fourth, ...) the ALT parts are used when they are not empty.
     /// On the first row of a list with more than one row, the FIRST parts win. On the last row, the LAST parts win.
     /// An empty part is ignored and the earlier choice stays, so an odd last row with no LASTROW part uses ALTROW, or ROW when ALTROW is empty too.</para>
-    /// <para><b>Warning:</b> a list with one row uses the LAST parts, not the FIRST parts. See docs/known-issues.md.</para>
+    /// <para><b>Warning:</b> by design the LAST parts win: a list with one row uses BEFORELASTROW, LASTROW and AFTERLASTROW, and never the FIRST parts.</para>
     /// </remarks>
     /// <example>
     /// <code>
