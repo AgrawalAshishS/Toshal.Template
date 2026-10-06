@@ -305,7 +305,12 @@ FOREACH @1:1 "rows" {"sort"="name" | "sort"="name"}
   [ROW]
     TEXT @1:29 "x"
 ### 108 "<%FOREACH Rows%>x<%ENDFOR%><%FOREACH rows%>y<%ENDFOR%>"
-ParserException @1:28 "FOREACH name rows is used twice at the same level. Rename one, or move it into a block."
+FOREACH @1:1 "rows"
+  [ROW]
+    TEXT @1:17 "x"
+FOREACH @1:28 "rows"
+  [ROW]
+    TEXT @1:44 "y"
 ### 109 "<%FOREACH rows%><%FOREACH rows%>x<%ENDFOR%><%ENDFOR%>"
 FOREACH @1:1 "rows"
   [ROW]

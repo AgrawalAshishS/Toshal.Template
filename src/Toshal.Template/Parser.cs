@@ -70,6 +70,7 @@ namespace Toshal.Template
             // A parser can be used for many templates. Each template only sees its own FOREACH blocks.
             this._parentLevel.Clear();
             this._forEachByLevel.Clear();
+            this._forEachById.Clear();
             this._allReuseForEachTokens.Clear();
             this._levels.Clear();
             this._subTemplateIndents?.Clear();
@@ -210,8 +211,11 @@ namespace Toshal.Template
         // Each level points to the level around it (null for the top), so REUSE_FOREACH can look from its own level outwards.
         private readonly Dictionary<List<IToken>, List<IToken>?> _parentLevel = new Dictionary<List<IToken>, List<IToken>?>(ReferenceEqualityComparer.Instance);
 
-        // The FOREACH blocks of each level by name. A name may be used once per level, and again at a deeper level.
-        private readonly Dictionary<List<IToken>, Dictionary<string, ForEachToken>> _forEachByLevel = new Dictionary<List<IToken>, Dictionary<string, ForEachToken>>(ReferenceEqualityComparer.Instance);
+        // The FOREACH blocks of each level. A name may be used any number of times, at any level.
+        private readonly Dictionary<List<IToken>, List<ForEachToken>> _forEachByLevel = new Dictionary<List<IToken>, List<ForEachToken>>(ReferenceEqualityComparer.Instance);
+
+        // The FOREACH blocks that have an id attribute, by lower case id. An id is unique in the whole template.
+        private readonly Dictionary<string, ForEachToken> _forEachById = new Dictionary<string, ForEachToken>();
 
         // Every REUSE_FOREACH with the level it is in. They are linked after the whole template is parsed,
         // so a REUSE_FOREACH may come before its FOREACH.
@@ -671,16 +675,22 @@ namespace Toshal.Template
                 }
             }
 
-            // A FOREACH name is unique per level. The second one is reported at its own position.
-            if (this._forEachByLevel.TryGetValue(tokenList, out var forEachByName) == false)
+            // A FOREACH name is the name of its list and may be used any number of times. An id is unique in the whole template.
+            if (this._forEachByLevel.TryGetValue(tokenList, out var forEachList) == false)
             {
-                forEachByName = new Dictionary<string, ForEachToken>();
-                this._forEachByLevel[tokenList] = forEachByName;
+                forEachList = new List<ForEachToken>();
+                this._forEachByLevel[tokenList] = forEachList;
             }
 
-            if (forEachByName.TryAdd(token.Name, token) == false)
+            forEachList.Add(token);
+
+            var id = token.Attributes.GetLowerCaseValue("id", string.Empty);
+            if (id.Length > 0 && this._forEachById.TryAdd(id, token) == false)
             {
-                throw new ParserException(split, "FOREACH name " + token.Name + " is used twice at the same level. Rename one, or move it into a block.");
+                // Inner blocks are finished first, so the one found earlier may come later in the text. Report the later one.
+                var other = this._forEachById[id];
+                var later = StartsBefore(other, token.LineNumber, token.StartingPosition) ? token : other;
+                throw new ParserException(later.LineNumber, later.StartingPosition, "FOREACH id " + id + " is used twice. Give each FOREACH its own id.");
             }
 
             tokenList.Add(token);
@@ -1040,6 +1050,10 @@ namespace Toshal.Template
             return true; // reached to end
         }
 
+        // True when the token starts before the given line and column of the template.
+        private static bool StartsBefore(Token token, int lineNumber, int startingPosition) =>
+            token.LineNumber < lineNumber || (token.LineNumber == lineNumber && token.StartingPosition < startingPosition);
+
         /// <summary>
         ///     The verify all reuse for each references.
         /// </summary>
@@ -1054,21 +1068,33 @@ namespace Toshal.Template
 
             foreach (var (reuseForEachToken, level) in this._allReuseForEachTokens)
             {
-                // The nearest FOREACH wins: the level of the REUSE_FOREACH first, then each outer level up to the top.
-                ForEachToken? found = null;
+                var name = reuseForEachToken.ExistingForEachName;
+
+                // A FOREACH with that id wins, wherever it is.
+                var found = this._forEachById.GetValueOrDefault(name);
+
+                // Then the nearest FOREACH with that name above the REUSE_FOREACH: its own level first, then each outer level up to the top.
                 for (List<IToken>? current = level; current != null && found == null; current = this._parentLevel[current])
                 {
-                    if (this._forEachByLevel.TryGetValue(current, out var forEachByName))
+                    if (this._forEachByLevel.TryGetValue(current, out var forEachList))
                     {
-                        forEachByName.TryGetValue(reuseForEachToken.ExistingForEachName, out found);
+                        foreach (var forEach in forEachList)
+                        {
+                            if (forEach.Name == name
+                                && StartsBefore(forEach, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition)
+                                && (found == null || StartsBefore(found, forEach.LineNumber, forEach.StartingPosition)))
+                            {
+                                found = forEach;
+                            }
+                        }
                     }
                 }
 
                 // Fallback: the first FOREACH with the name in the whole template, top to bottom. Blocks are finished inner first
                 // while parsing, so template order comes from the line and column, not from the order the blocks were found.
                 found ??= this._forEachByLevel.Values
-                    .Select(byName => byName.GetValueOrDefault(reuseForEachToken.ExistingForEachName))
-                    .OfType<ForEachToken>()
+                    .SelectMany(forEachList => forEachList)
+                    .Where(t => t.Name == name)
                     .OrderBy(t => t.LineNumber)
                     .ThenBy(t => t.StartingPosition)
                     .FirstOrDefault();

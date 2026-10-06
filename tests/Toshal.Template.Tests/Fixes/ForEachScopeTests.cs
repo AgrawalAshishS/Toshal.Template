@@ -6,26 +6,28 @@ using Xunit;
 
 namespace Toshal.Template.Tests.Fixes
 {
-    // Owner decision: a FOREACH name is unique per level. A level is one list of tokens: the top of the template, or the inside of
-    // an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. The same name may be used again at a deeper level.
-    // REUSE_FOREACH uses the nearest FOREACH: its own level first, then each outer level up to the top.
+    // Owner decision: a FOREACH name is the name of its list, so the same name may be used as often as wanted, at any level.
+    // REUSE_FOREACH finds its FOREACH in this order:
+    // 1. the FOREACH whose id attribute is the first word (ids are unique in the whole template),
+    // 2. the nearest FOREACH with that name above the REUSE_FOREACH: its own level first, then each outer level up to the top,
+    // 3. the first FOREACH with that name in the whole template, top to bottom.
     // Before: names had to be unique in the whole template only when a REUSE_FOREACH used them, and that failed with ArgumentException.
+    // Later the name was unique per level, which was wrong: a list can be shown more than once.
     public class ForEachScopeTests
     {
         private static List<IToken> Parse(string template) => new Parser().Parse(template);
 
         [Fact]
-        public void SameNameTwiceAtTheSameLevelIsAParserError()
+        public void SameNameTwiceAtTheSameLevelIsAllowed()
         {
-            var ex = Assert.Throws<ParserException>(() => Parse("<%FOREACH a%>1<%ENDFOR%>\n<%FOREACH a%>2<%ENDFOR%>"));
-            Assert.Equal(2, ex.LineNumber);
-            Assert.Equal(1, ex.StartingPosition);
+            Assert.Equal(2, Parse("<%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%>").Count);
         }
 
         [Fact]
-        public void SameNameTwiceInsideOneBlockIsAParserError()
+        public void SameNameTwiceInsideOneBlockIsAllowed()
         {
-            Assert.Throws<ParserException>(() => Parse("<%WITH w%><%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%><%ENDWITH%>"));
+            var with = (WithToken)Parse("<%WITH w%><%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%><%ENDWITH%>")[0];
+            Assert.Equal(2, with.InnerTokens.Count);
         }
 
         [Fact]
@@ -97,6 +99,82 @@ namespace Toshal.Template.Tests.Fixes
         public void NameNowhereInTheTemplateStillThrows()
         {
             Assert.Throws<ForEachMissingForReuseException>(() => Parse("<%IF x%><%FOREACH a%>T<%ENDFOR%><%ENDIF%><%REUSE_FOREACH z b%>"));
+        }
+
+        [Fact]
+        public void ReuseUsesTheNearestForEachAboveAtItsLevel()
+        {
+            var tokens = Parse("<%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%><%REUSE_FOREACH a b%><%FOREACH a%>3<%ENDFOR%>");
+
+            Assert.Same(tokens[1], ((ReuseForEachToken)tokens[2]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void ReuseUsesTheNearestForEachAboveAtAnOuterLevel()
+        {
+            var tokens = Parse("<%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%><%IF x%><%REUSE_FOREACH a b%><%ENDIF%><%FOREACH a%>3<%ENDFOR%>");
+
+            var reuse = (ReuseForEachToken)((ConditionToken)tokens[2]).InnerTokens[0];
+            Assert.Same(tokens[1], reuse.ExistingForEachToken);
+        }
+
+        [Fact]
+        public void AForEachAboveAtAnOuterLevelWinsOverOneBelowAtTheOwnLevel()
+        {
+            var tokens = Parse("<%FOREACH a%>T<%ENDFOR%><%WITH w%><%REUSE_FOREACH a b%><%FOREACH a%>W<%ENDFOR%><%ENDWITH%>");
+
+            var reuse = (ReuseForEachToken)((WithToken)tokens[1]).InnerTokens[0];
+            Assert.Same(tokens[0], reuse.ExistingForEachToken);
+        }
+
+        [Fact]
+        public void ReuseOfAForEachOnlyBelowFallsBackToTheFirstOne()
+        {
+            var tokens = Parse("<%REUSE_FOREACH a b%><%FOREACH a%>1<%ENDFOR%><%FOREACH a%>2<%ENDFOR%>");
+
+            Assert.Same(tokens[1], ((ReuseForEachToken)tokens[0]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void ReuseFindsAForEachById()
+        {
+            var tokens = Parse("<%FOREACH a id=\"one\"%>1<%ENDFOR%><%FOREACH a id=\"two\"%>2<%ENDFOR%><%REUSE_FOREACH one b%>");
+
+            Assert.Same(tokens[0], ((ReuseForEachToken)tokens[2]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void IdWinsOverAForEachName()
+        {
+            var tokens = Parse("<%FOREACH x%>1<%ENDFOR%><%FOREACH a id=\"x\"%>2<%ENDFOR%><%REUSE_FOREACH x b%>");
+
+            Assert.Same(tokens[1], ((ReuseForEachToken)tokens[2]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void IdIsFoundAnywhereAndIsNotCaseSensitive()
+        {
+            var tokens = Parse("<%REUSE_FOREACH Main b%><%IF x%><%FOREACH a id=\"MAIN\"%>1<%ENDFOR%><%ENDIF%>");
+
+            var inIf = ((ConditionToken)tokens[1]).InnerTokens[0];
+            Assert.Same(inIf, ((ReuseForEachToken)tokens[0]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void SameIdTwiceIsAParserError()
+        {
+            var ex = Assert.Throws<ParserException>(() => Parse("<%FOREACH a id=\"one\"%>1<%ENDFOR%>\n<%IF x%><%FOREACH b id=\"One\"%>2<%ENDFOR%><%ENDIF%>"));
+            Assert.Equal(2, ex.LineNumber);
+            Assert.Equal(9, ex.StartingPosition);
+        }
+
+        [Fact]
+        public void ProcessingUsesTheLayoutWithTheId()
+        {
+            var processor = new Processor { LoopValueProvider = args => new[] { args.Attributes.GetValue("id", "-") } };
+            var tokens = Parse("<%FOREACH a id=\"one\"%>1<%CONTEXT_AS_STRING%><%ENDFOR%><%FOREACH a id=\"two\"%>2<%ENDFOR%>|<%REUSE_FOREACH one b%>");
+
+            Assert.Equal("1one2|1one", processor.Process(new ProcessorArgs(tokens)).ToString());
         }
 
         [Fact]

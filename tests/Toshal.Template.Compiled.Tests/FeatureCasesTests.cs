@@ -45,6 +45,7 @@ namespace Toshal.Template.Compiled.Tests
             "<%FOREACH rows%><%FOREACH inner%>i<%ENDFOR%><%SEPARATOR%>,<%ENDSEPARATOR%><%ENDFOR%>",
             "<%FOREACH rows%><%=name%><%ENDFOR%>|<%REUSE_FOREACH rows again%>|<%WITH w%><%REUSE_FOREACH rows more%><%ENDWITH%>",
             "<%FOREACH rows top=\"2\"%><%=name%><%ENDFOR%><%REUSE_FOREACH rows again%>",
+            "<%FOREACH rows id=\"names\"%><%=name%><%ENDFOR%>|<%FOREACH rows%>[<%=name%>]<%ENDFOR%>|<%REUSE_FOREACH rows again%>|<%REUSE_FOREACH names more%>",
             "<%FOREACH rows%><%IF not odd%><%CONTEXT_AS_STRING%><%ELSEIF even x=\"1\"%>e<%ELSE%>o<%ENDIF%><%ENDFOR%>",
 
             // Lines with only control tags are dropped, and a sub template alone on its line is indented
