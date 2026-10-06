@@ -19,7 +19,7 @@
 <tr><td><code>&lt;%IF not Name%&gt;</code></td><td>A negative condition. The provider gets <code>name</code> and returns its value; the processor applies the <code>not</code>.</td><td><code>ConditionValueProvider</code></td></tr>
 <tr><td><code>&lt;%ELSEIF Name%&gt;</code>, <code>&lt;%ELSE%&gt;</code></td><td>Further branches of an IF.</td><td><code>ConditionValueProvider</code></td></tr>
 <tr><td><code>&lt;%FOREACH Name%&gt;...&lt;%ENDFOR%&gt;</code></td><td>Writes the inner part once per row.</td><td><code>LoopValueProvider</code> returns an <code>IList</code></td></tr>
-<tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the FOREACH named <code>Existing</code> again, for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
+<tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the nearest FOREACH named <code>Existing</code> again, for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
 <tr><td><code>&lt;%WITH Name%&gt;...&lt;%ENDWITH%&gt;</code></td><td>Makes an object the context of the inner part. Null skips the part.</td><td><code>WithValueProvider</code></td></tr>
 <tr><td><code>&lt;%SET Name%&gt;...&lt;%ENDSET%&gt;</code></td><td>Writes the inner part into a variable instead of the output.</td><td>none</td></tr>
 <tr><td><code>&lt;%PROCESS_TEMPLATE Name%&gt;</code></td><td>Runs a sub template in place, with the current context.</td><td><code>ProcessTemplateValueProvider</code> returns tokens</td></tr>
@@ -27,6 +27,15 @@
 <tr><td><code>&lt;%REMOVE_PREVIOUS n%&gt;</code></td><td>Removes the last n characters written so far.</td><td>none</td></tr>
 <tr><td><code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code></td><td>Removes a <code>\n</code> at the end of the output, then a <code>\r</code> at the end.</td><td>none</td></tr>
 </table></div>
+<h2>FOREACH names and REUSE_FOREACH</h2>
+<p>A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. Two FOREACH blocks with the same name at the same level are a <code>ParserException</code>; the same name at a deeper level, or in the IF and the ELSE part, is fine.</p>
+<p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. It does not see a FOREACH inside another block, such as an IF next to it.</p>
+<pre><code class="lang-text">&lt;%FOREACH items%&gt;top layout&lt;%ENDFOR%&gt;
+&lt;%WITH archive%&gt;
+  &lt;%FOREACH items%&gt;archive layout&lt;%ENDFOR%&gt;
+  &lt;%REUSE_FOREACH items old%&gt;      uses the archive layout (same level)
+&lt;%ENDWITH%&gt;
+&lt;%REUSE_FOREACH items more%&gt;       uses the top layout</code></pre>
 <h2>FOREACH parts</h2>
 <p>Inside a FOREACH you can write these parts, each at most once, each closed by its END tag (for example <code>&lt;%HEADER%&gt;...&lt;%ENDHEADER%&gt;</code>). Text outside every part belongs to ROW.</p>
 <div class="table-wrap"><table>

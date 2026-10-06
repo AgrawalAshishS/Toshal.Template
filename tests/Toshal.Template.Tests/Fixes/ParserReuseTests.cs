@@ -31,22 +31,15 @@ namespace Toshal.Template.Tests.Fixes
             Assert.Throws<ForEachMissingForReuseException>(() => parser.Parse("<%REUSE_FOREACH a b%>"));
         }
 
-        // Two FOREACH blocks with the same name are fine as long as REUSE_FOREACH points to another name.
+        // Two FOREACH blocks with the same name are fine at different levels, and REUSE_FOREACH of another name still works.
+        // (Owner decision: the same name twice at one level is a ParserException; see ForEachScopeTests.)
         [Fact]
-        public void DuplicateForEachNamesDoNotBreakReuseOfAnotherName()
+        public void DuplicateForEachNamesAtDifferentLevelsDoNotBreakReuseOfAnotherName()
         {
-            var tokens = new Parser().Parse("<%FOREACH a%><%ENDFOR%><%FOREACH a%><%ENDFOR%><%FOREACH b%>x<%ENDFOR%><%REUSE_FOREACH b c%>");
+            var tokens = new Parser().Parse("<%FOREACH a%><%ENDFOR%><%IF x%><%FOREACH a%><%ENDFOR%><%ENDIF%><%FOREACH b%>x<%ENDFOR%><%REUSE_FOREACH b c%>");
 
             var reuse = Assert.IsType<ReuseForEachToken>(tokens[3]);
             Assert.Same(tokens[2], reuse.ExistingForEachToken);
-        }
-
-        // Open question for the owner: which FOREACH should REUSE_FOREACH use when the name is not unique?
-        // Today it throws ArgumentException. This test only pins that it fails.
-        [Fact]
-        public void ReuseOfADuplicateForEachNameFails()
-        {
-            Assert.Throws<ArgumentException>(() => new Parser().Parse("<%FOREACH a%><%ENDFOR%><%FOREACH a%><%ENDFOR%><%REUSE_FOREACH a b%>"));
         }
     }
 }

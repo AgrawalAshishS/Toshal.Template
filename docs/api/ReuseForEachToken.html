@@ -11,7 +11,7 @@
 <main class="wrap">
 <h1>ReuseForEachToken</h1>
 <p class="muted">class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
-<p>A parsed <code>&lt;%REUSE_FOREACH existing name%&gt;</code> tag. It runs the FOREACH block named <code>existing</code> again, at this place, under the new name. The loop value provider is asked for the rows with the new name and the attributes of the existing FOREACH, so the same layout can show a different list. The existing FOREACH must be in the same template; it can come before or after this tag.</p>
+<p>A parsed <code>&lt;%REUSE_FOREACH existing name%&gt;</code> tag. It runs the FOREACH block named <code>existing</code> again, at this place, under the new name. The loop value provider is asked for the rows with the new name and the attributes of the existing FOREACH, so the same layout can show a different list. The parser links the nearest FOREACH with that name: at the level of this tag first (before or after it), then at each outer level. A FOREACH inside another block is not seen.</p>
 <h4>Example</h4>
 <pre><code class="lang-csharp">// Same table layout for two lists:
 // &lt;%FOREACH open%&gt;- &lt;%=Title%&gt;&lt;%ENDFOR%&gt;  Done: &lt;%REUSE_FOREACH open done%&gt;</code></pre>

@@ -11,13 +11,30 @@ Text outside tags is written as it is, including spaces and line breaks.
 | `<%IF not Name%>` | A negative condition. The provider gets `name` and returns its value; the processor applies the `not`. | `ConditionValueProvider` |
 | `<%ELSEIF Name%>`, `<%ELSE%>` | Further branches of an IF. | `ConditionValueProvider` |
 | `<%FOREACH Name%>...<%ENDFOR%>` | Writes the inner part once per row. | `LoopValueProvider` returns an `IList` |
-| `<%REUSE_FOREACH Existing NewName%>` | Runs the layout of the FOREACH named `Existing` again, for the list named `NewName`. | `LoopValueProvider` |
+| `<%REUSE_FOREACH Existing NewName%>` | Runs the layout of the nearest FOREACH named `Existing` again, for the list named `NewName`. | `LoopValueProvider` |
 | `<%WITH Name%>...<%ENDWITH%>` | Makes an object the context of the inner part. Null skips the part. | `WithValueProvider` |
 | `<%SET Name%>...<%ENDSET%>` | Writes the inner part into a variable instead of the output. | none |
 | `<%PROCESS_TEMPLATE Name%>` | Runs a sub template in place, with the current context. | `ProcessTemplateValueProvider` returns tokens |
 | `<%CONTEXT_AS_STRING%>` | Writes `ToString()` of the current context. | none |
 | `<%REMOVE_PREVIOUS n%>` | Removes the last n characters written so far. | none |
 | `<%REMOVE_PREVIOUS_NEW_LINE%>` | Removes a `\n` at the end of the output, then a `\r` at the end. | none |
+
+## FOREACH names and REUSE_FOREACH
+
+A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part.
+Two FOREACH blocks with the same name at the same level are a `ParserException`; the same name at a deeper level, or in the IF and the ELSE part, is fine.
+
+REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top.
+It does not see a FOREACH inside another block, such as an IF next to it.
+
+```text
+<%FOREACH items%>top layout<%ENDFOR%>
+<%WITH archive%>
+  <%FOREACH items%>archive layout<%ENDFOR%>
+  <%REUSE_FOREACH items old%>      uses the archive layout (same level)
+<%ENDWITH%>
+<%REUSE_FOREACH items more%>       uses the top layout
+```
 
 ## FOREACH parts
 

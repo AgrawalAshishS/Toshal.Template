@@ -13,6 +13,7 @@
 <p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
 <p>Turns template text into a list of tokens. Parse a template once and give the tokens to <a href="Processor.html"><code>Process</code></a> as often as you like.</p>
 <h4>Remarks</h4><p>Tags are written as <code>&lt;%...%&gt;</code>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive. Names are not case sensitive: the parser lower cases them.</p>
+<p>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part. A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top. It does not see a FOREACH inside another block.</p>
 <p class="warning"><strong>Warning:</strong> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</p>
 
 <h4>Example</h4>
@@ -30,9 +31,8 @@
 <dt><code>TokenMissingNameException</code></dt><dd>A tag that needs a name has none, for example <code>&lt;%=%&gt;</code>.</dd>
 <dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF.</dd>
 <dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>
-<dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is not in the template.</dd>
-<dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, or a REMOVE_PREVIOUS count that is missing, not a whole number, or negative. All the exceptions above derive from it.</dd>
-<dt><code>ArgumentException</code></dt><dd>Known issue: REUSE_FOREACH names a FOREACH name that is used more than once. See docs/known-issues.md.</dd>
+<dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is neither at its own level nor at an outer level.</dd>
+<dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</dd>
 </dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">var parser = new Parser();

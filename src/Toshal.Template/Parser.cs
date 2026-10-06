@@ -18,6 +18,10 @@ namespace Toshal.Template
     /// <remarks>
     /// <para>Tags are written as <c>&lt;%...%&gt;</c>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive.
     /// Names are not case sensitive: the parser lower cases them.</para>
+    /// <para>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE,
+    /// WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part.
+    /// A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top.
+    /// It does not see a FOREACH inside another block.</para>
     /// <para><b>Warning:</b> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</para>
     /// </remarks>
     /// <example>
@@ -48,11 +52,9 @@ namespace Toshal.Template
         /// <exception cref="TokenMissingNameException">A tag that needs a name has none, for example <c>&lt;%=%&gt;</c>.</exception>
         /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
-        /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is not in the template.</exception>
-        /// <exception cref="ParserException">An unknown tag, an end tag without its start, or a REMOVE_PREVIOUS count that is missing, not a whole number, or negative.
-        /// All the exceptions above derive from it.</exception>
-        /// <exception cref="ArgumentException">Known issue: REUSE_FOREACH names a FOREACH name that is used more than once.
-        /// See docs/known-issues.md.</exception>
+        /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is neither at its own level nor at an outer level.</exception>
+        /// <exception cref="ParserException">An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number,
+        /// or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</exception>
         /// <example>
         /// <code>
         /// var parser = new Parser();
@@ -66,8 +68,10 @@ namespace Toshal.Template
             var retList = new List<IToken>();
 
             // A parser can be used for many templates. Each template only sees its own FOREACH blocks.
-            this._allForEachTokens.Clear();
+            this._parentLevel.Clear();
+            this._forEachByLevel.Clear();
             this._allReuseForEachTokens.Clear();
+            this._levels.Clear();
 
             this._splits = SplitTemplateByTokens(templateText);
 
@@ -177,15 +181,19 @@ namespace Toshal.Template
 
         #region Fields
 
-        /// <summary>
-        ///     The _all for each tokens.
-        /// </summary>
-        private readonly List<ForEachToken> _allForEachTokens = new List<ForEachToken>();
+        // A level is one token list: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part.
+        // Each level points to the level around it (null for the top), so REUSE_FOREACH can look from its own level outwards.
+        private readonly Dictionary<List<IToken>, List<IToken>?> _parentLevel = new Dictionary<List<IToken>, List<IToken>?>(ReferenceEqualityComparer.Instance);
 
-        /// <summary>
-        ///     The _all reuse for each tokens.
-        /// </summary>
-        private readonly List<ReuseForEachToken> _allReuseForEachTokens = new List<ReuseForEachToken>();
+        // The FOREACH blocks of each level by name. A name may be used once per level, and again at a deeper level.
+        private readonly Dictionary<List<IToken>, Dictionary<string, ForEachToken>> _forEachByLevel = new Dictionary<List<IToken>, Dictionary<string, ForEachToken>>(ReferenceEqualityComparer.Instance);
+
+        // Every REUSE_FOREACH with the level it is in. They are linked after the whole template is parsed,
+        // so a REUSE_FOREACH may come before its FOREACH.
+        private readonly List<(ReuseForEachToken Token, List<IToken> Level)> _allReuseForEachTokens = new List<(ReuseForEachToken Token, List<IToken> Level)>();
+
+        // The levels being filled right now, the innermost on top.
+        private readonly Stack<List<IToken>> _levels = new Stack<List<IToken>>();
 
         /// <summary>
         ///     The _split index.
@@ -427,8 +435,19 @@ namespace Toshal.Template
                 }
             }
 
+            // A FOREACH name is unique per level. The second one is reported at its own position.
+            if (this._forEachByLevel.TryGetValue(tokenList, out var forEachByName) == false)
+            {
+                forEachByName = new Dictionary<string, ForEachToken>();
+                this._forEachByLevel[tokenList] = forEachByName;
+            }
+
+            if (forEachByName.TryAdd(token.Name, token) == false)
+            {
+                throw new ParserException(split, "FOREACH name " + token.Name + " is used twice at the same level. Rename one, or move it into a block.");
+            }
+
             tokenList.Add(token);
-            this._allForEachTokens.Add(token);
             return true;
         }
 
@@ -476,7 +495,7 @@ namespace Toshal.Template
 
             var token = new ReuseForEachToken(split);
             tokenList.Add(token);
-            this._allReuseForEachTokens.Add(token);
+            this._allReuseForEachTokens.Add((token, tokenList));
             return true;
         }
 
@@ -615,6 +634,25 @@ namespace Toshal.Template
         /// </returns>
         private bool ProcessSplitsTillEnd(List<IToken> tokenList)
         {
+            // The first time a list is filled, the list being filled around it is its outer level.
+            if (this._parentLevel.ContainsKey(tokenList) == false)
+            {
+                this._parentLevel[tokenList] = this._levels.Count > 0 ? this._levels.Peek() : null;
+            }
+
+            this._levels.Push(tokenList);
+            try
+            {
+                return this.ProcessSplitsTillEndOfLevel(tokenList);
+            }
+            finally
+            {
+                this._levels.Pop();
+            }
+        }
+
+        private bool ProcessSplitsTillEndOfLevel(List<IToken> tokenList)
+        {
             for (; this._splitIndex < this._splits.Count; this._splitIndex++)
             {
                 var split = this._splits[this._splitIndex];
@@ -692,22 +730,20 @@ namespace Toshal.Template
                 return;
             }
 
-            foreach (var reuseForEachToken in this._allReuseForEachTokens)
+            foreach (var (reuseForEachToken, level) in this._allReuseForEachTokens)
             {
-                var matches = this._allForEachTokens.Where(t => t.Name == reuseForEachToken.ExistingForEachName).ToList();
-                if (matches.Count > 1)
+                // The nearest FOREACH wins: the level of the REUSE_FOREACH first, then each outer level up to the top.
+                ForEachToken? found = null;
+                for (List<IToken>? current = level; current != null && found == null; current = this._parentLevel[current])
                 {
-                    throw new ArgumentException("FOREACH name " + reuseForEachToken.ExistingForEachName + " is used more than once, so REUSE_FOREACH " + reuseForEachToken.Name + " cannot pick one.");
+                    if (this._forEachByLevel.TryGetValue(current, out var forEachByName))
+                    {
+                        forEachByName.TryGetValue(reuseForEachToken.ExistingForEachName, out found);
+                    }
                 }
 
-                if (matches.Count == 1)
-                {
-                    reuseForEachToken.ExistingForEachToken = matches[0];
-                }
-                else
-                {
-                    throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition);
-                }
+                reuseForEachToken.ExistingForEachToken = found
+                    ?? throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition);
             }
         }
 

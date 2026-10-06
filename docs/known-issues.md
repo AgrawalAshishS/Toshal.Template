@@ -1,7 +1,7 @@
 # Known issues
 
 This page is written by hand. Each row has a test in `tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs`
-or `tests/Toshal.Template.Tests/Fixes/`. A skipped test shows the wanted behavior; the other tests pin what the library does today.
+or `tests/Toshal.Template.Tests/Fixes/`. A skipped test shows the wanted behavior of an open issue; the other tests pin what the library does.
 
 ## Open
 
@@ -12,14 +12,6 @@ None at the moment.
 | Behavior | Test |
 |---|---|
 | A list with one row uses the LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) and never the FIRST parts: the last row template wins. | `KnownIssues/KnownIssueTests.OneRowUsesTheLastRowPart` |
-
-## Open questions
-
-These are not clearly bugs. The owner has to decide what the template language should do.
-
-| Question | Today | Test |
-|---|---|---|
-| `<%REUSE_FOREACH a b%>` when two FOREACH blocks are named `a`. | `Parser.Parse` throws `ArgumentException` ("FOREACH name a is used more than once"). Should it be a `ParserException`, or should the first or last block win? | `ReuseOfADuplicateForEachNameFails` |
 
 ## Fixed in this version
 
@@ -38,3 +30,4 @@ These are not clearly bugs. The owner has to decide what the template language s
 | The same attribute twice in one tag, such as `<%=Name a="1" a="2"%>`, threw `ArgumentException`. It now throws `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid` |
 | `Parser.Parse(null)`, `Processor.Process(null)`, `new ProcessorArgs(null)` and `GetValue(null, ...)` threw `NullReferenceException`. They now throw `ArgumentNullException`. Processing a REUSE_FOREACH token made by hand that is not linked throws `InvalidOperationException`. | `Fixes/NullArgumentTests` |
 | IF, ELSEIF and FOREACH lower cased their attribute values (`unit="KG"` gave `kg`), the other tags did not. Now every tag keeps the value case, and `TokenAttributeDictionary.LowerCaseValues` has a lower case copy made by the parser. | `Fixes/AttributeCaseTests` |
+| Two FOREACH blocks with the same name and a REUSE_FOREACH threw `ArgumentException`. Now a FOREACH name is unique per level (`ParserException` for the second one at the same level), and REUSE_FOREACH uses the nearest FOREACH: its own level, then the outer levels. | `Fixes/ForEachScopeTests` |

@@ -9,7 +9,8 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// A parsed <c>&lt;%REUSE_FOREACH existing name%&gt;</c> tag. It runs the FOREACH block named <c>existing</c> again, at this place, under the new name.
     /// The loop value provider is asked for the rows with the new name and the attributes of the existing FOREACH,
-    /// so the same layout can show a different list. The existing FOREACH must be in the same template; it can come before or after this tag.
+    /// so the same layout can show a different list. The parser links the nearest FOREACH with that name: at the level of this tag first
+    /// (before or after it), then at each outer level. A FOREACH inside another block is not seen.
     /// </summary>
     /// <example>
     /// <code>

@@ -10,19 +10,13 @@
 <header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html" class="active" aria-current="page">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
 <main class="wrap">
 <h1>Known issues</h1>
-<p>This page is written by hand. Each row has a test in <code>tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs</code> or <code>tests/Toshal.Template.Tests/Fixes/</code>. A skipped test shows the wanted behavior; the other tests pin what the library does today.</p>
+<p>This page is written by hand. Each row has a test in <code>tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs</code> or <code>tests/Toshal.Template.Tests/Fixes/</code>. A skipped test shows the wanted behavior of an open issue; the other tests pin what the library does.</p>
 <h2>Open</h2>
 <p>None at the moment.</p>
 <h2>By design</h2>
 <div class="table-wrap"><table>
 <tr><th>Behavior</th><th>Test</th></tr>
 <tr><td>A list with one row uses the LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) and never the FIRST parts: the last row template wins.</td><td><code>KnownIssues/KnownIssueTests.OneRowUsesTheLastRowPart</code></td></tr>
-</table></div>
-<h2>Open questions</h2>
-<p>These are not clearly bugs. The owner has to decide what the template language should do.</p>
-<div class="table-wrap"><table>
-<tr><th>Question</th><th>Today</th><th>Test</th></tr>
-<tr><td><code>&lt;%REUSE_FOREACH a b%&gt;</code> when two FOREACH blocks are named <code>a</code>.</td><td><code>Parser.Parse</code> throws <code>ArgumentException</code> (&quot;FOREACH name a is used more than once&quot;). Should it be a <code>ParserException</code>, or should the first or last block win?</td><td><code>ReuseOfADuplicateForEachNameFails</code></td></tr>
 </table></div>
 <h2>Fixed in this version</h2>
 <div class="table-wrap"><table>
@@ -40,6 +34,7 @@
 <tr><td>The same attribute twice in one tag, such as <code>&lt;%=Name a=&quot;1&quot; a=&quot;2&quot;%&gt;</code>, threw <code>ArgumentException</code>. It now throws <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid</code></td></tr>
 <tr><td><code>Parser.Parse(null)</code>, <code>Processor.Process(null)</code>, <code>new ProcessorArgs(null)</code> and <code>GetValue(null, ...)</code> threw <code>NullReferenceException</code>. They now throw <code>ArgumentNullException</code>. Processing a REUSE_FOREACH token made by hand that is not linked throws <code>InvalidOperationException</code>.</td><td><code>Fixes/NullArgumentTests</code></td></tr>
 <tr><td>IF, ELSEIF and FOREACH lower cased their attribute values (<code>unit=&quot;KG&quot;</code> gave <code>kg</code>), the other tags did not. Now every tag keeps the value case, and <code>TokenAttributeDictionary.LowerCaseValues</code> has a lower case copy made by the parser.</td><td><code>Fixes/AttributeCaseTests</code></td></tr>
+<tr><td>Two FOREACH blocks with the same name and a REUSE_FOREACH threw <code>ArgumentException</code>. Now a FOREACH name is unique per level (<code>ParserException</code> for the second one at the same level), and REUSE_FOREACH uses the nearest FOREACH: its own level, then the outer levels.</td><td><code>Fixes/ForEachScopeTests</code></td></tr>
 </table></div>
 
 </main>
