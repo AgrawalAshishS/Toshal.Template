@@ -4,7 +4,8 @@ namespace Toshal.Template.Exceptions
 {
     /// <summary>
     /// Thrown by <see cref="Parser.Parse(string)"/> when <c>&lt;%REUSE_FOREACH existing name%&gt;</c> names a FOREACH that is nowhere in the template.
-    /// The nearest FOREACH is used first (own level, then outer levels), then the first one in the whole template.
+    /// A FOREACH with that id is used first, then the nearest FOREACH with that name above the tag (own level, then outer levels),
+    /// then the first one with that name in the whole template.
     /// <see cref="ParserException.Split"/> is null for this exception; the line and column are those of the REUSE_FOREACH tag.
     /// </summary>
     /// <example>

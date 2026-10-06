@@ -185,6 +185,25 @@ namespace Toshal.Template.Tests
             Assert.Equal("x|xx", Run("<%REUSE_FOREACH open done%>|<%FOREACH open%>x<%ENDFOR%>", processor));
         }
 
+        // The example of the syntax page: the same FOREACH name three times, picked by nearest above and by id.
+        [Fact]
+        public void ReuseForEachPicksTheNearestAboveOrTheId()
+        {
+            var processor = new Processor { LoopValueProvider = args => new List<int> { 1 }, WithValueProvider = args => "w" };
+            Assert.Equal("T|S|A|A|S|S", Run(
+                "<%FOREACH items%>T<%ENDFOR%>|<%FOREACH items id=\"short\"%>S<%ENDFOR%>|<%WITH archive%><%FOREACH items%>A<%ENDFOR%>|<%REUSE_FOREACH items old%><%ENDWITH%>|<%REUSE_FOREACH items more%>|<%REUSE_FOREACH short less%>",
+                processor));
+        }
+
+        [Fact]
+        public void ForEachIdIsPassedToTheLoopValueProvider()
+        {
+            var ids = new List<string>();
+            var processor = new Processor { LoopValueProvider = args => { ids.Add(args.Name + "=" + args.Attributes.GetValue("id", "")); return null; } };
+            Run("<%FOREACH items id=\"Short\"%>x<%ENDFOR%><%REUSE_FOREACH short less%>", processor);
+            Assert.Equal(new[] { "items=Short", "less=Short" }, ids);
+        }
+
         [Fact]
         public void ParentContextHoldsTopContextListAndItem()
         {

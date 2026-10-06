@@ -17,10 +17,12 @@ namespace Toshal.Template
     /// <remarks>
     /// <para>Tags are written as <c>&lt;%...%&gt;</c>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive.
     /// Names are not case sensitive: the parser lower cases them.</para>
-    /// <para>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE,
-    /// WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part.
-    /// A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top.
-    /// When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom.</para>
+    /// <para>A FOREACH name is the name of its list, so the same name may be used any number of times, at any level. A FOREACH may also have
+    /// an <c>id</c> attribute, for example <c>&lt;%FOREACH items id="archive"%&gt;</c>. An id is unique in the whole template and not case sensitive.
+    /// <c>&lt;%REUSE_FOREACH existing name%&gt;</c> finds its FOREACH like this: first the FOREACH whose id is <c>existing</c>, wherever it is;
+    /// then the nearest FOREACH named <c>existing</c> above the tag, at its own level first and then at each outer level up to the top
+    /// (a level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part);
+    /// then the first FOREACH named <c>existing</c> in the whole template, top to bottom.</para>
     /// <para><b>Warning:</b> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</para>
     /// </remarks>
     /// <example>
@@ -54,7 +56,7 @@ namespace Toshal.Template
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
         /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is nowhere in the template.</exception>
         /// <exception cref="ParserException">An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number,
-        /// or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</exception>
+        /// or negative, or two FOREACH blocks with the same id. All the exceptions above derive from it.</exception>
         /// <example>
         /// <code>
         /// var parser = new Parser();

@@ -11,7 +11,7 @@
 <main class="wrap">
 <h1>ParserException</h1>
 <p class="muted">class in <code>Toshal.Template.Exceptions</code>, assembly <code>Toshal.Template</code></p>
-<p>Thrown by <a href="Parser.html"><code>Parse</code></a> when the template text is not valid. It is also the base class of the more specific parser exceptions. It is thrown as this exact type for an unknown tag (for example <code>&lt;%FOO%&gt;</code>, or an <code>&lt;%ENDIF%&gt;</code> without IF), an unknown block inside a FOREACH, and a <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> whose n is not a whole number or is negative, and two FOREACH blocks with the same name at the same level.</p>
+<p>Thrown by <a href="Parser.html"><code>Parse</code></a> when the template text is not valid. It is also the base class of the more specific parser exceptions. It is thrown as this exact type for an unknown tag (for example <code>&lt;%FOO%&gt;</code>, or an <code>&lt;%ENDIF%&gt;</code> without IF), an unknown block inside a FOREACH, and a <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> whose n is not a whole number or is negative, and two FOREACH blocks with the same <code>id</code> attribute.</p>
 <h4>Example</h4>
 <pre><code class="lang-csharp">try { new Parser().Parse(text); }
 catch (ParserException ex) { Console.WriteLine($&quot;Line {ex.LineNumber}, column {ex.StartingPosition}: {ex.Message}&quot;); }</code></pre>

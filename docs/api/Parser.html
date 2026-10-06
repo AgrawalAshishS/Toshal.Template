@@ -13,7 +13,7 @@
 <p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
 <p>Turns template text into a list of tokens. Parse a template once and give the tokens to <a href="Processor.html"><code>Process</code></a> as often as you like.</p>
 <h4>Remarks</h4><p>Tags are written as <code>&lt;%...%&gt;</code>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive. Names are not case sensitive: the parser lower cases them.</p>
-<p>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part. A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom.</p>
+<p>A FOREACH name is the name of its list, so the same name may be used any number of times, at any level. A FOREACH may also have an <code>id</code> attribute, for example <code>&lt;%FOREACH items id=&quot;archive&quot;%&gt;</code>. An id is unique in the whole template and not case sensitive. <code>&lt;%REUSE_FOREACH existing name%&gt;</code> finds its FOREACH like this: first the FOREACH whose id is <code>existing</code>, wherever it is; then the nearest FOREACH named <code>existing</code> above the tag, at its own level first and then at each outer level up to the top (a level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part); then the first FOREACH named <code>existing</code> in the whole template, top to bottom.</p>
 <p class="warning"><strong>Warning:</strong> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</p>
 
 <h4>Example</h4>
@@ -32,7 +32,7 @@
 <dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF, or a comment has no <code>--%&gt;</code>.</dd>
 <dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>
 <dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is nowhere in the template.</dd>
-<dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</dd>
+<dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same id. All the exceptions above derive from it.</dd>
 </dl>
 <h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR, comments) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
 <p>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <a href="ProcessTemplateToken.html"><code>Indent</code></a>.</p>

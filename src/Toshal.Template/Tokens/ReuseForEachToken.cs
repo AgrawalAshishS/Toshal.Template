@@ -8,14 +8,16 @@ namespace Toshal.Template.Tokens
     /// <summary>
     /// A parsed <c>&lt;%REUSE_FOREACH existing name%&gt;</c> tag. It runs the FOREACH block named <c>existing</c> again, at this place, under the new name.
     /// The loop value provider is asked for the rows with the new name and the attributes of the existing FOREACH,
-    /// so the same layout can show a different list. The parser links the nearest FOREACH with that name: at the level of this tag first
-    /// (before or after it), then at each outer level. When none has the name, it links the first FOREACH with that name
-    /// in the whole template, top to bottom.
+    /// so the same layout can show a different list. The parser links the FOREACH whose <c>id</c> attribute is <c>existing</c>, wherever it is.
+    /// Without such an id it links the nearest FOREACH named <c>existing</c> above this tag: at the level of this tag first, then at each outer level.
+    /// When none is found, it links the first FOREACH with that name in the whole template, top to bottom.
     /// </summary>
     /// <example>
     /// <code>
     /// // Same table layout for two lists:
     /// // &lt;%FOREACH open%&gt;- &lt;%=Title%&gt;&lt;%ENDFOR%&gt;  Done: &lt;%REUSE_FOREACH open done%&gt;
+    /// // Pick one of two layouts of the same list by its id:
+    /// // &lt;%FOREACH open id="short"%&gt;&lt;%=Title%&gt;&lt;%ENDFOR%&gt;&lt;%FOREACH open%&gt;...&lt;%ENDFOR%&gt;  &lt;%REUSE_FOREACH short done%&gt;
     /// </code>
     /// </example>
     public sealed class ReuseForEachToken : Token
@@ -48,7 +50,7 @@ namespace Toshal.Template.Tokens
         }
 
         /// <summary>
-        /// Gets the name of the FOREACH to reuse, in lower case.
+        /// Gets the id or the name of the FOREACH to reuse, in lower case. An id wins over a name.
         /// </summary>
         /// <example>
         /// <code>

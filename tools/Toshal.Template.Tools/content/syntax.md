@@ -12,7 +12,7 @@ Text outside tags is written as it is, including spaces and line breaks, with on
 | `<%IF not Name%>` | A negative condition. The provider gets `name` and returns its value; the processor applies the `not`. | `ConditionValueProvider` |
 | `<%ELSEIF Name%>`, `<%ELSE%>` | Further branches of an IF. | `ConditionValueProvider` |
 | `<%FOREACH Name%>...<%ENDFOR%>` | Writes the inner part once per row. | `LoopValueProvider` returns an `IList` |
-| `<%REUSE_FOREACH Existing NewName%>` | Runs the layout of the nearest FOREACH named `Existing` again, for the list named `NewName`. | `LoopValueProvider` |
+| `<%REUSE_FOREACH Existing NewName%>` | Runs the layout of the FOREACH with id `Existing`, else of the nearest FOREACH named `Existing` above it, again for the list named `NewName`. | `LoopValueProvider` |
 | `<%WITH Name%>...<%ENDWITH%>` | Makes an object the context of the inner part. Null skips the part. | `WithValueProvider` |
 | `<%SET Name%>...<%ENDSET%>` | Writes the inner part into a variable instead of the output. | none |
 | `<%PROCESS_TEMPLATE Name%>` | Runs a sub template in place, with the current context. Alone on an indented line, it indents every line of the sub template (see below). | `ProcessTemplateValueProvider` returns tokens |
@@ -120,19 +120,26 @@ remove only text of the sub template.
 
 ## FOREACH names and REUSE_FOREACH
 
-A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part.
-Two FOREACH blocks with the same name at the same level are a `ParserException`; the same name at a deeper level, or in the IF and the ELSE part, is fine.
+A FOREACH name is the name of its list, so the same name may be used as often as you like, at any level.
+To pick one FOREACH for a REUSE_FOREACH, give it an `id` attribute: `<%FOREACH items id="short"%>`. An id is unique in the whole template
+(a second one is a `ParserException`) and not case sensitive. The loop value provider still gets `id` in `args.Attributes`, like any attribute.
 
-REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top.
-When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).
+`<%REUSE_FOREACH Existing NewName%>` finds its FOREACH in this order:
+
+1. the FOREACH whose id is `Existing`, wherever it is;
+2. the nearest FOREACH named `Existing` above the tag: its own level first, then each outer level up to the top.
+   A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part;
+3. the first FOREACH named `Existing` in the whole template, top to bottom (for example one below the tag, or inside an IF next to it).
 
 ```text
 <%FOREACH items%>top layout<%ENDFOR%>
+<%FOREACH items id="short"%>short layout<%ENDFOR%>
 <%WITH archive%>
   <%FOREACH items%>archive layout<%ENDFOR%>
-  <%REUSE_FOREACH items old%>      uses the archive layout (same level)
+  <%REUSE_FOREACH items old%>      uses the archive layout (nearest above, same level)
 <%ENDWITH%>
-<%REUSE_FOREACH items more%>       uses the top layout
+<%REUSE_FOREACH items more%>       uses the short layout (nearest above at this level)
+<%REUSE_FOREACH short less%>       uses the short layout (by id)
 ```
 
 ## FOREACH parts

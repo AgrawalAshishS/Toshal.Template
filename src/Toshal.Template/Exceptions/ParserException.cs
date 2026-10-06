@@ -7,7 +7,7 @@ namespace Toshal.Template.Exceptions
     /// <summary>
     /// Thrown by <see cref="Parser.Parse(string)"/> when the template text is not valid. It is also the base class of the more specific parser exceptions.
     /// It is thrown as this exact type for an unknown tag (for example <c>&lt;%FOO%&gt;</c>, or an <c>&lt;%ENDIF%&gt;</c> without IF),
-    /// an unknown block inside a FOREACH, and a <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> whose n is not a whole number or is negative, and two FOREACH blocks with the same name at the same level.
+    /// an unknown block inside a FOREACH, and a <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> whose n is not a whole number or is negative, and two FOREACH blocks with the same <c>id</c> attribute.
     /// </summary>
     /// <example>
     /// <code>

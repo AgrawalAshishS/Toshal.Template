@@ -10,7 +10,8 @@ namespace Toshal.Template.Tokens
     /// A parsed <c>&lt;%FOREACH name%&gt;</c> ... <c>&lt;%ENDFOR%&gt;</c> block. It has one token list for each part that a loop can have.
     /// Each part is written as <c>&lt;%PART%&gt;</c> ... <c>&lt;%ENDPART%&gt;</c> inside the block, for example <c>&lt;%HEADER%&gt;</c> ... <c>&lt;%ENDHEADER%&gt;</c>,
     /// and each part may appear once. Text and tags inside the block but outside every part belong to the ROW part.
-    /// The FOREACH name is unique per level; see <see cref="Parser"/>.
+    /// The same FOREACH name may be used many times. An <c>id</c> attribute, unique in the template, lets a REUSE_FOREACH pick this block;
+    /// see <see cref="Parser"/>.
     /// </summary>
     /// <remarks>
     /// <para>For each row the processor picks the parts like this: on odd rows (the second, fourth, ...) the ALT parts are used when they are not empty.

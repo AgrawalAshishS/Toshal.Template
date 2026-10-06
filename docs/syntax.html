@@ -19,7 +19,7 @@
 <tr><td><code>&lt;%IF not Name%&gt;</code></td><td>A negative condition. The provider gets <code>name</code> and returns its value; the processor applies the <code>not</code>.</td><td><code>ConditionValueProvider</code></td></tr>
 <tr><td><code>&lt;%ELSEIF Name%&gt;</code>, <code>&lt;%ELSE%&gt;</code></td><td>Further branches of an IF.</td><td><code>ConditionValueProvider</code></td></tr>
 <tr><td><code>&lt;%FOREACH Name%&gt;...&lt;%ENDFOR%&gt;</code></td><td>Writes the inner part once per row.</td><td><code>LoopValueProvider</code> returns an <code>IList</code></td></tr>
-<tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the nearest FOREACH named <code>Existing</code> again, for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
+<tr><td><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code></td><td>Runs the layout of the FOREACH with id <code>Existing</code>, else of the nearest FOREACH named <code>Existing</code> above it, again for the list named <code>NewName</code>.</td><td><code>LoopValueProvider</code></td></tr>
 <tr><td><code>&lt;%WITH Name%&gt;...&lt;%ENDWITH%&gt;</code></td><td>Makes an object the context of the inner part. Null skips the part.</td><td><code>WithValueProvider</code></td></tr>
 <tr><td><code>&lt;%SET Name%&gt;...&lt;%ENDSET%&gt;</code></td><td>Writes the inner part into a variable instead of the output.</td><td>none</td></tr>
 <tr><td><code>&lt;%PROCESS_TEMPLATE Name%&gt;</code></td><td>Runs a sub template in place, with the current context. Alone on an indented line, it indents every line of the sub template (see below).</td><td><code>ProcessTemplateValueProvider</code> returns tokens</td></tr>
@@ -80,14 +80,21 @@
     }</code></pre>
 <p>A sub template that is not alone on its line is written as it is. Inside an indented sub template, REMOVE_PREVIOUS and REMOVE_PREVIOUS_NEW_LINE remove only text of the sub template.</p>
 <h2>FOREACH names and REUSE_FOREACH</h2>
-<p>A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. Two FOREACH blocks with the same name at the same level are a <code>ParserException</code>; the same name at a deeper level, or in the IF and the ELSE part, is fine.</p>
-<p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).</p>
+<p>A FOREACH name is the name of its list, so the same name may be used as often as you like, at any level. To pick one FOREACH for a REUSE_FOREACH, give it an <code>id</code> attribute: <code>&lt;%FOREACH items id=&quot;short&quot;%&gt;</code>. An id is unique in the whole template (a second one is a <code>ParserException</code>) and not case sensitive. The loop value provider still gets <code>id</code> in <code>args.Attributes</code>, like any attribute.</p>
+<p><code>&lt;%REUSE_FOREACH Existing NewName%&gt;</code> finds its FOREACH in this order:</p>
+<ol>
+<li>the FOREACH whose id is <code>Existing</code>, wherever it is;</li>
+<li>the nearest FOREACH named <code>Existing</code> above the tag: its own level first, then each outer level up to the top. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part;</li>
+<li>the first FOREACH named <code>Existing</code> in the whole template, top to bottom (for example one below the tag, or inside an IF next to it).</li>
+</ol>
 <pre><code class="lang-text">&lt;%FOREACH items%&gt;top layout&lt;%ENDFOR%&gt;
+&lt;%FOREACH items id=&quot;short&quot;%&gt;short layout&lt;%ENDFOR%&gt;
 &lt;%WITH archive%&gt;
   &lt;%FOREACH items%&gt;archive layout&lt;%ENDFOR%&gt;
-  &lt;%REUSE_FOREACH items old%&gt;      uses the archive layout (same level)
+  &lt;%REUSE_FOREACH items old%&gt;      uses the archive layout (nearest above, same level)
 &lt;%ENDWITH%&gt;
-&lt;%REUSE_FOREACH items more%&gt;       uses the top layout</code></pre>
+&lt;%REUSE_FOREACH items more%&gt;       uses the short layout (nearest above at this level)
+&lt;%REUSE_FOREACH short less%&gt;       uses the short layout (by id)</code></pre>
 <h2>FOREACH parts</h2>
 <p>Inside a FOREACH you can write these parts, each at most once, each closed by its END tag (for example <code>&lt;%HEADER%&gt;...&lt;%ENDHEADER%&gt;</code>). Text outside every part belongs to ROW.</p>
 <div class="table-wrap"><table>
