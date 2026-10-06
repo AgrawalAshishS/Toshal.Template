@@ -63,10 +63,40 @@ namespace Toshal.Template.Tests.Fixes
             Assert.Same(tokens[0], reuse.ExistingForEachToken);
         }
 
+        // Fallback (owner decision): when no level from the REUSE_FOREACH outwards has the name, the first FOREACH with that name
+        // in the whole template (top to bottom) is used.
         [Fact]
-        public void ReuseDoesNotSeeAForEachInsideAnotherBlock()
+        public void ReuseFallsBackToAForEachInsideAnotherBlock()
         {
-            Assert.Throws<ForEachMissingForReuseException>(() => Parse("<%IF x%><%FOREACH a%>T<%ENDFOR%><%ENDIF%><%REUSE_FOREACH a b%>"));
+            var tokens = Parse("<%IF x%><%FOREACH a%>T<%ENDFOR%><%ENDIF%><%REUSE_FOREACH a b%>");
+
+            var inIf = ((ConditionToken)tokens[0]).InnerTokens[0];
+            Assert.Same(inIf, ((ReuseForEachToken)tokens[1]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void FallbackUsesTheFirstForEachInTemplateOrder()
+        {
+            // The outer "a" starts first in the text, even though the inner "a" is finished first while parsing.
+            var tokens = Parse("<%IF x%><%FOREACH a%>1<%FOREACH a%>2<%ENDFOR%><%ENDFOR%><%ENDIF%><%IF y%><%FOREACH a%>3<%ENDFOR%><%ENDIF%><%WITH w%><%REUSE_FOREACH a b%><%ENDWITH%>");
+
+            var outer = ((ConditionToken)tokens[0]).InnerTokens[0];
+            var reuse = (ReuseForEachToken)((WithToken)tokens[2]).InnerTokens[0];
+            Assert.Same(outer, reuse.ExistingForEachToken);
+        }
+
+        [Fact]
+        public void NearestStillWinsOverTheFallback()
+        {
+            var tokens = Parse("<%IF x%><%FOREACH a%>1<%ENDFOR%><%ENDIF%><%FOREACH a%>2<%ENDFOR%><%REUSE_FOREACH a b%>");
+
+            Assert.Same(tokens[1], ((ReuseForEachToken)tokens[2]).ExistingForEachToken);
+        }
+
+        [Fact]
+        public void NameNowhereInTheTemplateStillThrows()
+        {
+            Assert.Throws<ForEachMissingForReuseException>(() => Parse("<%IF x%><%FOREACH a%>T<%ENDFOR%><%ENDIF%><%REUSE_FOREACH z b%>"));
         }
 
         [Fact]

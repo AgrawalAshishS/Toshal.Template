@@ -25,7 +25,7 @@ A FOREACH name is unique per level. A level is the top of the template, or the i
 Two FOREACH blocks with the same name at the same level are a `ParserException`; the same name at a deeper level, or in the IF and the ELSE part, is fine.
 
 REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top.
-It does not see a FOREACH inside another block, such as an IF next to it.
+When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).
 
 ```text
 <%FOREACH items%>top layout<%ENDFOR%>

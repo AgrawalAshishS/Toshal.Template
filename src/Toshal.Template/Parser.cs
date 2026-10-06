@@ -21,7 +21,7 @@ namespace Toshal.Template
     /// <para>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE,
     /// WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part.
     /// A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top.
-    /// It does not see a FOREACH inside another block.</para>
+    /// When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom.</para>
     /// <para><b>Warning:</b> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</para>
     /// </remarks>
     /// <example>
@@ -52,7 +52,7 @@ namespace Toshal.Template
         /// <exception cref="TokenMissingNameException">A tag that needs a name has none, for example <c>&lt;%=%&gt;</c>.</exception>
         /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
-        /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is neither at its own level nor at an outer level.</exception>
+        /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is nowhere in the template.</exception>
         /// <exception cref="ParserException">An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number,
         /// or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</exception>
         /// <example>
@@ -741,6 +741,15 @@ namespace Toshal.Template
                         forEachByName.TryGetValue(reuseForEachToken.ExistingForEachName, out found);
                     }
                 }
+
+                // Fallback: the first FOREACH with the name in the whole template, top to bottom. Blocks are finished inner first
+                // while parsing, so template order comes from the line and column, not from the order the blocks were found.
+                found ??= this._forEachByLevel.Values
+                    .Select(byName => byName.GetValueOrDefault(reuseForEachToken.ExistingForEachName))
+                    .OfType<ForEachToken>()
+                    .OrderBy(t => t.LineNumber)
+                    .ThenBy(t => t.StartingPosition)
+                    .FirstOrDefault();
 
                 reuseForEachToken.ExistingForEachToken = found
                     ?? throw new ForEachMissingForReuseException(reuseForEachToken.Name, reuseForEachToken.ExistingForEachName, reuseForEachToken.LineNumber, reuseForEachToken.StartingPosition);

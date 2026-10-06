@@ -29,7 +29,7 @@
 </table></div>
 <h2>FOREACH names and REUSE_FOREACH</h2>
 <p>A FOREACH name is unique per level. A level is the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. Two FOREACH blocks with the same name at the same level are a <code>ParserException</code>; the same name at a deeper level, or in the IF and the ELSE part, is fine.</p>
-<p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. It does not see a FOREACH inside another block, such as an IF next to it.</p>
+<p>REUSE_FOREACH uses the nearest FOREACH with its name: its own level first (the FOREACH may come before or after it), then each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom (for example one inside an IF next to it).</p>
 <pre><code class="lang-text">&lt;%FOREACH items%&gt;top layout&lt;%ENDFOR%&gt;
 &lt;%WITH archive%&gt;
   &lt;%FOREACH items%&gt;archive layout&lt;%ENDFOR%&gt;
