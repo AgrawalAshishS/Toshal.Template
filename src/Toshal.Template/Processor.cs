@@ -5,6 +5,7 @@ namespace Toshal.Template
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
     using Toshal.Template.Tokens;
@@ -56,7 +57,8 @@ namespace Toshal.Template
             var parentContext = new List<object?>();
             if (args.Context != null) { parentContext.Add(args.Context); }
 
-            this.Process(retVal, args.TokenList, args.Context, parentContext, new Dictionary<string, string>());
+            var vars = default(Variables);
+            this.Process(retVal, args.TokenList, args.Context, parentContext, ref vars);
 
             return retVal;
         }
@@ -121,267 +123,187 @@ namespace Toshal.Template
         /// </example>
         public Func<ProcessTemplateArgs, List<IToken>?>? ProcessTemplateValueProvider { get; set; }
 
-        private bool HandleConditionToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
+        // Runs the tokens of one block. vars is the scope of SET variables: a block that shares the scope of its parent (IF, ELSE, a SET value,
+        // the rows of one FOREACH) gets the same ref; a block with its own scope gets Variables.Child, which copies only when a SET writes.
+        private void Process(StringBuilder output, List<IToken> tokenList, object? context, List<object?> parentContext, ref Variables vars)
         {
-            var conditionToken = token as ConditionToken;
-            if (conditionToken == null) return false;
-            if (this.ConditionValueProvider == null) return true; //skip as there is no value provider
-
-            var args = new ConditionArgs(conditionToken, context, parentContext);
-            var val = this.ConditionValueProvider(args);
-
-            if (conditionToken.IsPositive == val)
+            for (var i = 0; i < tokenList.Count; i++)
             {
-                this.Process(output, conditionToken.InnerTokens, context, parentContext, customTokens);
-            }
-            else if (conditionToken.FalsePart != null)
-            {
-                var elseToken = conditionToken.FalsePart as ElseToken;
-                if (elseToken != null)
+                // Same order of checks as before: a class that derives from two token types is handled as the first one.
+                switch (tokenList[i])
                 {
-                    this.Process(output, elseToken.InnerTokens, context, parentContext, customTokens);
-                }
-                else
-                {
-                    this.HandleConditionToken(output, conditionToken.FalsePart, context, parentContext, customTokens);
-                }
-            }
+                    case ContentToken contentToken:
+                        output.Append(contentToken.Content);
+                        break;
 
-            return true;
+                    case NamedToken namedToken:
+                        this.ProcessNamed(output, namedToken, context, parentContext, ref vars);
+                        break;
+
+                    case ConditionToken conditionToken:
+                        if (this.ConditionValueProvider != null)
+                        {
+                            this.ProcessCondition(output, conditionToken, context, parentContext, ref vars);
+                        }
+
+                        break;
+
+                    case ForEachToken forEachToken:
+                        var loopValueProvider = this.LoopValueProvider;
+                        if (loopValueProvider != null)
+                        {
+                            var args = new LoopArgs(forEachToken, context, parentContext);
+                            this.ProcessForEach(output, context, args, forEachToken, loopValueProvider, ref vars);
+                        }
+
+                        break;
+
+                    case ReuseForEachToken reuseForEachToken:
+                        this.ProcessReuseForEach(output, reuseForEachToken, context, parentContext, ref vars);
+                        break;
+
+                    case WithToken withToken:
+                        this.ProcessWith(output, withToken, context, parentContext, ref vars);
+                        break;
+
+                    case RemovePreviousNewLineToken:
+                        RemovePreviousNewLine(output);
+                        break;
+
+                    case RemovePreviousCharsToken removeToken:
+                        var count = removeToken.CharCount;
+                        if (output.Length < count) count = output.Length;
+                        output.Remove(output.Length - count, count);
+                        break;
+
+                    case ProcessTemplateToken processTemplateToken:
+                        this.ProcessTemplate(output, processTemplateToken, context, parentContext, ref vars);
+                        break;
+
+                    case ContextAsStringToken:
+                        if (context != null) output.Append(context.ToString());
+                        break;
+
+                    case SetToken setToken:
+                        var valueOutput = new StringBuilder();
+                        this.Process(valueOutput, setToken.InnerTokens, context, parentContext, ref vars);
+                        vars.Set(setToken.Name, valueOutput.ToString());
+                        break;
+                }
+            }
         }
 
-        private bool HandleForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
+        private void ProcessNamed(StringBuilder output, NamedToken namedToken, object? context, List<object?> parentContext, ref Variables vars)
         {
-            var forEachToken = token as ForEachToken;
-            if (forEachToken == null) return false;
-            var loopValueProvider = this.LoopValueProvider;
-            if (loopValueProvider == null) return true; //skip as there is no value provider
-
-            var args = new LoopArgs(forEachToken, context, parentContext);
-            return this.ProcessForEach(output, context, args, forEachToken, loopValueProvider, customTokens);
-        }
-
-        private bool HandleNamedToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
-        {
-            var namedToken = token as NamedToken;
-            if (namedToken == null) return false;
-
-            string? value = "";
-            if (customTokens.TryGetValue(namedToken.Name, out value))
+            if (vars.TryGet(namedToken.Name, out var value))
             {
                 output.Append(value);
-                return true;
+                return;
             }
 
-            if (this.TokenValueProvider == null) return true; //skip as there is no value provider
+            var tokenValueProvider = this.TokenValueProvider;
+            if (tokenValueProvider == null) return; //skip as there is no value provider
 
-            var args = new TokenArgs(namedToken, context, parentContext);
-            var val = this.TokenValueProvider(args);
-
+            var val = tokenValueProvider(new TokenArgs(namedToken, context, parentContext));
             if (!string.IsNullOrEmpty(val))
             {
                 output.Append(val);
             }
-
-            return true;
         }
 
-        private bool HandleReuseForEachToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
+        private void ProcessCondition(StringBuilder output, ConditionToken conditionToken, object? context, List<object?> parentContext, ref Variables vars)
         {
-            var reuseForEachToken = token as ReuseForEachToken;
-            if (reuseForEachToken == null) return false;
+            var val = this.ConditionValueProvider!(new ConditionArgs(conditionToken, context, parentContext));
+
+            if (conditionToken.IsPositive == val)
+            {
+                this.Process(output, conditionToken.InnerTokens, context, parentContext, ref vars);
+            }
+            else if (conditionToken.FalsePart is ElseToken elseToken)
+            {
+                this.Process(output, elseToken.InnerTokens, context, parentContext, ref vars);
+            }
+            else if (conditionToken.FalsePart is ConditionToken elseIfToken)
+            {
+                this.ProcessCondition(output, elseIfToken, context, parentContext, ref vars);
+            }
+        }
+
+        private void ProcessReuseForEach(StringBuilder output, ReuseForEachToken reuseForEachToken, object? context, List<object?> parentContext, ref Variables vars)
+        {
             var loopValueProvider = this.LoopValueProvider;
-            if (loopValueProvider == null) return true;
+            if (loopValueProvider == null) return;
 
             // Parser.Parse links every REUSE_FOREACH. Only a token made by hand can be unlinked.
             var existing = reuseForEachToken.ExistingForEachToken
                 ?? throw new InvalidOperationException("REUSE_FOREACH " + reuseForEachToken.Name + " is not linked to a FOREACH. Create tokens with Parser.Parse.");
 
             var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, existing.Attributes);
-            return this.ProcessForEach(output, context, args, existing, loopValueProvider, customTokens);
+            this.ProcessForEach(output, context, args, existing, loopValueProvider, ref vars);
         }
 
-        private bool HandleWithToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
+        private void ProcessWith(StringBuilder output, WithToken withToken, object? context, List<object?> parentContext, ref Variables vars)
         {
-            var withToken = token as WithToken;
-            if (withToken == null) return false;
-            if (this.WithValueProvider == null) return true;//skip as there is no value provider;
+            var withValueProvider = this.WithValueProvider;
+            if (withValueProvider == null) return; //skip as there is no value provider
 
-            var args = new TokenArgs(withToken, context, parentContext);
-
-            var val = this.WithValueProvider(args);
+            var val = withValueProvider(new TokenArgs(withToken, context, parentContext));
             if (val != null)
             {
                 parentContext.Add(val);
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, withToken.InnerTokens, val, parentContext, newCustomTokens);
+                var withVars = Variables.Child(vars);
+                this.Process(output, withToken.InnerTokens, val, parentContext, ref withVars);
                 RemoveLast(parentContext, val);
             }
-
-            return true;
         }
 
-        private bool HandleSetToken(IToken token, object? context, List<object?> parentContext, ref Dictionary<string, string> customTokens)
+        private void ProcessTemplate(StringBuilder output, ProcessTemplateToken processTemplateToken, object? context, List<object?> parentContext, ref Variables vars)
         {
-            var setToken = token as SetToken;
-            if (setToken == null) return false;
+            var processTemplateValueProvider = this.ProcessTemplateValueProvider;
+            if (processTemplateValueProvider == null) return; //skip as there is no value provider
 
-            var valueOutput = new StringBuilder();
-            this.Process(valueOutput, setToken.InnerTokens, context, parentContext, customTokens);
-
-            if (customTokens.ContainsKey(setToken.Name) == false)
+            var val = processTemplateValueProvider(new ProcessTemplateArgs(processTemplateToken, context, parentContext));
+            if (val != null)
             {
-                customTokens.Add(setToken.Name, valueOutput.ToString());
+                var templateVars = Variables.Child(vars);
+                this.Process(output, val, context, parentContext, ref templateVars);
             }
-            else
-            {
-                customTokens[setToken.Name] = valueOutput.ToString();
-            }
-
-            return true;
         }
 
-        private bool HandleRemovePreviousNewLine(StringBuilder output, IToken token, object? context, Dictionary<string, string> customTokens)
+        private static void RemovePreviousNewLine(StringBuilder output)
         {
-            var removeToken = token as RemovePreviousNewLineToken;
-            if (removeToken == null) return false;
-
-            if (output.Length == 0) return true;
+            if (output.Length == 0) return;
 
             if (output[output.Length - 1] == '\n')
                 output.Remove(output.Length - 1, 1);
 
             if (output.Length > 0 && output[output.Length - 1] == '\r')
                 output.Remove(output.Length - 1, 1);
-
-            return true;
         }
 
-        private bool HandleRemovePreviousChars(StringBuilder output, IToken token, object? context, Dictionary<string, string> customTokens)
+        private void ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, ref Variables vars)
         {
-            var removeToken = token as RemovePreviousCharsToken;
-            if (removeToken == null) return false;
-
-            var count = removeToken.CharCount;
-            if (output.Length < removeToken.CharCount) count = output.Length;
-
-            output.Remove(output.Length - count, count);
-
-            return true;
-        }
-
-        private bool HandleProcessTemplateToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
-        {
-            var processTemplateToken = token as ProcessTemplateToken;
-            if (processTemplateToken == null) return false;
-            if (this.ProcessTemplateValueProvider == null) return true;//skip as there is no value provider;
-
-            var args = new ProcessTemplateArgs(processTemplateToken, context, parentContext);
-
-            var val = this.ProcessTemplateValueProvider(args);
-            if (val != null)
-            {
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, val, context, parentContext, newCustomTokens);
-            }
-
-            return true;
-        }
-
-        private bool HandleContextAsString(StringBuilder output, IToken token, object? context)
-        {
-            var contextToken = token as ContextAsStringToken;
-            if (contextToken == null) return false;
-
-            if (context == null) return true;
-
-            output.Append(context.ToString());
-
-            return true;
-        }
-
-        private void Process(StringBuilder output, List<IToken> tokenList, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
-        {
-            foreach (var token in tokenList)
-            {
-                var contentToken = token as ContentToken;
-                if (contentToken != null)
-                {
-                    output.Append(contentToken.Content);
-                    continue;
-                }
-
-                if (this.HandleNamedToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleConditionToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleForEachToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleReuseForEachToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleWithToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleRemovePreviousNewLine(output, token, context, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleRemovePreviousChars(output, token, context, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleProcessTemplateToken(output, token, context, parentContext, customTokens))
-                {
-                    continue;
-                }
-
-                if (this.HandleContextAsString(output, token, context))
-                {
-                    continue;
-                }
-
-                HandleSetToken(token, context, parentContext, ref customTokens);
-            }
-        }
-
-        private bool ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, Dictionary<string, string> customTokens)
-        {
-            var rowLevelShared = new Dictionary<string, string>(customTokens);
-
             var val = loopValueProvider(args);
             if (val == null || val.Count == 0)
             {
                 if (forEachToken.NoRecordTokens.Count > 0)
                 {
-                    var newCustomTokens = new Dictionary<string, string>(customTokens);
-                    this.Process(output, forEachToken.NoRecordTokens, context, args.ParentContext, newCustomTokens);
+                    var noRecordVars = Variables.Child(vars);
+                    this.Process(output, forEachToken.NoRecordTokens, context, args.ParentContext, ref noRecordVars);
                 }
 
-                return true;
+                return;
             }
+
+            // The rows share one scope: a SET in a row is seen by the next rows, but not after the loop.
+            var rowVars = Variables.Child(vars);
 
             args.ParentContext.Add(val);
 
             if (forEachToken.HeaderTokens.Count > 0)
             {
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, forEachToken.HeaderTokens, val, args.ParentContext, newCustomTokens);
+                var headerVars = Variables.Child(vars);
+                this.Process(output, forEachToken.HeaderTokens, val, args.ParentContext, ref headerVars);
             }
 
             for (var i = 0; i < val.Count; i++)
@@ -434,19 +356,19 @@ namespace Toshal.Template
 
                 if (beforeTokens.Count > 0)
                 {
-                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
-                    this.Process(output, beforeTokens, item, args.ParentContext, newCustomTokens);
+                    var beforeVars = Variables.Child(rowVars);
+                    this.Process(output, beforeTokens, item, args.ParentContext, ref beforeVars);
                 }
 
                 if (rowTokens.Count > 0)
                 {
-                    this.Process(output, rowTokens, item, args.ParentContext, rowLevelShared);
+                    this.Process(output, rowTokens, item, args.ParentContext, ref rowVars);
                 }
 
                 if (afterTokens.Count > 0)
                 {
-                    var newCustomTokens = new Dictionary<string, string>(rowLevelShared);
-                    this.Process(output, afterTokens, item, args.ParentContext, newCustomTokens);
+                    var afterVars = Variables.Child(rowVars);
+                    this.Process(output, afterTokens, item, args.ParentContext, ref afterVars);
                 }
 
                 RemoveLast(args.ParentContext, item);
@@ -454,13 +376,11 @@ namespace Toshal.Template
 
             if (forEachToken.FooterTokens.Count > 0)
             {
-                var newCustomTokens = new Dictionary<string, string>(customTokens);
-                this.Process(output, forEachToken.FooterTokens, val, args.ParentContext, newCustomTokens);
+                var footerVars = Variables.Child(vars);
+                this.Process(output, forEachToken.FooterTokens, val, args.ParentContext, ref footerVars);
             }
 
             RemoveLast(args.ParentContext, val);
-
-            return true;
         }
 
         // The parent context is a stack, so the entry a block added is the last one equal to it.
@@ -470,6 +390,38 @@ namespace Toshal.Template
             if (index >= 0)
             {
                 parentContext.RemoveAt(index);
+            }
+        }
+
+        // The SET variables of one scope. A child scope shares the dictionary of its parent and copies it only when a SET writes,
+        // so blocks without SET allocate nothing. The parent never runs while a child scope is in use, so the shared dictionary cannot change under it.
+        private struct Variables
+        {
+            private Dictionary<string, string>? map;
+            private bool owned;
+
+            public static Variables Child(Variables parent) => new Variables { map = parent.map };
+
+            public readonly bool TryGet(string name, [NotNullWhen(true)] out string? value)
+            {
+                if (this.map == null)
+                {
+                    value = null;
+                    return false;
+                }
+
+                return this.map.TryGetValue(name, out value);
+            }
+
+            public void Set(string name, string value)
+            {
+                if (!this.owned)
+                {
+                    this.map = this.map == null ? new Dictionary<string, string>() : new Dictionary<string, string>(this.map);
+                    this.owned = true;
+                }
+
+                this.map[name] = value;
             }
         }
     }
