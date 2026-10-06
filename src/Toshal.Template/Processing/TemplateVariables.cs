@@ -33,7 +33,8 @@ namespace Toshal.Template.Processing
                 this.owned = true;
             }
 
-            this.map[name] = value;
+            // owned is set only together with a new map.
+            this.map![name] = value;
         }
     }
 }

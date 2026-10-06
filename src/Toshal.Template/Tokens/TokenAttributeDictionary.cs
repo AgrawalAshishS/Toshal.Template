@@ -87,16 +87,6 @@ namespace Toshal.Template.Tokens
             return this.lowerCaseValues?.TryGetValue(attributeName.ToLower(), out value) == true ? value! : defaultValue;
         }
 
-
-
-        /// <summary>
-        /// Splits "name attr="value" ..." into the name and the attributes.
-        /// </summary>
-        /// <param name="split">The tag, for the exception.</param>
-        /// <param name="nameString">The text after the tag keyword.</param>
-        /// <param name="attributes">The dictionary to fill.</param>
-        /// <returns>The name, trimmed and in lower case. Attribute names are lower cased, attribute values keep their case.</returns>
-        /// <exception cref="InvalidTokenAttributeException">The attributes are not written as <c>name="value"</c>.</exception>
         // Adds an attribute and its lower case copy, made once here: at parse time, or when a compiled template is loaded.
         // The key must already be lower case. Returns false when the key is already there.
         internal bool TryAddAttribute(string key, string value)
