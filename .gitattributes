@@ -77,3 +77,6 @@ tests/**/Golden/*.txt text eol=crlf
 
 # The templates the code generator writes its files with. Their line breaks are the line breaks of those files.
 src/Toshal.Template.CodeGen/Templates/*.rtt text eol=crlf
+
+# The example compares a compiled template with the same .rtt template, which it reads with LF line breaks. Keep the .ctt LF too.
+examples/**/*.ctt text eol=lf
