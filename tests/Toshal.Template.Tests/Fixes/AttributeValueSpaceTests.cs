@@ -42,12 +42,11 @@ namespace Toshal.Template.Tests.Fixes
             Assert.Throws<InvalidTokenAttributeException>(() => Parse("<%=Name a=\"1\" junk%>"));
         }
 
-        // Open question for the owner: should a repeated attribute be an InvalidTokenAttributeException, or should the last one win?
-        // Today it throws ArgumentException. This test only pins that it fails.
+        // The same attribute twice in one tag is an invalid attribute. Before the fix it threw ArgumentException.
         [Fact]
-        public void RepeatedAttributeFails()
+        public void RepeatedAttributeIsInvalid()
         {
-            Assert.Throws<ArgumentException>(() => Parse("<%=Name a=\"1\" a=\"2\"%>"));
+            Assert.Throws<InvalidTokenAttributeException>(() => Parse("<%=Name a=\"1\" a=\"2\"%>"));
         }
     }
 }

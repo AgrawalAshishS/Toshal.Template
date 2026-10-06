@@ -13,7 +13,7 @@
 <p class="muted">class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
 <p>The attributes of a tag, such as <code>format=&quot;0.00&quot;</code> in <code>&lt;%=Total format=&quot;0.00&quot;%&gt;</code>. Keys are the attribute names in lower case. A quoted value may contain spaces.</p>
 <h4>Remarks</h4><p class="warning"><strong>Warning:</strong> it is a normal, case sensitive dictionary with lower case keys. Use <a href="TokenAttributeDictionary.html"><code>GetValue</code></a>, or read it with a lower case key: <code>attributes[&quot;format&quot;]</code> works, <code>attributes[&quot;Format&quot;]</code> throws KeyNotFoundException.</p>
-<p class="warning"><strong>Known issue:</strong> the same attribute twice in one tag makes the parser throw ArgumentException. See docs/known-issues.md.</p>
+<p>The same attribute twice in one tag makes the parser throw InvalidTokenAttributeException.</p>
 
 <h4>Example</h4>
 <pre><code class="lang-csharp">var token = (NamedToken)new Parser().Parse(&quot;&lt;%=Total format=\&quot;0.00\&quot;%&gt;&quot;)[0];

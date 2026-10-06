@@ -4,7 +4,7 @@ namespace Toshal.Template.Exceptions
 {
     /// <summary>
     /// Thrown by <see cref="Parser.Parse(string)"/> when the attributes of a tag are not written as <c>name="value"</c>,
-    /// for example <c>&lt;%=Total format=0.00%&gt;</c> or <c>&lt;%=Total format = "0.00"%&gt;</c>.
+    /// for example <c>&lt;%=Total format=0.00%&gt;</c> or <c>&lt;%=Total format = "0.00"%&gt;</c>, or when a tag has the same attribute twice.
     /// </summary>
     /// <example>
     /// <code>

@@ -17,7 +17,6 @@ These are not clearly bugs. The owner has to decide what the template language s
 |---|---|---|
 | A list with one row: FIRSTROW, LASTROW or both? | The LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) are used; the FIRST parts are not. | `OneRowUsesTheLastRowPartToday` |
 | `<%REUSE_FOREACH a b%>` when two FOREACH blocks are named `a`. | `Parser.Parse` throws `ArgumentException` ("FOREACH name a is used more than once"). Should it be a `ParserException`, or should the first or last block win? | `ReuseOfADuplicateForEachNameFails` |
-| The same attribute twice in one tag, such as `<%=Name a="1" a="2"%>`. | `Parser.Parse` throws `ArgumentException`. Should it be an `InvalidTokenAttributeException`, or should the last one win? | `RepeatedAttributeFails` |
 
 ## Fixed in this version
 
@@ -33,3 +32,4 @@ These are not clearly bugs. The owner has to decide what the template language s
 | Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from `ParentContext`. | `Fixes/ParentContextStackTests` |
 | Attribute values with spaces, and attributes separated by more than one space, threw `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests` |
 | A negative count in `<%REMOVE_PREVIOUS n%>` was accepted by the parser, and the processor then threw `ArgumentOutOfRangeException`. The parser now throws `ParserException`. | `Fixes/NegativeRemovePreviousTests` |
+| The same attribute twice in one tag, such as `<%=Name a="1" a="2"%>`, threw `ArgumentException`. It now throws `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid` |

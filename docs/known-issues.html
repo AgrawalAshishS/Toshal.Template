@@ -22,7 +22,6 @@
 <tr><th>Question</th><th>Today</th><th>Test</th></tr>
 <tr><td>A list with one row: FIRSTROW, LASTROW or both?</td><td>The LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) are used; the FIRST parts are not.</td><td><code>OneRowUsesTheLastRowPartToday</code></td></tr>
 <tr><td><code>&lt;%REUSE_FOREACH a b%&gt;</code> when two FOREACH blocks are named <code>a</code>.</td><td><code>Parser.Parse</code> throws <code>ArgumentException</code> (&quot;FOREACH name a is used more than once&quot;). Should it be a <code>ParserException</code>, or should the first or last block win?</td><td><code>ReuseOfADuplicateForEachNameFails</code></td></tr>
-<tr><td>The same attribute twice in one tag, such as <code>&lt;%=Name a=&quot;1&quot; a=&quot;2&quot;%&gt;</code>.</td><td><code>Parser.Parse</code> throws <code>ArgumentException</code>. Should it be an <code>InvalidTokenAttributeException</code>, or should the last one win?</td><td><code>RepeatedAttributeFails</code></td></tr>
 </table></div>
 <h2>Fixed in this version</h2>
 <div class="table-wrap"><table>
@@ -37,6 +36,7 @@
 <tr><td>Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from <code>ParentContext</code>.</td><td><code>Fixes/ParentContextStackTests</code></td></tr>
 <tr><td>Attribute values with spaces, and attributes separated by more than one space, threw <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests</code></td></tr>
 <tr><td>A negative count in <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> was accepted by the parser, and the processor then threw <code>ArgumentOutOfRangeException</code>. The parser now throws <code>ParserException</code>.</td><td><code>Fixes/NegativeRemovePreviousTests</code></td></tr>
+<tr><td>The same attribute twice in one tag, such as <code>&lt;%=Name a=&quot;1&quot; a=&quot;2&quot;%&gt;</code>, threw <code>ArgumentException</code>. It now throws <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid</code></td></tr>
 </table></div>
 
 </main>

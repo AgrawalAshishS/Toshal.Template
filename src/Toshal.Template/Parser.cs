@@ -50,7 +50,7 @@ namespace Toshal.Template
         /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is not in the template.</exception>
         /// <exception cref="ParserException">An unknown tag, an end tag without its start, or a REMOVE_PREVIOUS count that is missing, not a whole number, or negative.
         /// All the exceptions above derive from it.</exception>
-        /// <exception cref="ArgumentException">Known issue: REUSE_FOREACH names a FOREACH name that is used more than once, or a tag repeats an attribute.
+        /// <exception cref="ArgumentException">Known issue: REUSE_FOREACH names a FOREACH name that is used more than once.
         /// See docs/known-issues.md.</exception>
         /// <example>
         /// <code>

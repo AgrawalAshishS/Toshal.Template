@@ -65,3 +65,6 @@
 # Tests use verbatim strings with CRLF line breaks. Keep C# files CRLF on every OS.
 *.cs text eol=crlf
 *.cmd text eol=crlf
+
+# The website is generated with LF line endings. Keep them, so docs check sees no change.
+docs/** text eol=lf

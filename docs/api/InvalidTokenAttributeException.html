@@ -11,7 +11,7 @@
 <main class="wrap">
 <h1>InvalidTokenAttributeException</h1>
 <p class="muted">class in <code>Toshal.Template.Exceptions</code>, assembly <code>Toshal.Template</code></p>
-<p>Thrown by <a href="Parser.html"><code>Parse</code></a> when the attributes of a tag are not written as <code>name=&quot;value&quot;</code>, for example <code>&lt;%=Total format=0.00%&gt;</code> or <code>&lt;%=Total format = &quot;0.00&quot;%&gt;</code>.</p>
+<p>Thrown by <a href="Parser.html"><code>Parse</code></a> when the attributes of a tag are not written as <code>name=&quot;value&quot;</code>, for example <code>&lt;%=Total format=0.00%&gt;</code> or <code>&lt;%=Total format = &quot;0.00&quot;%&gt;</code>, or when a tag has the same attribute twice.</p>
 <h4>Example</h4>
 <pre><code class="lang-csharp">Assert.Throws&lt;InvalidTokenAttributeException&gt;(() =&gt; new Parser().Parse(&quot;&lt;%=Total format=0.00%&gt;&quot;));</code></pre>
 <h2>Constructors</h2>

@@ -13,7 +13,7 @@ namespace Toshal.Template.Tokens
     /// <remarks>
     /// <para><b>Warning:</b> it is a normal, case sensitive dictionary with lower case keys. Use <see cref="GetValue(string, string)"/>, or read it with
     /// a lower case key: <c>attributes["format"]</c> works, <c>attributes["Format"]</c> throws KeyNotFoundException.</para>
-    /// <para><b>Known issue:</b> the same attribute twice in one tag makes the parser throw ArgumentException. See docs/known-issues.md.</para>
+    /// <para>The same attribute twice in one tag makes the parser throw InvalidTokenAttributeException.</para>
     /// </remarks>
     /// <example>
     /// <code>
@@ -71,7 +71,11 @@ namespace Toshal.Template.Tokens
                 int end = 0;
                 foreach (Match m in Regex.Matches(rest, tokenAttributeExpression))
                 {
-                    attributes.Add(m.Groups["Name"].Value.ToLower(), m.Groups["Value"].Value);
+                    // The same attribute twice is an error, not a choice between the two values.
+                    if (attributes.TryAdd(m.Groups["Name"].Value.ToLower(), m.Groups["Value"].Value) == false)
+                    {
+                        throw new InvalidTokenAttributeException(split);
+                    }
                     end = m.Index + m.Length;
                 }
 

@@ -31,7 +31,7 @@
 <dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>
 <dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is not in the template.</dd>
 <dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, or a REMOVE_PREVIOUS count that is missing, not a whole number, or negative. All the exceptions above derive from it.</dd>
-<dt><code>ArgumentException</code></dt><dd>Known issue: REUSE_FOREACH names a FOREACH name that is used more than once, or a tag repeats an attribute. See docs/known-issues.md.</dd>
+<dt><code>ArgumentException</code></dt><dd>Known issue: REUSE_FOREACH names a FOREACH name that is used more than once. See docs/known-issues.md.</dd>
 </dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">var parser = new Parser();
