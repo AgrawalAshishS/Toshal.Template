@@ -12,17 +12,17 @@
 <h1>Compiled templates</h1>
 <p>A template can also be turned into a C# class when the project is built. The template text becomes plain C# code: <code>output.Append(&quot;...&quot;)</code> for text, <code>if</code> for IF, a <code>for</code> loop for FOREACH. So no parser runs and no token list is walked at run time. You write the template, not the string building code.</p>
 <h2>Install</h2>
-<p>Use the source generator (the class is made in memory on every build):</p>
+<p>Use the package (the class is written next to the template on every build):</p>
 <pre><code class="lang-text">dotnet add package Toshal.Template.Generator</code></pre>
-<p>or the tool (the class is written to disk next to the template):</p>
+<p>or the tool (the class is written next to the template when you run it):</p>
 <pre><code class="lang-text">dotnet tool install --global Toshal.Template.Cli
 toshal-template generate Templates</code></pre>
-<p>Use one of the two in a project, not both: both would make the same class. Both bring the run time package <code>Toshal.Template.Compiled</code>.</p>
+<p>Both write <code>OrderConfirm.g.cs</code> beside <code>OrderConfirm.ctt</code>: a normal C# file that you can open, step through and search, and that shows in diffs. Commit it with the template. Do not change it: the next build makes it again from the template. The package writes it only when its text changes. Use one of the two in a project, not both. Both bring the run time package <code>Toshal.Template.Compiled</code>.</p>
 <h2>Write a template</h2>
-<p>Give the file the extension <code>.ctt</code> (compiled Toshal template). The syntax is the same as for the processor; see <a href="syntax.html">Template syntax</a>. A template that Processor reads at run time gets the extension <code>.rtt</code> (run time Toshal template), so the generator does not pick it up.</p>
+<p>Give the file the extension <code>.ctt</code> (compiled Toshal template). The syntax is the same as for the processor; see <a href="syntax.html">Template syntax</a>. A template that Processor reads at run time gets the extension <code>.rtt</code> (run time Toshal template), so the package does not pick it up.</p>
 <pre><code class="lang-text">The &lt;%=Product abc=&quot;xyz&quot;%&gt; team</code></pre>
 <p>The class name is the file name. The namespace is the root namespace of the project and the folders, the way .resx files get theirs: <code>Templates/Email/OrderConfirm.ctt</code> in the project <code>MyApp</code> is the class <code>MyApp.Templates.Email.OrderConfirm</code>.</p>
-<p>With the generator every <code>.ctt</code> file of the project folder and its sub folders is used. To list them yourself, set the property <code>ToshalTemplateAutoInclude</code> to <code>false</code> and add <code>&lt;AdditionalFiles Include=&quot;Templates\**\*.ctt&quot; /&gt;</code>. The item metadata <code>ClassName</code> and <code>Namespace</code> change the names:</p>
+<p>With the package every <code>.ctt</code> file of the project folder and its sub folders is used. To list them yourself, set the property <code>ToshalTemplateAutoInclude</code> to <code>false</code> and add <code>&lt;AdditionalFiles Include=&quot;Templates\**\*.ctt&quot; /&gt;</code>. The item metadata <code>ClassName</code> and <code>Namespace</code> change the names:</p>
 <pre><code class="lang-text">&lt;AdditionalFiles Update=&quot;Templates\Mail.ctt&quot; ClassName=&quot;MailTemplate&quot; Namespace=&quot;Shop.Mail&quot; /&gt;</code></pre>
 <p>The tool takes files or folders, and the options <code>--root-namespace</code>, <code>--project-dir</code>, <code>--namespace</code>, <code>--class</code>, <code>--writer</code> and <code>--no-stub</code>.</p>
 <h2>Give the values</h2>
@@ -43,7 +43,7 @@ toshal-template generate Templates</code></pre>
 <h2>Same text as the processor</h2>
 <p>A compiled template writes exactly the text the processor writes for the same template and the same provider answers: the same SET scopes, FOREACH parts, SEPARATOR, REMOVE_PREVIOUS, indents of sub templates and lines that hold only control tags. The tests run every template of the parser tests through both and compare the text.</p>
 <p><code>REMOVE_PREVIOUS</code> and <code>REMOVE_PREVIOUS_NEW_LINE</code> are done at build time when the chars they remove are template text: the generated code just writes the shorter text. Only chars that come from data (a value, the rows of a FOREACH, a sub template) are removed at run time.</p>
-<p>Differences: a sub template is another compiled class, returned by <code>SubTemplate</code>, not a token list. A template with an error does not build: the generator reports <code>TTC001</code> at the line and column of the error, and the tool prints the same.</p>
+<p>Differences: a sub template is another compiled class, returned by <code>SubTemplate</code>, not a token list. A template with an error does not build: the build reports <code>TTC001</code> at the line and column of the error, and the tool prints the same.</p>
 <pre><code class="lang-csharp">// Title: Compiled templates (.ctt)
 // Summary: A .ctt file becomes a C# class at build time (Toshal.Template.Generator). No parser runs at run time; the values come from partial methods in the other half of the class, which is made once for you. The text is the same as the processor writes.
 

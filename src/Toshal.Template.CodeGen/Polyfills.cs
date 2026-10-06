@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
 
-// The parser sources are written for .NET 10. These few members let them compile for netstandard2.0, where the source generator runs.
+// The parser sources are written for .NET 10. These few members let them compile for netstandard2.0, where the MSBuild task runs.
 // They only exist in this assembly.
 
 namespace System

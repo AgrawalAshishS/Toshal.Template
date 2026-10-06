@@ -6,24 +6,26 @@ string building code.
 
 ## Install
 
-Use the source generator (the class is made in memory on every build):
+Use the package (the class is written next to the template on every build):
 
 ```text
 dotnet add package Toshal.Template.Generator
 ```
 
-or the tool (the class is written to disk next to the template):
+or the tool (the class is written next to the template when you run it):
 
 ```text
 dotnet tool install --global Toshal.Template.Cli
 toshal-template generate Templates
 ```
 
-Use one of the two in a project, not both: both would make the same class. Both bring the run time package `Toshal.Template.Compiled`.
+Both write `OrderConfirm.g.cs` beside `OrderConfirm.ctt`: a normal C# file that you can open, step through and search, and that shows in
+diffs. Commit it with the template. Do not change it: the next build makes it again from the template. The package writes it only when its
+text changes. Use one of the two in a project, not both. Both bring the run time package `Toshal.Template.Compiled`.
 
 ## Write a template
 
-Give the file the extension `.ctt` (compiled Toshal template). The syntax is the same as for the processor; see [Template syntax](syntax.html). A template that Processor reads at run time gets the extension `.rtt` (run time Toshal template), so the generator does not pick it up.
+Give the file the extension `.ctt` (compiled Toshal template). The syntax is the same as for the processor; see [Template syntax](syntax.html). A template that Processor reads at run time gets the extension `.rtt` (run time Toshal template), so the package does not pick it up.
 
 ```text
 The <%=Product abc="xyz"%> team
@@ -32,7 +34,7 @@ The <%=Product abc="xyz"%> team
 The class name is the file name. The namespace is the root namespace of the project and the folders, the way .resx files get theirs:
 `Templates/Email/OrderConfirm.ctt` in the project `MyApp` is the class `MyApp.Templates.Email.OrderConfirm`.
 
-With the generator every `.ctt` file of the project folder and its sub folders is used. To list them yourself, set the property
+With the package every `.ctt` file of the project folder and its sub folders is used. To list them yourself, set the property
 `ToshalTemplateAutoInclude` to `false` and add `<AdditionalFiles Include="Templates\**\*.ctt" />`. The item metadata `ClassName` and
 `Namespace` change the names:
 
@@ -80,6 +82,6 @@ parser tests through both and compare the text.
 just writes the shorter text. Only chars that come from data (a value, the rows of a FOREACH, a sub template) are removed at run time.
 
 Differences: a sub template is another compiled class, returned by `SubTemplate`, not a token list. A template with an error does not build:
-the generator reports `TTC001` at the line and column of the error, and the tool prints the same.
+the build reports `TTC001` at the line and column of the error, and the tool prints the same.
 
 {{include:examples/Toshal.Template.Examples/CompiledTemplatesExample.cs}}

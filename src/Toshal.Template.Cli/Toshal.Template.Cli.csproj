@@ -12,7 +12,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>toshal-template</ToolCommandName>
     <PackageId>Toshal.Template.Cli</PackageId>
-    <Description>The toshal-template tool: turns .ctt templates (one file, or every file of a folder and its sub folders) into C# classes written next to them, for projects that want the generated code on disk instead of the Toshal.Template.Generator source generator.</Description>
+    <Description>The toshal-template tool: turns .ctt templates (one file, or every file of a folder and its sub folders) into C# classes written next to them, for projects that run it by hand instead of on every build with the Toshal.Template.Generator package.</Description>
     <PackageTags>template;text-template;code-generation;compiled-template;dotnet-tool</PackageTags>
   </PropertyGroup>
 

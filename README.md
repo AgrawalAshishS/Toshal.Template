@@ -26,7 +26,7 @@ string text = processor.Process(new ProcessorArgs(tokens)).ToString();   // Hell
 ## Compiled templates
 
 Give a template the extension `.ctt` and it becomes a C# class when the project builds: the text turns into plain C# code, so no parser
-runs at run time. `dotnet add package Toshal.Template.Generator` (a source generator) or `dotnet tool install -g Toshal.Template.Cli`
+runs at run time. `dotnet add package Toshal.Template.Generator` (writes `Name.g.cs` next to each template on every build) or `dotnet tool install -g Toshal.Template.Cli`
 (`toshal-template generate Templates` writes the code to disk). The values come from partial methods in the other half of the class,
 which is made once for you next to the template:
 
