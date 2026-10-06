@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examples - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Examples</h1>
+<p>Each page is one file of the runnable project <code>examples/Toshal.Template.Examples</code>. Every example checks its own output, and the tests run them all. Run them with <code>dotnet run --project examples/Toshal.Template.Examples</code>.</p>
+<ul>
+<li><a href="Program.html">Run all examples</a>: The entry point. It runs every topic in order and needs no database. The database half of the pattern example runs only when the connection string is set.</li>
+<li><a href="QuickStartExample.html">Quick start</a>: Parse a template once, set a provider, and process it. Parser.Parse, ProcessorArgs and Processor.Process are all you need for the first template.</li>
+<li><a href="ValuesAndAttributesExample.html">Values and attributes</a>: A value tag can carry attributes such as format=&quot;0.00&quot;. The provider reads them with TokenArgs.GetAttribute; tokens and TokenAttributeDictionary expose them too.</li>
+<li><a href="ConditionsExample.html">Conditions: IF, ELSEIF, ELSE and not</a>: The condition value provider answers each named condition with true or false. The processor handles &quot;not&quot;, ELSEIF chains and ELSE.</li>
+<li><a href="LoopsExample.html">Loops: FOREACH and its parts</a>: The loop value provider returns a list. HEADER and FOOTER run once, ROW runs per item, ALTROW on every second row, FIRSTROW and LASTROW at the ends, and NORECORD when the list is empty.</li>
+<li><a href="ReuseForEachExample.html">Reuse a loop layout: REUSE_FOREACH</a>: Write a FOREACH layout once and run it again for another list. The loop value provider gets the new name and the attributes of the original FOREACH.</li>
+<li><a href="WithAndParentContextExample.html">WITH, the context and the parent contexts</a>: WITH switches the context to a child object. Providers see the current object in args.Context and the outer ones in args.ParentContext. The args copy constructors hand a part of the work to another provider.</li>
+<li><a href="SetVariablesExample.html">Variables: SET</a>: SET writes text into a variable instead of the output. A later value tag with that name writes the variable. Variables follow the blocks: a SET inside WITH stays inside, a SET inside a ROW is shared by the rows of that loop.</li>
+<li><a href="WhitespaceExample.html">Whitespace control</a>: Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing. SEPARATOR writes a separator between rows, and a sub template on an indented line is indented as a whole.</li>
+<li><a href="SubTemplatesExample.html">Sub templates: PROCESS_TEMPLATE</a>: Share a header or footer between templates. The process template provider returns the parsed tokens of the named part; they run in place with the current context.</li>
+<li><a href="ParserErrorsExample.html">Parser errors</a>: A broken template fails in Parser.Parse with a ParserException (or a more specific subclass) that tells the line and column. Show it to the template author.</li>
+<li><a href="TokenTreeExample.html">Inspect the parsed tokens</a>: Parser.Parse returns a tree of tokens with their line and column. Walk it to lint templates, list the names a template needs, or unit test a provider on its own with hand made args.</li>
+<li><a href="ProviderInterfacesExample.html">Provider classes with the Signatures interfaces</a>: The Processor takes delegates. When the providers belong together, put them in one class that implements the interfaces of Toshal.Template.Signatures, then assign its methods.</li>
+<li><a href="ContextProvidersExample.html">Typed providers with ContextProviderRegistry</a>: Many context types? Write one ContextProvider&lt;T&gt; per type and register them. The registry picks the providers by the type of the context, so no provider has to check the type, and a hand written provider can win over a generated one, even with false or an empty text.</li>
+<li><a href="EmailExample.html">Realistic: a welcome email</a>: A welcome email from an embedded template file, filled from plain C# objects by the property reading providers. It uses IF/ELSE, FOREACH, a formatted date and a shared signature sub template.</li>
+<li><a href="ReportExample.html">Realistic: a text report</a>: A monthly sales report as an aligned text table, with a header, a footer with totals and a &quot;no data&quot; text. The footer reads the totals from the report object through the parent contexts.</li>
+<li><a href="CodeGenerationExample.html">Realistic: code generation</a>: Generate a C# class and a SQL create table script from one table description. REMOVE_PREVIOUS drops the trailing comma of a column list.</li>
+<li><a href="CompiledTemplatesExample.html">Compiled templates (.ctt)</a>: A .ctt file becomes a C# class at build time (Toshal.Template.Generator). No parser runs at run time; the values come from partial methods in the other half of the class, which is made once for you. The text is the same as the processor writes.</li>
+<li><a href="ProjectStructureExample.html">Realistic: generate a project structure</a>: A manifest template decides which files to create (the test project only when asked), and one template per file writes each of them into a folder. Shared parts come from a sub template.</li>
+<li><a href="Entity.html">Compiled template: the values of Entity.ctt</a>: The other half of the class made from CompiledTemplates/Entity.ctt. The build made it once with a case for every name; here it is filled in with typed code.</li>
+<li><a href="ObjectProviders.html">Helper: providers that read object properties</a>: The library never reads your objects by itself; providers decide what a name means. This helper builds a Processor whose providers read public properties by name, so plain C# objects can feed a template. The realistic examples use it.</li>
+<li><a href="EmbeddedTemplates.html">Helper: templates as embedded files</a>: Keep each template in its own .rtt file (a run time template), compile the files into the assembly as embedded resources, and parse each one once. The csproj line is &lt;EmbeddedResource Include=&quot;Templates\**\*.rtt&quot; /&gt;.</li>
+<li><a href="OrderQueries.html">Pattern 1 of 4: the queries (production code)</a>: The SQL lives in one place as constants. The production code and the fake setup both use these constants, so a changed query cannot drift away from its test setup.</li>
+<li><a href="OrderEmailService.html">Pattern 2 of 4: the code under test (production code)</a>: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.</li>
+<li><a href="OrderQueryFakes.html">Pattern 3 of 4: one setup helper per query (test code)</a>: A small static helper returns the fake rule for one query, and another builds an empty result with the right columns. Every test starts from them and adds only what is special.</li>
+<li><a href="FakeOrRealTestPatternExample.html">Pattern 4 of 4: one scenario, fake or real database (test code)</a>: The complete pattern. The same scenario runs against fakes (unit test, no server) or against PostgreSQL (integration test). Only the arrange and verify steps differ; the act and the checks on the email text are shared, which proves the fake behaves like the database.</li>
+<li><a href="templates.html">Template files</a>: the .rtt templates (run time templates) that the realistic examples embed.</li>
+</ul>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

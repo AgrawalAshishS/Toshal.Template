@@ -61,3 +61,19 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Tests use verbatim strings with CRLF line breaks. Keep C# files CRLF on every OS.
+*.cs text eol=crlf
+*.cmd text eol=crlf
+
+# The website is generated with LF line endings. Keep them, so docs check sees no change.
+docs/** text eol=lf
+
+# The benchmark template must keep CRLF: the benchmark compares its text with a C# string that has CRLF line breaks.
+benchmarks/**/*.ctt text eol=crlf
+
+# The golden files of the emitters are compared byte for byte with their output, which has CRLF line breaks.
+tests/**/Golden/*.txt text eol=crlf
+
+# The templates the code generator writes its files with. Their line breaks are the line breaks of those files.
+src/Toshal.Template.CodeGen/Templates/*.rtt text eol=crlf

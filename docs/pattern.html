@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing pattern - Toshal.Template</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="compiled.html">Compiled templates</a><a href="pattern.html" class="active" aria-current="page">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Testing pattern: one scenario, fake or real database</h1>
+<p>Code that fills a template usually reads its data from a database first. This page shows how to test such code with one scenario that runs in two modes:</p>
+<ul>
+<li><strong>Fake mode</strong>: the database is replaced by the fakes of <a href="https://github.com/AgrawalAshishS/NpgsqlCommon">NpgsqlCommon</a>. It is a fast unit test that needs no server.</li>
+<li><strong>Database mode</strong>: the same scenario runs against a real PostgreSQL database. It is an integration test.</li>
+</ul>
+<p>The act step and the checks on the produced text are shared. When both modes pass, the fakes behave like the database for this scenario.</p>
+<p>The example has four parts. The first two are production code, the last two are test code.</p>
+<h2>1. The queries</h2>
+<p>The SQL lives in one place as constants, used by the production code and by the fakes.</p>
+<pre><code class="lang-csharp">// Title: Pattern 1 of 4: the queries (production code)
+// Summary: The SQL lives in one place as constants. The production code and the fake setup both use these constants, so a changed query cannot drift away from its test setup.
+
+using NpgsqlCommon;
+
+namespace Toshal.Template.Examples.Patterns;
+
+public static class OrderQueries
+{
+    // {SCHEMA} and {PREFIX} are replaced by NpgsqlCommon with the schema and prefix of the database scope.
+    public const string GetOrder = &quot;select order_id, customer_name, placed_on from {SCHEMA}{PREFIX}sample_orders where order_id = @order_id&quot;;
+
+    public const string GetLines = &quot;select product, quantity, unit_price from {SCHEMA}{PREFIX}sample_order_lines where order_id = @order_id order by line_no&quot;;
+}
+
+public static class OrderScopes
+{
+    /// &lt;summary&gt;The scope rule of the order service: one database called &quot;main&quot;, no schema and no prefix. Production and tests use the same rule.&lt;/summary&gt;
+    public static DbScope Rule(in DbKey key) =&gt; new DbScope(&quot;main&quot;);
+
+    /// &lt;summary&gt;The text of a query after the markers are replaced. This is the text the fake rules see.&lt;/summary&gt;
+    public static string Final(string template) =&gt; Rule(new DbKey(&quot;orders&quot;)).Apply(template);
+}</code></pre>
+<h2>2. The code under test</h2>
+<p>A normal service: it reads an order and its lines through <code>IDatabase</code>, then fills an embedded template.</p>
+<pre><code class="lang-csharp">// Title: Pattern 2 of 4: the code under test (production code)
+// Summary: A normal service. It reads an order and its lines through an IDatabase, then fills the embedded OrderConfirmation.rtt template. Nothing in it knows about tests.
+
+using System.Data.Common;
+using Npgsql;
+using NpgsqlCommon;
+using Toshal.Template.Examples.Support;
+
+namespace Toshal.Template.Examples.Patterns;
+
+public record OrderLine(string Product, int Quantity, decimal UnitPrice)
+{
+    public decimal LineTotal =&gt; Quantity * UnitPrice;
+}
+
+public record Order(int OrderId, string CustomerName, DateTime PlacedOn, List&lt;OrderLine&gt; Lines)
+{
+    public decimal Total =&gt; Lines.Sum(l =&gt; l.LineTotal);
+}
+
+public sealed class OrderEmailService
+{
+    private readonly IDatabase db;
+
+    // In production: new OrderEmailService(factory.For(&quot;orders&quot;)). In a unit test: a TestableDatabase. Nothing else changes.
+    public OrderEmailService(IDatabase db)
+    {
+        this.db = db;
+    }
+
+    /// &lt;summary&gt;The confirmation text of an order, or null when the order does not exist.&lt;/summary&gt;
+    public async Task&lt;string?&gt; RenderConfirmationAsync(int orderId, CancellationToken cancellationToken)
+    {
+        Order? order = await LoadAsync(orderId, cancellationToken);
+        if (order == null) return null;
+
+        var args = new ProcessorArgs(EmbeddedTemplates.Tokens(&quot;OrderConfirmation.rtt&quot;)) { Context = order };
+        return ObjectProviders.Create().Process(args).ToString();
+    }
+
+    private async Task&lt;Order?&gt; LoadAsync(int orderId, CancellationToken cancellationToken)
+    {
+        int id;
+        string customer;
+        DateTime placedOn;
+        await using (DbDataReader reader = await db.ReaderAsync(OrderQueries.GetOrder, [new NpgsqlParameter(&quot;order_id&quot;, orderId)], cancellationToken))
+        {
+            if (!await reader.ReadAsync(cancellationToken)) return null;
+            id = reader.GetInt32(reader.GetOrdinal(&quot;order_id&quot;));
+            customer = reader.GetString(reader.GetOrdinal(&quot;customer_name&quot;));
+            placedOn = reader.GetDateTime(reader.GetOrdinal(&quot;placed_on&quot;));
+        }
+
+        var lines = new List&lt;OrderLine&gt;();
+        await using (DbDataReader reader = await db.ReaderAsync(OrderQueries.GetLines, [new NpgsqlParameter(&quot;order_id&quot;, orderId)], cancellationToken))
+        {
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                lines.Add(new OrderLine(
+                    reader.GetString(reader.GetOrdinal(&quot;product&quot;)),
+                    reader.GetInt32(reader.GetOrdinal(&quot;quantity&quot;)),
+                    reader.GetDecimal(reader.GetOrdinal(&quot;unit_price&quot;))));
+            }
+        }
+
+        return new Order(id, customer, placedOn, lines);
+    }
+}</code></pre>
+<p>The template:</p>
+<pre><code class="lang-csharp">Order &lt;%=OrderId%&gt; for &lt;%=CustomerName%&gt;, placed on &lt;%=PlacedOn format=&quot;yyyy-MM-dd&quot;%&gt;
+&lt;%FOREACH Lines%&gt;&lt;%=Quantity%&gt; x &lt;%=Product%&gt; at &lt;%=UnitPrice format=&quot;0.00&quot;%&gt; = &lt;%=LineTotal format=&quot;0.00&quot;%&gt;
+&lt;%FOOTER%&gt;Total: &lt;%=Total format=&quot;0.00&quot;%&gt;&lt;%ENDFOOTER%&gt;&lt;%NORECORD%&gt;This order has no lines yet.&lt;%ENDNORECORD%&gt;&lt;%ENDFOR%&gt;</code></pre>
+<h2>3. One setup helper per query</h2>
+<pre><code class="lang-csharp">// Title: Pattern 3 of 4: one setup helper per query (test code)
+// Summary: A small static helper returns the fake rule for one query, and another builds an empty result with the right columns. Every test starts from them and adds only what is special.
+
+using System.Data.Common;
+using NpgsqlCommon.Testable;
+
+namespace Toshal.Template.Examples.Patterns;
+
+public static class OrderQueryFakes
+{
+    /// &lt;summary&gt;The rule for OrderQueries.GetOrder. Add ReturnsDefault or ForCallNumber to it.&lt;/summary&gt;
+    public static TestableQueryHandler&lt;DbDataReader&gt;.ResultManagement&lt;DbDataReader&gt; SetupGetOrder(TestableDatabaseFactory dbs)
+    {
+        return dbs.When().ExecuteReaderCalled().ForQueryEquals(OrderScopes.Final(OrderQueries.GetOrder));
+    }
+
+    /// &lt;summary&gt;The rule for OrderQueries.GetLines.&lt;/summary&gt;
+    public static TestableQueryHandler&lt;DbDataReader&gt;.ResultManagement&lt;DbDataReader&gt; SetupGetLines(TestableDatabaseFactory dbs)
+    {
+        return dbs.When().ExecuteReaderCalled().ForQueryEquals(OrderScopes.Final(OrderQueries.GetLines));
+    }
+
+    /// &lt;summary&gt;An empty result with the columns and the PostgreSQL types of OrderQueries.GetOrder.&lt;/summary&gt;
+    public static TestableResult NewGetOrderResult()
+    {
+        return new TestableResult()
+            .AddColumn(&quot;order_id&quot;, typeof(int))
+            .AddColumn(&quot;customer_name&quot;, typeof(string))
+            .AddColumn(&quot;placed_on&quot;, typeof(DateTime));
+    }
+
+    /// &lt;summary&gt;An empty result with the columns and the PostgreSQL types of OrderQueries.GetLines.&lt;/summary&gt;
+    public static TestableResult NewGetLinesResult()
+    {
+        return new TestableResult()
+            .AddColumn(&quot;product&quot;, typeof(string))
+            .AddColumn(&quot;quantity&quot;, typeof(int))
+            .AddColumn(&quot;unit_price&quot;, typeof(decimal));
+    }
+}</code></pre>
+<h2>4. The scenario in both modes</h2>
+<pre><code class="lang-csharp">// Title: Pattern 4 of 4: one scenario, fake or real database (test code)
+// Summary: The complete pattern. The same scenario runs against fakes (unit test, no server) or against PostgreSQL (integration test). Only the arrange and verify steps differ; the act and the checks on the email text are shared, which proves the fake behaves like the database.
+
+using Npgsql;
+using NpgsqlCommon;
+using NpgsqlCommon.Testable;
+using Toshal.Template.Examples.Patterns;
+using Toshal.Template.Examples.Support;
+
+namespace Toshal.Template.Examples;
+
+public enum TestMode
+{
+    /// &lt;summary&gt;Unit test: TestableDatabaseFactory. Fast, needs no server.&lt;/summary&gt;
+    Fake = 1,
+
+    /// &lt;summary&gt;Integration test: NpgsqlDatabaseFactory against a real PostgreSQL database.&lt;/summary&gt;
+    Database = 2,
+}
+
+public static class FakeOrRealTestPatternExample
+{
+    private const string Expected =
+        &quot;Order 7 for Asha Patel, placed on 2026-03-05\n&quot; +
+        &quot;2 x Pen at 10.50 = 21.00\n&quot; +
+        &quot;1 x Notebook at 45.00 = 45.00\n&quot; +
+        &quot;Total: 66.00&quot;;
+
+    // Scenario: an order with two lines, an order without lines, and an order that does not exist.
+    // In your test project this body is the test method, and the Verify calls are your assertions.
+    public static async Task ConfirmationEmails(TestMode mode, string? connectionString = null)
+    {
+        TestableDatabaseFactory? fake = null;
+        DataSourceRegistry? sources = null;
+        IDatabase db;
+
+        // ---- ARRANGE: the only part that differs a lot between the modes.
+        if (mode == TestMode.Fake)
+        {
+            fake = new TestableDatabaseFactory(OrderScopes.Rule);
+
+            // A METHOD per rule, so every call gets a fresh reader, and the answer depends on the parameter like a table would.
+            OrderQueryFakes.SetupGetOrder(fake).ReturnsDefault((call, parameters) =&gt;
+            {
+                var result = OrderQueryFakes.NewGetOrderResult();
+                int id = (int)parameters!.Single(p =&gt; p.ParameterName == &quot;order_id&quot;).Value!;
+                if (id == 7) result.AddRow(7, &quot;Asha Patel&quot;, new DateTime(2026, 3, 5));
+                if (id == 8) result.AddRow(8, &quot;Ravi Shah&quot;, new DateTime(2026, 3, 6));
+                return new TestableDataReader(result);
+            });
+
+            OrderQueryFakes.SetupGetLines(fake).ReturnsDefault((call, parameters) =&gt;
+            {
+                var result = OrderQueryFakes.NewGetLinesResult();
+                if ((int)parameters!.Single(p =&gt; p.ParameterName == &quot;order_id&quot;).Value! == 7)
+                {
+                    result.AddRow(&quot;Pen&quot;, 2, 10.50m);
+                    result.AddRow(&quot;Notebook&quot;, 1, 45.00m);
+                }
+                return new TestableDataReader(result);
+            });
+
+            db = fake.For(&quot;orders&quot;);
+        }
+        else
+        {
+            // The same scope rule. The registry turns the name &quot;main&quot; into the connection string.
+            sources = new DataSourceRegistry(new ConnectionStringMap { [&quot;main&quot;] = connectionString! });
+            db = new NpgsqlDatabaseFactory(OrderScopes.Rule, sources).For(&quot;orders&quot;);
+            await DropTablesAsync(db);
+            await db.NonQueryAsync(&quot;create table sample_orders (order_id int primary key, customer_name text not null, placed_on date not null)&quot;);
+            await db.NonQueryAsync(&quot;create table sample_order_lines (order_id int not null, line_no int not null, product text not null, quantity int not null, unit_price numeric(10,2) not null)&quot;);
+            await db.NonQueryAsync(&quot;insert into sample_orders values (7, &#39;Asha Patel&#39;, &#39;2026-03-05&#39;), (8, &#39;Ravi Shah&#39;, &#39;2026-03-06&#39;)&quot;);
+            await db.NonQueryAsync(&quot;insert into sample_order_lines values (7, 1, &#39;Pen&#39;, 2, 10.50), (7, 2, &#39;Notebook&#39;, 1, 45.00)&quot;);
+        }
+
+        try
+        {
+            // ---- ACT: identical in both modes.
+            var service = new OrderEmailService(db);
+            string? withLines = await service.RenderConfirmationAsync(7, CancellationToken.None);
+            string? noLines = await service.RenderConfirmationAsync(8, CancellationToken.None);
+            string? missing = await service.RenderConfirmationAsync(999, CancellationToken.None);
+
+            // ---- ASSERT on the result: identical in both modes.
+            Verify.Equal(Expected, withLines ?? &quot;(null)&quot;, &quot;order with lines&quot;);
+            Verify.Equal(&quot;Order 8 for Ravi Shah, placed on 2026-03-06\nThis order has no lines yet.&quot;, noLines ?? &quot;(null)&quot;, &quot;order without lines&quot;);
+            Verify.That(missing == null, &quot;unknown order gives null&quot;);
+
+            // ---- VERIFY: each mode proves its own side.
+            if (mode == TestMode.Fake)
+            {
+                Verify.That(fake!.AllQueryGotCalled(), &quot;all rules used&quot;);
+                Verify.That(fake.Calls.Count == 5, &quot;two calls per found order, one for the missing order&quot;);
+                Verify.That(fake.Calls[0].Template == OrderQueries.GetOrder &amp;&amp; fake.Calls[1].Template == OrderQueries.GetLines, &quot;the order is read before its lines&quot;);
+            }
+            else
+            {
+                Verify.That(await db.ScalarAsync&lt;long&gt;(&quot;select count(*) from sample_order_lines&quot;) == 2, &quot;the lines are in the table&quot;);
+            }
+        }
+        finally
+        {
+            if (mode == TestMode.Database)
+            {
+                await DropTablesAsync(db);
+                await sources!.DisposeAsync();
+            }
+        }
+    }
+
+    private static async Task DropTablesAsync(IDatabase db)
+    {
+        await db.NonQueryAsync(&quot;drop table if exists sample_order_lines&quot;);
+        await db.NonQueryAsync(&quot;drop table if exists sample_orders&quot;);
+    }
+
+    public static async Task Run(string? connectionString)
+    {
+        Console.WriteLine(&quot;== One scenario, fake or real database ==&quot;);
+
+        await ConfirmationEmails(TestMode.Fake);
+        Console.WriteLine(&quot;Fake mode: passed.&quot;);
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            Console.WriteLine(&quot;Database mode: skipped (set the environment variable ConnectionStrings__testdb).&quot;);
+            return;
+        }
+
+        await ConfirmationEmails(TestMode.Database, connectionString);
+        Console.WriteLine(&quot;Database mode: passed.&quot;);
+    }
+}</code></pre>
+<h2>Running it</h2>
+<ul>
+<li><code>test.cmd</code> runs the fake mode every time (<code>ExamplesTests.PatternWithFakes</code>).</li>
+<li>In GitHub Actions a Linux job runs both modes against a PostgreSQL service container.</li>
+<li>Locally, the database mode (<code>ExamplesTests.PatternWithDatabase</code>) runs only when the environment variable <code>ConnectionStrings__testdb</code> points to an empty PostgreSQL database. It creates two tables named <code>sample_orders</code> and <code>sample_order_lines</code>, and drops them at the end.</li>
+</ul>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

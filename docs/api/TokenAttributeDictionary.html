@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TokenAttributeDictionary - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>TokenAttributeDictionary</h1>
+<p class="muted">class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
+<p>The attributes of a tag, such as <code>format=&quot;0.00&quot;</code> in <code>&lt;%=Total format=&quot;0.00&quot;%&gt;</code>. Keys are the attribute names in lower case. Values keep the case the template author wrote, in every tag. A quoted value may contain spaces.</p>
+<h4>Remarks</h4><p>Case rules: the names the library itself uses (the tag name, such as <code>total</code>, and the FOREACH name of a REUSE_FOREACH) and the attribute names are lower case. Attribute values are your own settings, so they keep their case. When you want to compare a value without case, use <a href="TokenAttributeDictionary.html"><code>LowerCaseValues</code></a> or <a href="TokenAttributeDictionary.html"><code>GetLowerCaseValue</code></a>: the parser fills a lower case copy of every value while it parses, so nothing is lower cased again for each run of the processor.</p>
+<p class="warning"><strong>Warning:</strong> it is a normal, case sensitive dictionary with lower case keys. Use <a href="TokenAttributeDictionary.html"><code>GetValue</code></a>, or read it with a lower case key: <code>attributes[&quot;format&quot;]</code> works, <code>attributes[&quot;Format&quot;]</code> throws KeyNotFoundException.</p>
+<p>The same attribute twice in one tag makes the parser throw InvalidTokenAttributeException.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var token = (NamedToken)new Parser().Parse(&quot;&lt;%=Total format=\&quot;0.00\&quot;%&gt;&quot;)[0];
+string format = token.Attributes.GetValue(&quot;Format&quot;, &quot;0&quot;);   // &quot;0.00&quot;</code></pre>
+<h2>Properties</h2>
+<section class="member">
+<pre class="sig"><code>IReadOnlyDictionary&lt;string, string&gt; LowerCaseValues { get; }</code></pre>
+<p>Gets the same attributes with the values in lower case (invariant culture), for example <code>n2</code> for <code>format=&quot;N2&quot;</code>. The parser fills it together with the dictionary itself.</p>
+<h4>Remarks</h4><p class="warning"><strong>Warning:</strong> only the parser fills this copy. Entries that you add to the dictionary yourself, with <code>Add</code> or the indexer, are not in it.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">// &lt;%IF Weight unit=&quot;KG&quot;%&gt;
+bool kilograms = args.Attributes.LowerCaseValues.TryGetValue(&quot;unit&quot;, out var unit) &amp;&amp; unit == &quot;kg&quot;;</code></pre>
+</section>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>string GetLowerCaseValue(string attributeName, string defaultValue)</code></pre>
+<p>Gets an attribute value in lower case, or a default when the attribute is missing. The name is not case sensitive. The value comes from <a href="TokenAttributeDictionary.html"><code>LowerCaseValues</code></a>, which the parser fills.</p>
+<h4>Parameters</h4><dl>
+<dt><code>attributeName</code></dt><dd>The attribute name.</dd>
+<dt><code>defaultValue</code></dt><dd>The value to return when the attribute is missing. It is returned as given, not lower cased.</dd>
+</dl>
+<h4>Returns</h4><p>The attribute value in lower case, or <code>defaultValue</code>.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>attributeName</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">// &lt;%=Total Currency=&quot;INR&quot;%&gt;
+string currency = attributes.GetLowerCaseValue(&quot;currency&quot;, &quot;usd&quot;);   // &quot;inr&quot;</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>string GetValue(string attributeName, string defaultValue)</code></pre>
+<p>Gets an attribute value, or a default when the attribute is missing. The name is not case sensitive.</p>
+<h4>Parameters</h4><dl>
+<dt><code>attributeName</code></dt><dd>The attribute name.</dd>
+<dt><code>defaultValue</code></dt><dd>The value to return when the attribute is missing.</dd>
+</dl>
+<h4>Returns</h4><p>The attribute value, or <code>defaultValue</code>.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>attributeName</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">string format = attributes.GetValue(&quot;FORMAT&quot;, &quot;0&quot;);</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

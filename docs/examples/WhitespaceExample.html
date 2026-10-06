@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whitespace control - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Whitespace control</h1>
+<p>Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing. SEPARATOR writes a separator between rows, and a sub template on an indented line is indented as a whole.</p>
+<p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/WhitespaceExample.cs">examples/Toshal.Template.Examples/WhitespaceExample.cs</a></p>
+<pre><code class="lang-csharp">// Title: Whitespace control
+// Summary: Put control tags on their own lines and indent them like code: a line that holds only control tags writes nothing. SEPARATOR writes a separator between rows, and a sub template on an indented line is indented as a whole.
+
+using Toshal.Template.Examples.Support;
+
+namespace Toshal.Template.Examples;
+
+public static class WhitespaceExample
+{
+    public static void Run()
+    {
+        Console.WriteLine(&quot;== Whitespace ==&quot;);
+
+        // The FOREACH and ENDFOR lines hold only control tags, so they write nothing: no indent, no line break.
+        // The lines with text keep their indent and their line break.
+        const string template =
+            &quot;public enum Color\n&quot; +
+            &quot;{\n&quot; +
+            &quot;    &lt;%FOREACH items%&gt;\n&quot; +
+            &quot;    &lt;%CONTEXT_AS_STRING%&gt;,\n&quot; +
+            &quot;    &lt;%ENDFOR%&gt;\n&quot; +
+            &quot;}\n&quot;;
+        var processor = new Processor { LoopValueProvider = args =&gt; new[] { &quot;Red&quot;, &quot;Green&quot; } };
+        string text = processor.Process(new ProcessorArgs(new Parser().Parse(template))).ToString();
+        Console.WriteLine(text);
+        Verify.Equal(&quot;public enum Color\n{\n    Red,\n    Green,\n}\n&quot;, text, &quot;tag lines&quot;);
+
+        // A line with text or a value keeps everything. Here the IF is inside a text line, so only the tags go.
+        const string inline = &quot;Status: &lt;%IF items%&gt;has items&lt;%ENDIF%&gt;\n&quot;;
+        var inlineProcessor = new Processor { ConditionValueProvider = args =&gt; true };
+        string status = inlineProcessor.Process(new ProcessorArgs(new Parser().Parse(inline))).ToString();
+        Console.WriteLine(status);
+        Verify.Equal(&quot;Status: has items\n&quot;, status, &quot;tags inside a text line&quot;);
+
+        // SEPARATOR is written in every row except the last: no trailing comma, and no characters to count.
+        const string parameters =
+            &quot;public Paint(\n&quot; +
+            &quot;    &lt;%FOREACH items%&gt;\n&quot; +
+            &quot;    Color &lt;%CONTEXT_AS_STRING%&gt;&lt;%SEPARATOR%&gt;,&lt;%ENDSEPARATOR%&gt;\n&quot; +
+            &quot;    &lt;%ENDFOR%&gt;\n&quot; +
+            &quot;)\n&quot;;
+        string signature = processor.Process(new ProcessorArgs(new Parser().Parse(parameters))).ToString();
+        Console.WriteLine(signature);
+        Verify.Equal(&quot;public Paint(\n    Color Red,\n    Color Green\n)\n&quot;, signature, &quot;separator&quot;);
+
+        // A sub template alone on an indented line gets that indent on every line; its own indent stays.
+        var nullCheck = new Parser().Parse(&quot;if (color == null)\n{\n    throw new ArgumentNullException(nameof(color));\n}&quot;);
+        var subProcessor = new Processor { ProcessTemplateValueProvider = args =&gt; nullCheck };
+        const string method = &quot;    public void Paint(Color color)\n    {\n        &lt;%PROCESS_TEMPLATE null_check%&gt;\n    }\n&quot;;
+        string body = subProcessor.Process(new ProcessorArgs(new Parser().Parse(method))).ToString();
+        Console.WriteLine(body);
+        Verify.Equal(
+            &quot;    public void Paint(Color color)\n    {\n        if (color == null)\n        {\n            throw new ArgumentNullException(nameof(color));\n        }\n    }\n&quot;,
+            body,
+            &quot;indented sub template&quot;);
+    }
+}
+</code></pre>
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

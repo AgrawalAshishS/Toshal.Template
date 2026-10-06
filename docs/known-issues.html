@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Known issues - Toshal.Template</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="index.html">Toshal.Template</a><nav><a href="index.html">Home</a><a href="why.html">Why use it</a><a href="getting-started.html">Getting started</a><a href="syntax.html">Template syntax</a><a href="compiled.html">Compiled templates</a><a href="pattern.html">Testing pattern</a><a href="api/index.html">API reference</a><a href="examples/index.html">Examples</a><a href="known-issues.html" class="active" aria-current="page">Known issues</a><a href="contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Known issues</h1>
+<p>This page is written by hand. Each row has a test in <code>tests/Toshal.Template.Tests/KnownIssues/KnownIssueTests.cs</code> or <code>tests/Toshal.Template.Tests/Fixes/</code>. A skipped test shows the wanted behavior of an open issue; the other tests pin what the library does.</p>
+<h2>Open</h2>
+<p>None at the moment.</p>
+<h2>By design</h2>
+<div class="table-wrap"><table>
+<tr><th>Behavior</th><th>Test</th></tr>
+<tr><td>A list with one row uses the LAST parts (BEFORELASTROW, LASTROW, AFTERLASTROW) and never the FIRST parts: the last row template wins.</td><td><code>KnownIssues/KnownIssueTests.OneRowUsesTheLastRowPart</code></td></tr>
+</table></div>
+<h2>Fixed in this version</h2>
+<div class="table-wrap"><table>
+<tr><th>Issue</th><th>Test</th></tr>
+<tr><td>A SET inside AFTERROW changed the variables around the loop, and AFTERROW did not see the variables set in ROW.</td><td><code>Fixes/AfterRowSetScopeTests</code></td></tr>
+<tr><td>An ELSEIF with no content skipped the following ELSEIF and ELSE.</td><td><code>Fixes/EmptyElseIfTests</code></td></tr>
+<tr><td>A template that ended with <code>&lt;%ELSE%&gt;</code> threw <code>ArgumentOutOfRangeException</code> instead of <code>TokenNotClosedException</code>, and <code>ElseToken</code> had the position of the text after the ELSE tag.</td><td><code>Fixes/ElseAtEndTests</code></td></tr>
+<tr><td>A <code>Parser</code> instance kept the FOREACH blocks of earlier templates, so a second <code>Parse</code> with REUSE_FOREACH failed or linked to an old block. Two FOREACH blocks with the same name broke every REUSE_FOREACH in the template.</td><td><code>Fixes/ParserReuseTests</code></td></tr>
+<tr><td>A <code>%&gt;</code> with no text before it (at the start, or right after a tag) was lost.</td><td><code>Fixes/StrayCloseTagTests</code></td></tr>
+<tr><td>Line and column numbers: the first text had 0 and 0, columns after a line break were 0 based, and text after a tag pointed to the <code>%&gt;</code>. All are 1 based now.</td><td><code>Fixes/TokenPositionTests</code></td></tr>
+<tr><td><code>new TokenArgs(args, context)</code>, <code>new ConditionArgs(args, context)</code> and <code>new LoopArgs(args, context)</code> added to the parent context list of the original args.</td><td><code>Fixes/ArgsCopyTests</code></td></tr>
+<tr><td>Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from <code>ParentContext</code>.</td><td><code>Fixes/ParentContextStackTests</code></td></tr>
+<tr><td>Attribute values with spaces, and attributes separated by more than one space, threw <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests</code></td></tr>
+<tr><td>A negative count in <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> was accepted by the parser, and the processor then threw <code>ArgumentOutOfRangeException</code>. The parser now throws <code>ParserException</code>.</td><td><code>Fixes/NegativeRemovePreviousTests</code></td></tr>
+<tr><td>The same attribute twice in one tag, such as <code>&lt;%=Name a=&quot;1&quot; a=&quot;2&quot;%&gt;</code>, threw <code>ArgumentException</code>. It now throws <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid</code></td></tr>
+<tr><td><code>Parser.Parse(null)</code>, <code>Processor.Process(null)</code>, <code>new ProcessorArgs(null)</code> and <code>GetValue(null, ...)</code> threw <code>NullReferenceException</code>. They now throw <code>ArgumentNullException</code>. Processing a REUSE_FOREACH token made by hand that is not linked throws <code>InvalidOperationException</code>.</td><td><code>Fixes/NullArgumentTests</code></td></tr>
+<tr><td>IF, ELSEIF and FOREACH lower cased their attribute values (<code>unit=&quot;KG&quot;</code> gave <code>kg</code>), the other tags did not. Now every tag keeps the value case, and <code>TokenAttributeDictionary.LowerCaseValues</code> has a lower case copy made by the parser.</td><td><code>Fixes/AttributeCaseTests</code></td></tr>
+<tr><td>Two FOREACH blocks with the same name and a REUSE_FOREACH threw <code>ArgumentException</code>. Now a FOREACH name is unique per level (<code>ParserException</code> for the second one at the same level), and REUSE_FOREACH uses the nearest FOREACH: its own level, then the outer levels, then the first one in the whole template.</td><td><code>Fixes/ForEachScopeTests</code></td></tr>
+</table></div>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

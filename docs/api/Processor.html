@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Processor - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Processor</h1>
+<p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
+<p>Turns parsed tokens into text. The data comes from five provider delegates that you set: one for each kind of tag that needs data. The processor does not read properties by reflection; your providers decide what each name means.</p>
+<h4>Remarks</h4><p class="warning"><strong>Warning:</strong> when a provider is not set, its tags are skipped without an error. An IF block (with its ELSE) is skipped when <a href="Processor.html"><code>ConditionValueProvider</code></a> is null, a FOREACH block (with its NORECORD) when <a href="Processor.html"><code>LoopValueProvider</code></a> is null, and so on. A <code>&lt;%=name%&gt;</code> still writes a SET variable of that name when there is one.</p>
+<p>The processor keeps no state between calls other than the provider properties, so one instance can process many templates, also from many threads at once.</p>
+<p class="warning"><strong>Warning:</strong> to save allocations, one call of <a href="Processor.html"><code>Process</code></a> reuses one <a href="TokenArgs.html"><code>TokenArgs</code></a> for all value and WITH tags and one <a href="ConditionArgs.html"><code>ConditionArgs</code></a> for all IF and ELSEIF tags. An args object is valid only while your provider runs; do not keep it.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var processor = new Processor
+{
+    TokenValueProvider = args =&gt; args.Name == &quot;name&quot; ? ((Customer)args.Context!).Name : null,
+    ConditionValueProvider = args =&gt; args.Name == &quot;vip&quot; &amp;&amp; ((Customer)args.Context!).IsVip,
+};
+string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }).ToString();</code></pre>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>StringBuilder Process(ProcessorArgs args)</code></pre>
+<p>Processes the tokens with the given top context and returns the text.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The tokens and the top context.</dd>
+</dl>
+<h4>Returns</h4><p>A new <code>StringBuilder</code> with the text.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+<dt><code>InvalidOperationException</code></dt><dd>The tokens hold a <a href="ReuseForEachToken.html"><code>ReuseForEachToken</code></a> made by hand that is not linked to a FOREACH. Tokens from <a href="Parser.html"><code>Parse</code></a> are always linked.</dd>
+</dl>
+<h4>Remarks</h4><p>Exceptions thrown by your providers are not caught; they reach the caller.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">StringBuilder text = processor.Process(new ProcessorArgs(tokens) { Context = order });
+File.WriteAllText(&quot;order.txt&quot;, text.ToString());</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void Process(ProcessorArgs args, StringBuilder output)</code></pre>
+<p>Processes the tokens with the given top context and appends the text to a builder you give. Reuse one builder (call <code>Clear</code> between runs) to avoid a new builder, its growth and the copy of <code>ToString()</code> for every run.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The tokens and the top context.</dd>
+<dt><code>output</code></dt><dd>The builder to append to. Text already in it stays.</dd>
+</dl>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> or <code>output</code> is null.</dd>
+<dt><code>InvalidOperationException</code></dt><dd>The tokens hold a <a href="ReuseForEachToken.html"><code>ReuseForEachToken</code></a> made by hand that is not linked to a FOREACH. Tokens from <a href="Parser.html"><code>Parse</code></a> are always linked.</dd>
+</dl>
+<h4>Remarks</h4><p><code>&lt;%REMOVE_PREVIOUS n%&gt;</code> and <code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code> remove only text that this call wrote, never text that was in <code>output</code> before the call.</p>
+<p>Exceptions thrown by your providers are not caught; they reach the caller. The text written before the exception stays in <code>output</code>.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var output = new StringBuilder();
+foreach (var order in orders)
+{
+    output.Clear();
+    processor.Process(new ProcessorArgs(tokens) { Context = order }, output);
+    writer.Write(output);   // TextWriter.Write(StringBuilder) copies no string
+}</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

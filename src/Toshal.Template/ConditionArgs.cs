@@ -1,0 +1,86 @@
+// Copyright (c) 2026 Toshal Infotech. Licensed under the MIT License. See LICENSE in the repository root.
+
+namespace Toshal.Template
+{
+    using System.Collections.Generic;
+    using Toshal.Template.Tokens;
+
+    /// <summary>
+    /// The arguments of <see cref="Processor.ConditionValueProvider"/> for an <c>&lt;%IF name%&gt;</c> or <c>&lt;%ELSEIF name%&gt;</c> tag.
+    /// </summary>
+    /// <remarks>
+    /// <para>For <c>&lt;%IF not Paid%&gt;</c> the name is <c>paid</c>. Return whether <c>paid</c> is true; the processor applies the <c>not</c>.</para>
+    /// <para><b>Warning:</b> within one <see cref="Processor.Process(ProcessorArgs)"/> call the processor reuses one <see cref="ConditionArgs"/> object for every IF and ELSEIF tag,
+    /// so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// processor.ConditionValueProvider = args =&gt; args.Name == "paid" &amp;&amp; ((Invoice)args.Context!).Paid;
+    /// </code>
+    /// </example>
+    public class ConditionArgs : ArgsBase
+    {
+        /// <summary>
+        /// Creates the arguments for a condition tag. The processor calls it; you need it only to test a provider on its own.
+        /// </summary>
+        /// <param name="token">The parsed condition tag. Its name and attributes are copied.</param>
+        /// <param name="context">The current context. It can be null.</param>
+        /// <param name="parentContext">The contexts around the tag, outermost first. It is stored as is, not copied.</param>
+        /// <example>
+        /// <code>
+        /// var token = (ConditionToken)new Parser().Parse("&lt;%IF paid%&gt;x&lt;%ENDIF%&gt;")[0];
+        /// bool result = myProvider(new ConditionArgs(token, invoice, new List&lt;object?&gt; { invoice }));
+        /// </code>
+        /// </example>
+        public ConditionArgs(ConditionToken token, object? context, List<object?> parentContext)
+            : base(token.Name, context, parentContext)
+        {
+            this.Attributes = token.Attributes;
+        }
+
+        /// <summary>
+        /// Creates arguments for a child object: same name and attributes, a new context, and the old context added at the end of a copy of
+        /// the parent contexts. Use it when a provider hands part of the work to another provider.
+        /// </summary>
+        /// <param name="args">The arguments to copy. They are not changed.</param>
+        /// <param name="context">The new context. It can be null.</param>
+        /// <example>
+        /// <code>
+        /// var child = new ConditionArgs(args, customer.Address);   // child.ParentContext ends with customer
+        /// </code>
+        /// </example>
+        public ConditionArgs(ConditionArgs args, object? context)
+            : base(args.Name, context, new List<object?>(args.ParentContext))
+        {
+            ParentContext.Add(args.Context);
+            this.Attributes = args.Attributes;
+        }
+
+        /// <summary>
+        /// Gets the attributes written in the tag, for example <c>min</c> in <c>&lt;%IF total min="100"%&gt;</c>. Keys are lower case.
+        /// </summary>
+        /// <remarks>
+        /// <para>Attribute names are lower case; values keep the case the template author wrote. For a lower case copy of the values use <see cref="TokenAttributeDictionary.LowerCaseValues"/>.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// string min = args.Attributes.GetValue("min", "0");
+        /// </code>
+        /// </example>
+        public TokenAttributeDictionary Attributes { get; private set; }
+
+        // Made by compiled templates, which have no token objects.
+        internal ConditionArgs(string name, TokenAttributeDictionary attributes, object? context, List<object?> parentContext)
+            : base(name, context, parentContext)
+        {
+            this.Attributes = attributes;
+        }
+
+        internal ConditionArgs Reuse(string name, TokenAttributeDictionary attributes, object? context)
+        {
+            this.Reuse(name, context);
+            this.Attributes = attributes;
+            return this;
+        }
+    }
+}

@@ -1,0 +1,20 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Toshal Infotech</Authors>
+    <Company>Toshal Infotech</Company>
+    <Product>Toshal.Template</Product>
+    <Copyright>Copyright (c) 2026 Toshal Infotech</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/AgrawalAshishS/Toshal.Template</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AgrawalAshishS/Toshal.Template</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>template;text-template;code-generation;email;report</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

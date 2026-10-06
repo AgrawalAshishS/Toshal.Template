@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <!-- Only the libraries are measured: the engine, the run time and the code generator of compiled templates, and the tool.
+               The generator assembly also holds a copy of the code generator; only its own classes are counted there. -->
+          <Include>[Toshal.Template]*,[Toshal.Template.Compiled]*,[Toshal.Template.CodeGen]*,[Toshal.Template.Generator]Toshal.Template.Generator.*,[toshal-template]*</Include>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework><%=Framework%></TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+<%IF Packages%>
+  <ItemGroup><%FOREACH Packages%>
+    <PackageReference Include="<%=Id%>" Version="<%=Version%>" /><%ENDFOR%>
+  </ItemGroup>
+<%ENDIF%>
+</Project>

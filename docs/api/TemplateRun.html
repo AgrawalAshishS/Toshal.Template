@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TemplateRun - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>TemplateRun</h1>
+<p class="muted">class in <code>Toshal.Template.Compiled</code>, assembly <code>Toshal.Template.Compiled</code></p>
+<p>The state of one call of <a href="CompiledTemplate.html"><code>Process</code></a>: the parent context stack, the FOREACH rows being written and the args objects that every provider call reuses. Generated code uses it; you do not need it in your own code.</p>
+<h4>Remarks</h4><p>It is the same state <a href="Processor.html"><code>Processor</code></a> keeps, so a compiled template writes the same text as the processor.</p>
+<p class="warning"><strong>Warning:</strong> the args objects it returns are reused for the next tag. They are valid only while your provider runs; do not keep them.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">// Generated code for &lt;%=name%&gt;:
+var value = this.TokenValue(run.TokenArgs(&quot;name&quot;, A0, context));</code></pre>
+<h2>Properties</h2>
+<section class="member">
+<pre class="sig"><code>bool InRowBeforeTheLast { get; }</code></pre>
+<p>Gets whether a row of the innermost FOREACH is being written and it is not the last row. SEPARATOR blocks are written only then.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">if (run.InRowBeforeTheLast) output.Append(&quot;, &quot;);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>List&lt;object&gt; ParentContext { get; }</code></pre>
+<p>Gets the stack of the outer contexts: the top context, then each FOREACH list, FOREACH row and WITH object around the current tag.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.ParentContext.Add(row);</code></pre>
+</section>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>ConditionArgs ConditionArgs(string name, TokenAttributeDictionary attributes, object context)</code></pre>
+<p>Gets the args for an IF or ELSEIF tag. The same object is reused for every such tag of this run.</p>
+<h4>Parameters</h4><dl>
+<dt><code>name</code></dt><dd>The lower case name of the condition, without <code>not</code>.</dd>
+<dt><code>attributes</code></dt><dd>The attributes of the tag.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+</dl>
+<h4>Returns</h4><p>The args, pointed at this tag.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">if (this.Condition(run.ConditionArgs(&quot;vip&quot;, A1, context))) { }</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void EnterLoop()</code></pre>
+<p>Starts a FOREACH. Call <a href="TemplateRun.html"><code>ExitLoop</code></a> when it ends.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.EnterLoop();</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void ExitLoop()</code></pre>
+<p>Ends the innermost FOREACH.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.ExitLoop();</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void LeaveRow()</code></pre>
+<p>Marks that the rows of the innermost FOREACH are done, before its FOOTER.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.LeaveRow();</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>LoopArgs LoopArgs(string name, TokenAttributeDictionary attributes, object context)</code></pre>
+<p>Makes the args for a FOREACH or REUSE_FOREACH tag.</p>
+<h4>Parameters</h4><dl>
+<dt><code>name</code></dt><dd>The lower case name of the loop.</dd>
+<dt><code>attributes</code></dt><dd>The attributes of the FOREACH tag.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+</dl>
+<h4>Returns</h4><p>New args; a provider may keep them.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">LoopArgs args = run.LoopArgs(&quot;lines&quot;, A2, context);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>ProcessTemplateArgs ProcessTemplateArgs(string name, TokenAttributeDictionary attributes, object context)</code></pre>
+<p>Makes the args for a PROCESS_TEMPLATE tag.</p>
+<h4>Parameters</h4><dl>
+<dt><code>name</code></dt><dd>The lower case name of the sub template.</dd>
+<dt><code>attributes</code></dt><dd>The attributes of the tag.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+</dl>
+<h4>Returns</h4><p>New args; a provider may keep them.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">ProcessTemplateArgs args = run.ProcessTemplateArgs(&quot;footer&quot;, A3, context);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void RemoveParent(object value)</code></pre>
+<p>Removes the last entry equal to <code>value</code> from <a href="TemplateRun.html"><code>ParentContext</code></a>: the one the block added.</p>
+<h4>Parameters</h4><dl>
+<dt><code>value</code></dt><dd>The object the block added.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.ParentContext.Add(row);
+// ... the row ...
+run.RemoveParent(row);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void RemovePrevious(StringBuilder output, int count)</code></pre>
+<p>Does <code>&lt;%REMOVE_PREVIOUS n%&gt;</code>: removes up to <code>count</code> chars at the end, but only text this run wrote.</p>
+<h4>Parameters</h4><dl>
+<dt><code>output</code></dt><dd>The builder being written.</dd>
+<dt><code>count</code></dt><dd>The number of chars.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.RemovePrevious(output, 1);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void RemovePreviousNewLine(StringBuilder output)</code></pre>
+<p>Does <code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code>: removes one line break at the end, but only text this run wrote.</p>
+<h4>Parameters</h4><dl>
+<dt><code>output</code></dt><dd>The builder being written.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.RemovePreviousNewLine(output);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>StringBuilder RentBuilder()</code></pre>
+<p>Gets an empty builder for the value of a SET block or for a sub template that is indented. Give it back with <a href="TemplateRun.html"><code>ReturnBuilder</code></a>.</p>
+<h4>Returns</h4><p>An empty builder.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">var value = run.RentBuilder();
+value.Append(&quot;x&quot;);
+scope.Set(&quot;name&quot;, value.ToString());
+run.ReturnBuilder(value);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void ReturnBuilder(StringBuilder builder)</code></pre>
+<p>Gives back a builder from <a href="TemplateRun.html"><code>RentBuilder</code></a>. Give builders back in the reverse order you got them.</p>
+<h4>Parameters</h4><dl>
+<dt><code>builder</code></dt><dd>The builder. It is cleared.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.ReturnBuilder(value);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void SetRow(bool isLast)</code></pre>
+<p>Marks the start of a row of the innermost FOREACH.</p>
+<h4>Parameters</h4><dl>
+<dt><code>isLast</code></dt><dd>True for the last row.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">run.SetRow(i == list.Count - 1);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>TokenArgs TokenArgs(string name, TokenAttributeDictionary attributes, object context)</code></pre>
+<p>Gets the args for a value or WITH tag. The same object is reused for every such tag of this run.</p>
+<h4>Parameters</h4><dl>
+<dt><code>name</code></dt><dd>The lower case name of the tag.</dd>
+<dt><code>attributes</code></dt><dd>The attributes of the tag.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+</dl>
+<h4>Returns</h4><p>The args, pointed at this tag.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">TokenArgs args = run.TokenArgs(&quot;name&quot;, A0, context);</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

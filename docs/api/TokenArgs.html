@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TokenArgs - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>TokenArgs</h1>
+<p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
+<p>The arguments of <a href="Processor.html"><code>TokenValueProvider</code></a> for a <code>&lt;%=name%&gt;</code> tag, and of <a href="Processor.html"><code>WithValueProvider</code></a> for a <code>&lt;%WITH name%&gt;</code> tag.</p>
+<h4>Remarks</h4><p class="warning"><strong>Warning:</strong> within one <a href="Processor.html"><code>Process</code></a> call the processor reuses one <a href="TokenArgs.html"><code>TokenArgs</code></a> object for every value and WITH tag, so it is valid only while your provider runs. Do not keep it; read the values you need while the provider runs.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.TokenValueProvider = args =&gt; args.Name switch
+{
+    &quot;total&quot; =&gt; ((Order)args.Context!).Total.ToString(args.GetAttribute(&quot;format&quot;, &quot;0.00&quot;)),
+    _ =&gt; null,
+};</code></pre>
+<h2>Constructors</h2>
+<section class="member">
+<pre class="sig"><code>TokenArgs(TokenArgs args, object context)</code></pre>
+<p>Creates arguments for a child object: same name and attributes, a new context, and the old context added at the end of a copy of the parent contexts. Use it when a provider hands part of the work to another provider.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments to copy. They are not changed.</dd>
+<dt><code>context</code></dt><dd>The new context. It can be null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">// &quot;customer.name&quot;: hand &quot;name&quot; to the customer provider with the customer as context.
+string? name = customerProvider(new TokenArgs(args, order.Customer));</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>TokenArgs(NamedToken token, object context, List&lt;object&gt; parentContext)</code></pre>
+<p>Creates the arguments for a value tag. The processor calls it; you need it only to test a provider on its own.</p>
+<h4>Parameters</h4><dl>
+<dt><code>token</code></dt><dd>The parsed value tag. Its name and attributes are copied.</dd>
+<dt><code>context</code></dt><dd>The current context. It can be null.</dd>
+<dt><code>parentContext</code></dt><dd>The contexts around the tag, outermost first. It is stored as is, not copied.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">var token = (NamedToken)new Parser().Parse(&quot;&lt;%=total%&gt;&quot;)[0];
+string? text = myProvider(new TokenArgs(token, order, new List&lt;object?&gt; { order }));</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>TokenArgs(WithToken token, object context, List&lt;object&gt; parentContext)</code></pre>
+<p>Creates the arguments for a WITH tag. The processor calls it; you need it only to test a provider on its own.</p>
+<h4>Parameters</h4><dl>
+<dt><code>token</code></dt><dd>The parsed WITH tag. Its name and attributes are copied.</dd>
+<dt><code>context</code></dt><dd>The current context. It can be null.</dd>
+<dt><code>parentContext</code></dt><dd>The contexts around the tag, outermost first. It is stored as is, not copied.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">var token = (WithToken)new Parser().Parse(&quot;&lt;%WITH customer%&gt;x&lt;%ENDWITH%&gt;&quot;)[0];
+object? value = myProvider(new TokenArgs(token, order, new List&lt;object?&gt; { order }));</code></pre>
+</section>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>string GetAttribute(string key, string defaultValue)</code></pre>
+<p>Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.</p>
+<h4>Parameters</h4><dl>
+<dt><code>key</code></dt><dd>The attribute name.</dd>
+<dt><code>defaultValue</code></dt><dd>The value to return when the attribute is missing.</dd>
+</dl>
+<h4>Returns</h4><p>The attribute value as written in the tag, or <code>defaultValue</code>.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>key</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">// &lt;%=Total format=&quot;0.00&quot;%&gt;
+string format = args.GetAttribute(&quot;Format&quot;, &quot;0&quot;);   // &quot;0.00&quot;</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

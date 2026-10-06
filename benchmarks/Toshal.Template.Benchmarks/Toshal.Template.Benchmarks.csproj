@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- CompiledShop.ctt is the benchmark template as a compiled template, made by the generator of this repository. -->
+  <Import Project="..\..\src\Toshal.Template.Generator\build\Toshal.Template.Generator.props" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Compiled\Toshal.Template.Compiled.csproj" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Generator\Toshal.Template.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ToshalTemplateTaskAssembly>$(MSBuildThisFileDirectory)..\..\src\Toshal.Template.Generator\bin\$(Configuration)\netstandard2.0\Toshal.Template.Generator.dll</ToshalTemplateTaskAssembly>
+  </PropertyGroup>
+
+  <Import Project="..\..\src\Toshal.Template.Generator\build\Toshal.Template.Generator.targets" />
+
+</Project>

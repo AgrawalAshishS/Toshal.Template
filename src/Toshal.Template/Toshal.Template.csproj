@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Toshal.Template</AssemblyName>
+    <PackageId>Toshal.Template</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Description>A text template engine with ASP style tags such as &lt;%=Name%&gt;, IF, FOREACH, WITH and SET. It produces any text: emails, reports, source code, project files.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The compiled templates share the run state of Processor, so both write the same text. The two packages ship together. -->
+    <InternalsVisibleTo Include="Toshal.Template.Compiled" />
+  </ItemGroup>
+
+</Project>

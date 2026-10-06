@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inspect the parsed tokens - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html">API reference</a><a href="../examples/index.html" class="active" aria-current="page">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Inspect the parsed tokens</h1>
+<p>Parser.Parse returns a tree of tokens with their line and column. Walk it to lint templates, list the names a template needs, or unit test a provider on its own with hand made args.</p>
+<p class="muted">File: <a href="https://github.com/AgrawalAshishS/Toshal.Template/blob/main/examples/Toshal.Template.Examples/TokenTreeExample.cs">examples/Toshal.Template.Examples/TokenTreeExample.cs</a></p>
+<pre><code class="lang-csharp">// Title: Inspect the parsed tokens
+// Summary: Parser.Parse returns a tree of tokens with their line and column. Walk it to lint templates, list the names a template needs, or unit test a provider on its own with hand made args.
+
+using System.Collections;
+using Toshal.Template.Examples.Support;
+using Toshal.Template.Tokens;
+
+namespace Toshal.Template.Examples;
+
+public static class TokenTreeExample
+{
+    public static void Run()
+    {
+        Console.WriteLine(&quot;== Token tree ==&quot;);
+
+        const string template =
+            &quot;Hi &lt;%=Name%&gt;\n&quot; +
+            &quot;&lt;%IF not Paid THEN%&gt;Pay now&lt;%ELSEIF Partly%&gt;Pay the rest&lt;%ELSE%&gt;Thanks&lt;%ENDIF%&gt;\n&quot; +
+            &quot;&lt;%FOREACH Lines%&gt;&lt;%HEADER%&gt;Lines:&lt;%ENDHEADER%&gt;&lt;%=Item%&gt;&lt;%ENDFOR%&gt;\n&quot; +
+            &quot;&lt;%REUSE_FOREACH Lines Returns%&gt;&lt;%WITH Customer%&gt;&lt;%SET x%&gt;1&lt;%ENDSET%&gt;&lt;%ENDWITH%&gt;&quot; +
+            &quot;&lt;%PROCESS_TEMPLATE Footer%&gt;&lt;%REMOVE_PREVIOUS 1%&gt;&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;&lt;%CONTEXT_AS_STRING%&gt;&quot;;
+        List&lt;IToken&gt; tokens = new Parser().Parse(template);
+
+        // List every name the template needs, with its position.
+        var names = new List&lt;string&gt;();
+        void Walk(IEnumerable&lt;IToken&gt; list)
+        {
+            foreach (IToken token in list)
+            {
+                switch (token)
+                {
+                    case NamedToken n: names.Add($&quot;value {n.Name} @{n.LineNumber}:{n.StartingPosition}&quot;); break;
+                    case ConditionToken c:
+                        names.Add($&quot;condition {(c.IsPositive ? &quot;&quot; : &quot;not &quot;)}{c.Name} @{c.LineNumber}:{c.StartingPosition}&quot;);
+                        Walk(c.InnerTokens);
+                        if (c.FalsePart is ConditionToken elseIf) Walk([elseIf]);
+                        else if (c.FalsePart is ElseToken e) Walk(e.InnerTokens);
+                        break;
+                    case ForEachToken f:
+                        names.Add($&quot;loop {f.Name} @{f.LineNumber}:{f.StartingPosition}&quot;);
+                        Walk(f.HeaderTokens.Concat(f.RowTokens).Concat(f.FooterTokens).Concat(f.NoRecordTokens));
+                        break;
+                    case ReuseForEachToken r: names.Add($&quot;loop {r.Name} (layout of {r.ExistingForEachName}, linked: {r.ExistingForEachToken != null})&quot;); break;
+                    case WithToken w: names.Add($&quot;with {w.Name}&quot;); Walk(w.InnerTokens); break;
+                    case SetToken s: names.Add($&quot;variable {s.Name}&quot;); break;
+                    case ProcessTemplateToken p: names.Add($&quot;sub template {p.Name}&quot;); break;
+                    case RemovePreviousCharsToken rc: names.Add($&quot;remove {rc.CharCount} chars&quot;); break;
+                }
+            }
+        }
+        Walk(tokens);
+        names.ForEach(n =&gt; Console.WriteLine(&quot;  &quot; + n));
+        Verify.That(names.Contains(&quot;value name @1:4&quot;) &amp;&amp; names.Contains(&quot;condition not paid @2:1&quot;) &amp;&amp; names.Contains(&quot;loop lines @3:1&quot;), &quot;names and positions&quot;);
+        Verify.That(names.Contains(&quot;loop returns (layout of lines, linked: True)&quot;), &quot;reuse is linked&quot;);
+
+        // Every token type, by position in the list.
+        Verify.That(tokens[0] is ContentToken { Content: &quot;Hi &quot; }, &quot;ContentToken&quot;);
+        Verify.That(tokens.OfType&lt;RemovePreviousNewLineToken&gt;().Count() == 1 &amp;&amp; tokens.OfType&lt;ContextAsStringToken&gt;().Count() == 1, &quot;other tokens&quot;);
+        Verify.That(tokens.OfType&lt;IContainerToken&gt;().Count() == 2 &amp;&amp; tokens.OfType&lt;ContainerTokenBase&gt;().All(t =&gt; t.InnerTokens != null), &quot;containers&quot;);
+        Verify.That(tokens.OfType&lt;Token&gt;().Count() == tokens.Count, &quot;all tokens derive from Token&quot;);
+
+        // A FOREACH has one token list per part. Every tag that takes attributes exposes them.
+        var parts = (ForEachToken)new Parser().Parse(
+            &quot;&lt;%FOREACH rows by=\&quot;id\&quot;%&gt;&lt;%NORECORD%&gt;0&lt;%ENDNORECORD%&gt;&lt;%HEADER%&gt;h&lt;%ENDHEADER%&gt;&lt;%BEFOREFIRSTROW%&gt;1&lt;%ENDBEFOREFIRSTROW%&gt;&lt;%FIRSTROW%&gt;2&lt;%ENDFIRSTROW%&gt;&quot; +
+            &quot;&lt;%AFTERFIRSTROW%&gt;3&lt;%ENDAFTERFIRSTROW%&gt;&lt;%BEFOREROW%&gt;4&lt;%ENDBEFOREROW%&gt;&lt;%ROW%&gt;5&lt;%ENDROW%&gt;&lt;%AFTERROW%&gt;6&lt;%ENDAFTERROW%&gt;&lt;%BEFOREALTROW%&gt;7&lt;%ENDBEFOREALTROW%&gt;&quot; +
+            &quot;&lt;%ALTROW%&gt;8&lt;%ENDALTROW%&gt;&lt;%AFTERALTROW%&gt;9&lt;%ENDAFTERALTROW%&gt;&lt;%BEFORELASTROW%&gt;a&lt;%ENDBEFORELASTROW%&gt;&lt;%LASTROW%&gt;b&lt;%ENDLASTROW%&gt;&lt;%AFTERLASTROW%&gt;c&lt;%ENDAFTERLASTROW%&gt;&quot; +
+            &quot;&lt;%FOOTER%&gt;f&lt;%ENDFOOTER%&gt;&lt;%ENDFOR%&gt;&quot;)[0];
+        var allParts = new[]
+        {
+            parts.NoRecordTokens, parts.HeaderTokens, parts.BeforeFirstRowTokens, parts.FirstRowTokens, parts.AfterFirstRowTokens,
+            parts.BeforeRowTokens, parts.RowTokens, parts.AfterRowTokens, parts.BeforeAltRowTokens, parts.AltRowTokens, parts.AfterAltRowTokens,
+            parts.BeforeLastRowTokens, parts.LastRowTokens, parts.AfterLastRowTokens, parts.FooterTokens,
+        };
+        Verify.That(allParts.All(p =&gt; p.Count == 1) &amp;&amp; parts.Attributes.GetValue(&quot;by&quot;, &quot;&quot;) == &quot;id&quot;, &quot;every FOREACH part&quot;);
+
+        var tagged = new ProcessorArgs(new Parser().Parse(
+            &quot;&lt;%IF a x=\&quot;1\&quot;%&gt;&lt;%ENDIF%&gt;&lt;%WITH b y=\&quot;2\&quot;%&gt;&lt;%ENDWITH%&gt;&lt;%SET c z=\&quot;3\&quot;%&gt;&lt;%ENDSET%&gt;&lt;%PROCESS_TEMPLATE d lang=\&quot;en\&quot;%&gt;&quot;));
+        var sub2 = (ProcessTemplateToken)tagged.TokenList[3];
+        Verify.That(((ConditionToken)tagged.TokenList[0]).Attributes[&quot;x&quot;] == &quot;1&quot; &amp;&amp; ((WithToken)tagged.TokenList[1]).Attributes[&quot;y&quot;] == &quot;2&quot;
+            &amp;&amp; ((SetToken)tagged.TokenList[2]).Attributes[&quot;z&quot;] == &quot;3&quot; &amp;&amp; sub2.Attributes[&quot;lang&quot;] == &quot;en&quot; &amp;&amp; sub2.GetAttribute(&quot;LANG&quot;, &quot;&quot;) == &quot;en&quot;, &quot;attributes of every tag&quot;);
+
+        string? langSeen = null;
+        new Processor { ProcessTemplateValueProvider = a =&gt; { langSeen = a.Attributes.GetValue(&quot;lang&quot;, &quot;&quot;); return null; } }.Process(tagged);
+        Verify.That(langSeen == &quot;en&quot;, &quot;ProcessTemplateArgs.Attributes&quot;);
+
+        Token first = (Token)tagged.TokenList[0];
+        Verify.That(first.LineNumber == 1 &amp;&amp; first.StartingPosition == 1, &quot;Token position&quot;);
+
+        // Tokens can be made by hand from a Split, for example to unit test a provider without a template.
+        var hand = new List&lt;IToken&gt;
+        {
+            new ContentToken(new Split { Content = &quot;x&quot; }),
+            new ContextAsStringToken(new Split { Content = &quot;&lt;%CONTEXT_AS_STRING%&gt;&quot; }),
+            new RemovePreviousNewLineToken(new Split { Content = &quot;&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;&quot; }),
+            new RemovePreviousCharsToken(new Split { Content = &quot;&lt;%REMOVE_PREVIOUS 1%&gt;&quot; }),
+            new ElseToken(new Split { Content = &quot;&lt;%ELSE%&gt;&quot; }),
+            new SetToken(new Split { Content = &quot;&lt;%SET v%&gt;&quot; }),
+            new WithToken(new Split { Content = &quot;&lt;%WITH c%&gt;&quot; }),
+            new ReuseForEachToken(new Split { Content = &quot;&lt;%REUSE_FOREACH a b%&gt;&quot; }),
+        };
+        Verify.That(hand.Count == 8, &quot;hand made tokens&quot;);
+
+        // Test a provider alone: build the args the processor would build.
+        Func&lt;ConditionArgs, bool&gt; conditions = a =&gt; a.Name == &quot;paid&quot; &amp;&amp; (bool)a.Context!;
+        Func&lt;LoopArgs, IList?&gt; loops = a =&gt; a.Name == &quot;lines&quot; ? new[] { 1, 2 } : null;
+        Func&lt;TokenArgs, string?&gt; values = a =&gt; a.Name == &quot;name&quot; ? &quot;Asha&quot; : null;
+        Func&lt;TokenArgs, object?&gt; withs = a =&gt; a.Name == &quot;customer&quot; ? &quot;c&quot; : null;
+        Func&lt;ProcessTemplateArgs, List&lt;IToken&gt;?&gt; subs = a =&gt; a.Name == &quot;footer&quot; ? [] : null;
+
+        var cond = new ConditionToken(new Split { Content = &quot;&lt;%IF Paid%&gt;&quot; });
+        var loop = new ForEachToken(new Split { Content = &quot;&lt;%FOREACH Lines%&gt;&quot; });
+        var value = new NamedToken(new Split { Content = &quot;&lt;%=Name%&gt;&quot; });
+        var with = new WithToken(new Split { Content = &quot;&lt;%WITH Customer%&gt;&quot; });
+        var sub = new ProcessTemplateToken(new Split { Content = &quot;&lt;%PROCESS_TEMPLATE Footer%&gt;&quot; });
+        var none = new List&lt;object?&gt;();
+
+        Verify.That(conditions(new ConditionArgs(cond, true, none)), &quot;ConditionArgs&quot;);
+        Verify.That(loops(new LoopArgs(loop, null, none))!.Count == 2, &quot;LoopArgs&quot;);
+        Verify.That(values(new TokenArgs(value, null, none)) == &quot;Asha&quot;, &quot;TokenArgs for a value&quot;);
+        Verify.That(withs(new TokenArgs(with, null, none)) is &quot;c&quot;, &quot;TokenArgs for WITH&quot;);
+        Verify.That(subs(new ProcessTemplateArgs(sub, null, none)) != null, &quot;ProcessTemplateArgs&quot;);
+        Console.WriteLine(&quot;Providers tested alone with hand made args.&quot;);
+    }
+}
+</code></pre>
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

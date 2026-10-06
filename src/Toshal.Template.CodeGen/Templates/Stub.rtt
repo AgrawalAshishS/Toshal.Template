@@ -1,0 +1,13 @@
+// Made once by Toshal.Template from <%=sourcepath%>. This file is yours: give the values here.
+// It is not made again. When the template uses a new kind of tag, the compiler names the method to add.
+
+#nullable enable
+
+<%IF namespace%>
+namespace <%=namespace%>
+{
+    <%PROCESS_TEMPLATE body%>
+}
+<%ELSE%>
+<%PROCESS_TEMPLATE body%>
+<%ENDIF%>

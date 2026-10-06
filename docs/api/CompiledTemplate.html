@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CompiledTemplate - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>CompiledTemplate</h1>
+<p class="muted">abstract class in <code>Toshal.Template.Compiled</code>, assembly <code>Toshal.Template.Compiled</code></p>
+<p>The base class of a compiled template: a C# class made at build time from a <code>.ctt</code> file by Toshal.Template.Generator or by the <code>toshal-template</code> tool. The template text is already turned into code, so no parser runs and no token list is walked at run time.</p>
+<h4>Remarks</h4><p>The generated class gets its data from partial methods that you write in the other half of the class (a stub is made once for you): <code>TokenValue</code> (or <code>WriteToken</code>) for <code>&lt;%=name%&gt;</code>, <code>Condition</code> for IF and ELSEIF, <code>Loop</code> for FOREACH and REUSE_FOREACH, <code>With</code> for WITH and <code>SubTemplate</code> for PROCESS_TEMPLATE. Only the methods for the tags the template uses are declared.</p>
+<p>The text is the same as <a href="Processor.html"><code>Processor</code></a> writes for the same template and the same provider answers.</p>
+<p>A call of <code>Process</code> keeps its state in its own objects, so one instance can be used from many threads at once, as long as your partial methods are safe for that.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">// Templates/Hello.ctt:   Hello &lt;%=Name%&gt;!
+// Hello.cs (the stub, filled in by you):
+public partial class Hello
+{
+    private partial string? TokenValue(TokenArgs args) =&gt; args.Name switch
+    {
+        &quot;name&quot; =&gt; ((Customer)args.Context!).Name,
+        _ =&gt; null,
+    };
+}
+
+string text = new Hello().Process(customer).ToString();   // &quot;Hello Asha!&quot;</code></pre>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>static TokenAttributeDictionary Attributes(params string[] namesAndValues)</code></pre>
+<p>Makes the attributes of one tag, with their lower case copy. Generated code calls it once per tag, in a static field.</p>
+<h4>Parameters</h4><dl>
+<dt><code>namesAndValues</code></dt><dd>Pairs of lower case attribute name and value as written.</dd>
+</dl>
+<h4>Returns</h4><p>The attributes.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>namesAndValues</code> is null.</dd>
+<dt><code>ArgumentException</code></dt><dd>The array has an odd length, or a name is repeated.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">private static readonly TokenAttributeDictionary A0 = Attributes(&quot;format&quot;, &quot;0.00&quot;);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>StringBuilder Process(object context = null)</code></pre>
+<p>Writes the template with the given top context and returns the text.</p>
+<h4>Parameters</h4><dl>
+<dt><code>context</code></dt><dd>The top context. Your partial methods get it as <a href="ArgsBase.html"><code>Context</code></a> for tags outside any FOREACH or WITH. When it is not null it is also the first entry of <a href="ArgsBase.html"><code>ParentContext</code></a>.</dd>
+</dl>
+<h4>Returns</h4><p>A new <code>StringBuilder</code> with the text.</p>
+<h4>Remarks</h4><p>Exceptions thrown by your partial methods are not caught; they reach the caller.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">string text = new OrderConfirm().Process(order).ToString();</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void Process(object context, StringBuilder output)</code></pre>
+<p>Writes the template with the given top context and appends the text to a builder you give. Reuse one builder (call <code>Clear</code> between runs) to avoid a new builder, its growth and the copy of <code>ToString()</code> for every run.</p>
+<h4>Parameters</h4><dl>
+<dt><code>context</code></dt><dd>The top context, as for <a href="CompiledTemplate.html"><code>Process</code></a>.</dd>
+<dt><code>output</code></dt><dd>The builder to append to. Text already in it stays.</dd>
+</dl>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>output</code> is null.</dd>
+</dl>
+<h4>Remarks</h4><p><code>&lt;%REMOVE_PREVIOUS n%&gt;</code> and <code>&lt;%REMOVE_PREVIOUS_NEW_LINE%&gt;</code> remove only text that this call wrote, never text that was in <code>output</code> before the call.</p>
+<p>Exceptions thrown by your partial methods are not caught; they reach the caller. The text written before the exception stays in <code>output</code>.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var template = new OrderConfirm();
+var output = new StringBuilder();
+foreach (var order in orders)
+{
+    output.Clear();
+    template.Process(order, output);
+    writer.Write(output);
+}</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>static void ProcessSubTemplate(CompiledTemplate template, StringBuilder output, object context, TemplateRun run, TemplateScope scope, string indent)</code></pre>
+<p>Does <code>&lt;%PROCESS_TEMPLATE name%&gt;</code>: writes another compiled template in place, with the current context. Its SET variables stay inside it. When <code>indent</code> is not empty, every line of it after the first gets the indent.</p>
+<h4>Parameters</h4><dl>
+<dt><code>template</code></dt><dd>The sub template your <code>SubTemplate</code> method returned. Null writes nothing.</dd>
+<dt><code>output</code></dt><dd>The builder being written.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+<dt><code>run</code></dt><dd>The state of this call.</dd>
+<dt><code>scope</code></dt><dd>The SET variables of the current block; the sub template sees them.</dd>
+<dt><code>indent</code></dt><dd>The spaces or tabs in front of the tag when it is alone on its line, else empty.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">ProcessSubTemplate(this.SubTemplate(run.ProcessTemplateArgs(&quot;footer&quot;, A0, context)), output, context, run, ref scope, &quot;    &quot;);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>void Render(StringBuilder output, object context, TemplateRun run, TemplateScope scope)</code></pre>
+<p>Writes the template. The generated half of the class implements it; you do not.</p>
+<h4>Parameters</h4><dl>
+<dt><code>output</code></dt><dd>The builder to append to: the main output, or the value of a SET block.</dd>
+<dt><code>context</code></dt><dd>The current context.</dd>
+<dt><code>run</code></dt><dd>The state of this call.</dd>
+<dt><code>scope</code></dt><dd>The SET variables of the current block.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">protected override void Render(StringBuilder output, object? context, TemplateRun run, ref TemplateScope scope)
+{
+    output.Append(&quot;Hello&quot;);
+}</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

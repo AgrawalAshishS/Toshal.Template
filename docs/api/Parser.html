@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parser - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../compiled.html">Compiled templates</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>Parser</h1>
+<p class="muted">class in <code>Toshal.Template</code>, assembly <code>Toshal.Template</code></p>
+<p>Turns template text into a list of tokens. Parse a template once and give the tokens to <a href="Processor.html"><code>Process</code></a> as often as you like.</p>
+<h4>Remarks</h4><p>Tags are written as <code>&lt;%...%&gt;</code>. The keywords (IF, FOREACH, WITH, SET, ...) are upper case and case sensitive. Names are not case sensitive: the parser lower cases them.</p>
+<p>FOREACH names are unique per level. A level is one list of tokens: the top of the template, or the inside of an IF, ELSEIF, ELSE, WITH, SET or FOREACH part. The same name may be used again at a deeper level, or in the IF part and the ELSE part. A REUSE_FOREACH uses the nearest FOREACH with its name: first at its own level, then at each outer level up to the top. When none of those levels has the name, it uses the first FOREACH with that name in the whole template, top to bottom.</p>
+<p class="warning"><strong>Warning:</strong> a parser keeps state while it works. Parse one template at a time with one instance; do not share an instance between threads.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">List&lt;IToken&gt; tokens = new Parser().Parse(&quot;Hello &lt;%=Name%&gt;!&quot;);</code></pre>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>List&lt;IToken&gt; Parse(string templateText)</code></pre>
+<p>Parses a template. Plain text becomes <a href="ContentToken.html"><code>ContentToken</code></a>, each tag becomes its token, and blocks such as IF and FOREACH hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.</p>
+<h4>Parameters</h4><dl>
+<dt><code>templateText</code></dt><dd>The template. An empty string gives an empty list.</dd>
+</dl>
+<h4>Returns</h4><p>The top level tokens, in template order.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>templateText</code> is null.</dd>
+<dt><code>TokenMissingNameException</code></dt><dd>A tag that needs a name has none, for example <code>&lt;%=%&gt;</code>.</dd>
+<dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF, or a comment has no <code>--%&gt;</code>.</dd>
+<dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>
+<dt><code>ForEachMissingForReuseException</code></dt><dd>A REUSE_FOREACH names a FOREACH that is nowhere in the template.</dd>
+<dt><code>ParserException</code></dt><dd>An unknown tag, an end tag without its start, a REMOVE_PREVIOUS count that is missing, not a whole number, or negative, or two FOREACH blocks with the same name at the same level. All the exceptions above derive from it.</dd>
+</dl>
+<h4>Remarks</h4><p>A line that holds only control tags (IF, ELSEIF, ELSE, ENDIF, FOREACH and its parts, ENDFOR, WITH, ENDWITH, SET, ENDSET, SEPARATOR, ENDSEPARATOR, comments) and spaces or tabs gives no text token: its indent, the spaces between its tags and its line break are dropped. Lines with text or with a tag that writes something stay as they are. The line numbers and columns of the tokens stay those of the template.</p>
+<p>A PROCESS_TEMPLATE alone on its line after spaces or tabs gets those as its <a href="ProcessTemplateToken.html"><code>Indent</code></a>.</p>
+<p>A comment <code>&lt;%-- ... --%&gt;</code> gives no token. It may span lines and hold tags; it ends at the first <code>--%&gt;</code>. For the line rule above it counts as a control tag. In plain text, <code>\&lt;\%</code> and <code>\%\&gt;</code> become <code>&lt;%</code> and <code>%&gt;</code> in the <a href="ContentToken.html"><code>ContentToken</code></a>.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var parser = new Parser();
+List&lt;IToken&gt; tokens = parser.Parse(&quot;&lt;%IF vip%&gt;Dear &lt;%=Name%&gt;&lt;%ELSE%&gt;Hello&lt;%ENDIF%&gt;&quot;);</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>
