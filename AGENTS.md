@@ -19,6 +19,8 @@ examples/Toshal.Template.Examples/    console app, one file per topic; Templates
                                       Patterns/ + FakeOrRealTestPatternExample.cs: the fake or real database pattern (NpgsqlCommon)
 tools/Toshal.Template.Tools/          C# tool: website generator and coverage report. content/ holds the hand written page texts
 tools/VisualEditor/                   old browser based template editor (JavaScript). Not built, not maintained yet
+benchmarks/Toshal.Template.Benchmarks/ BenchmarkDotNet: the same template through the old chain style, ContextProviderRegistry and a
+                                      hand written lower bound. Not packed. Run before and after any change to Processor or the registry
 docs/                                 GitHub Pages site. known-issues.md is hand written, everything else is generated
 coverlet.runsettings                  coverage settings
 .github/workflows/ci.yml              GitHub Actions: build (warnings fail), tests, coverage >= 90%, docs check, pack;
@@ -34,6 +36,7 @@ coverlet.runsettings                  coverage settings
 | `coverage` | Run the tests with coverlet, print a per-class table, write `coverage/index.html`. Fails below 90%. |
 | `docs` | Regenerate the website in `docs/`. `docs check` fails when `docs/` is out of date (a test does the same). |
 | `pack` | Build the NuGet package into `artifacts/`. |
+| `dotnet run -c Release --project benchmarks/Toshal.Template.Benchmarks -- --filter *` | Measure time and allocations. Run time speed comes first in this library. |
 
 ## Rules
 

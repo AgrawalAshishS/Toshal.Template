@@ -166,3 +166,4 @@ _distribution/
 coverage/
 artifacts/
 TestResults/
+BenchmarkDotNet.Artifacts/
