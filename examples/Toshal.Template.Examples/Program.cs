@@ -19,6 +19,7 @@ SubTemplatesExample.Run();
 ParserErrorsExample.Run();
 TokenTreeExample.Run();
 ProviderInterfacesExample.Run();
+ContextProvidersExample.Run();
 EmailExample.Run();
 ReportExample.Run();
 CodeGenerationExample.Run();

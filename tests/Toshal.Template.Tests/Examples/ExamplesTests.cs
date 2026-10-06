@@ -21,6 +21,7 @@ namespace Toshal.Template.Tests.Examples
         [Fact] public void ParserErrors() => ParserErrorsExample.Run();
         [Fact] public void TokenTree() => TokenTreeExample.Run();
         [Fact] public void ProviderInterfaces() => ProviderInterfacesExample.Run();
+        [Fact] public void ContextProviders() => ContextProvidersExample.Run();
         [Fact] public void Email() => EmailExample.Run();
         [Fact] public void Report() => ReportExample.Run();
         [Fact] public void CodeGeneration() => CodeGenerationExample.Run();

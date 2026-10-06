@@ -73,5 +73,53 @@ namespace Toshal.Template
         /// </code>
         /// </example>
         public List<object?> ParentContext { get; private set; }
+
+        /// <summary>
+        /// Finds the nearest entry of type <typeparamref name="T"/> in <see cref="ParentContext"/>, searching from the inside (the last entry) out.
+        /// The current context is normally the last entry, so it is found first when it matches.
+        /// </summary>
+        /// <typeparam name="T">The type to look for. Entries that derive from it or implement it match too.</typeparam>
+        /// <returns>The nearest matching entry, or null when there is none.</returns>
+        /// <remarks>
+        /// <para>A plain loop with a type check: no reflection, no allocation.</para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// // Inside a FOREACH of columns inside a FOREACH of insert queries.
+        /// var query = args.FindParent&lt;InsertQuery&gt;();
+        /// </code>
+        /// </example>
+        public T? FindParent<T>()
+            where T : class
+        {
+            var list = this.ParentContext;
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                if (list[i] is T found) return found;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the entry of <see cref="ParentContext"/> that is <paramref name="levelsUp"/> levels above the last entry.
+        /// <c>Parent(0)</c> is the last entry (normally the current context). Inside a FOREACH row, <c>Parent(1)</c> is the list of the loop.
+        /// </summary>
+        /// <param name="levelsUp">How many entries to go up from the last one. 0 or more.</param>
+        /// <returns>The entry, or null when the list has fewer entries.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="levelsUp"/> is negative.</exception>
+        /// <example>
+        /// <code>
+        /// // Inside a FOREACH row: the whole list.
+        /// var rows = (IList?)args.Parent(1);
+        /// </code>
+        /// </example>
+        public object? Parent(int levelsUp)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(levelsUp);
+
+            var index = this.ParentContext.Count - 1 - levelsUp;
+            return index >= 0 ? this.ParentContext[index] : null;
+        }
     }
 }

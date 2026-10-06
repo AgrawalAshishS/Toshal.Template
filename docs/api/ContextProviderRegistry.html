@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ContextProviderRegistry - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>ContextProviderRegistry</h1>
+<p class="muted">class in <code>Toshal.Template.Providers</code>, assembly <code>Toshal.Template</code></p>
+<p>Picks the providers for a tag by the type of the current context, so each provider sees only its own type. It replaces a long chain of &quot;try this provider, then that one&quot; with one lookup by type. Its <a href="ContextProviderRegistry.html"><code>Token</code></a>, <a href="ContextProviderRegistry.html"><code>Condition</code></a>, <a href="ContextProviderRegistry.html"><code>Loop</code></a> and <a href="ContextProviderRegistry.html"><code>With</code></a> methods fit the provider properties of <a href="Processor.html"><code>Processor</code></a>; <a href="ContextProviderRegistry.html"><code>AttachTo</code></a> sets all four.</p>
+<h4>Remarks</h4><p>The order for one tag:</p>
+<p>The first provider that handles the name wins, even with a null, empty or <code>false</code> value. When no provider handles it, a token, loop and with get null and a condition gets <code>false</code>.</p>
+<p>Speed: the list of providers for a type is built once, on the first tag with a context of that type, and then cached. Each later tag costs one dictionary lookup on the type and one call per provider tried. No reflection runs while processing, and nothing is allocated.</p>
+<p class="warning"><strong>Warning:</strong> register every provider before the first lookup. After it, <a href="ContextProviderRegistry.html"><code>Register``1</code></a> and <a href="ContextProviderRegistry.html"><code>RegisterGlobal</code></a> throw. Lookups are safe from many threads at once.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">var registry = new ContextProviderRegistry()
+    .Register(new CustomerProviderCustom())   // hand written: asked first
+    .Register(new CustomerProvider())         // generated
+    .Register(new OrderProvider())
+    .RegisterGlobal(new ProjectGlobals(), GlobalOrder.BeforeTyped);
+
+var processor = new Processor();
+registry.AttachTo(processor);
+string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }).ToString();</code></pre>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>void AttachTo(Processor processor)</code></pre>
+<p>Sets <a href="Processor.html"><code>TokenValueProvider</code></a>, <a href="Processor.html"><code>ConditionValueProvider</code></a>, <a href="Processor.html"><code>LoopValueProvider</code></a> and <a href="Processor.html"><code>WithValueProvider</code></a> to this registry. <a href="Processor.html"><code>ProcessTemplateValueProvider</code></a> is not changed.</p>
+<h4>Parameters</h4><dl>
+<dt><code>processor</code></dt><dd>The processor to set.</dd>
+</dl>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>processor</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">var processor = new Processor { ProcessTemplateValueProvider = args =&gt; templates[args.Name] };
+registry.AttachTo(processor);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>bool Condition(ConditionArgs args)</code></pre>
+<p>Answers <code>&lt;%IF name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>ConditionValueProvider</code></a>.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments from the processor.</dd>
+</dl>
+<h4>Returns</h4><p>The value of the condition, or <code>false</code> when no provider handled the name.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.ConditionValueProvider = registry.Condition;</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>IList Loop(LoopArgs args)</code></pre>
+<p>Answers <code>&lt;%FOREACH name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>LoopValueProvider</code></a>.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments from the processor.</dd>
+</dl>
+<h4>Returns</h4><p>The rows, or null when no provider handled the name.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.LoopValueProvider = registry.Loop;</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>ContextProviderRegistry Register&lt;T&gt;(ContextProvider&lt;T&gt; provider)</code></pre>
+<p>Adds a provider for contexts of type  and of every type that derives from it or implements it.</p>
+<h4>Parameters</h4><dl>
+<dt><code>provider</code></dt><dd>The provider.</dd>
+</dl>
+<h4>Returns</h4><p>This registry, so calls can be chained.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>provider</code> is null.</dd>
+<dt><code>InvalidOperationException</code></dt><dd>The registry was already used for a lookup.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">registry.Register(new TableColumnProviderCustom()).Register(new TableColumnProvider());</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>ContextProviderRegistry RegisterGlobal(GlobalProvider provider, GlobalOrder order = GlobalOrder.AfterTyped)</code></pre>
+<p>Adds a provider that is asked for every context, also a null one.</p>
+<h4>Parameters</h4><dl>
+<dt><code>provider</code></dt><dd>The provider.</dd>
+<dt><code>order</code></dt><dd>Whether it is asked before or after the typed providers. The default is <a href="GlobalOrder.html"><code>AfterTyped</code></a>.</dd>
+</dl>
+<h4>Returns</h4><p>This registry, so calls can be chained.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>provider</code> is null.</dd>
+<dt><code>InvalidOperationException</code></dt><dd>The registry was already used for a lookup.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">registry.RegisterGlobal(new ProjectGlobals(), GlobalOrder.BeforeTyped);</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>string Token(TokenArgs args)</code></pre>
+<p>Answers <code>&lt;%=name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>TokenValueProvider</code></a>.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments from the processor.</dd>
+</dl>
+<h4>Returns</h4><p>The text, or null when no provider handled the name.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.TokenValueProvider = registry.Token;</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>object With(TokenArgs args)</code></pre>
+<p>Answers <code>&lt;%WITH name%&gt;</code> with the first provider that handles the name. It fits <a href="Processor.html"><code>WithValueProvider</code></a>.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The arguments from the processor.</dd>
+</dl>
+<h4>Returns</h4><p>The context for the block, or null when no provider handled the name.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+</dl>
+<h4>Example</h4>
+<pre><code class="lang-csharp">processor.WithValueProvider = registry.With;</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

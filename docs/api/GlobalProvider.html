@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GlobalProvider - Toshal.Template</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<header><div class="wrap"><a class="brand" href="../index.html">Toshal.Template</a><nav><a href="../index.html">Home</a><a href="../why.html">Why use it</a><a href="../getting-started.html">Getting started</a><a href="../syntax.html">Template syntax</a><a href="../pattern.html">Testing pattern</a><a href="../api/index.html" class="active" aria-current="page">API reference</a><a href="../examples/index.html">Examples</a><a href="../known-issues.html">Known issues</a><a href="../contributing.html">Contributing</a><a href="https://github.com/AgrawalAshishS/Toshal.Template">GitHub</a></nav></div></header>
+<main class="wrap">
+<h1>GlobalProvider</h1>
+<p class="muted">abstract class in <code>Toshal.Template.Providers</code>, assembly <code>Toshal.Template</code></p>
+<p>Answers names that do not depend on the type of the current context, such as a project name, a version or today&#39;s date. It is asked for every context, also when the context is null. Register it with <a href="ContextProviderRegistry.html"><code>RegisterGlobal</code></a>.</p>
+<h4>Remarks</h4><p>Each method returns <code>true</code> when it handled the name, even when the value is null, empty or <code>false</code>. Return <code>false</code> to let the next provider try.</p>
+<p class="warning"><strong>Warning:</strong> a global provider runs for every tag of its kind, so keep it short: one <code>switch</code> on <a href="ArgsBase.html"><code>Name</code></a>. It is called from many threads when you process templates in parallel.</p>
+
+<h4>Example</h4>
+<pre><code class="lang-csharp">sealed class ProjectGlobals : GlobalProvider
+{
+    public override bool TryToken(TokenArgs args, out string? value)
+    {
+        switch (args.Name)
+        {
+            case &quot;project_name&quot;: value = &quot;Shop&quot;; return true;
+        }
+
+        value = null;
+        return false;
+    }
+}</code></pre>
+<h2>Methods</h2>
+<section class="member">
+<pre class="sig"><code>bool TryCondition(ConditionArgs args, bool value)</code></pre>
+<p>Answers <code>&lt;%IF name%&gt;</code> and <code>&lt;%ELSEIF name%&gt;</code>. The default answers &quot;not handled&quot;.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The name, the attributes, the context (it can be null) and the parent contexts of the tag.</dd>
+<dt><code>value</code></dt><dd>Whether the condition is true.</dd>
+</dl>
+<h4>Returns</h4><p><code>true</code> when this provider handled the name, also when <code>value</code> is <code>false</code>; <code>false</code> to let the next provider try.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">public override bool TryCondition(ConditionArgs args, out bool value)
+{
+    switch (args.Name)
+    {
+        case &quot;for_each_count&quot;: value = args.Context is IList list &amp;&amp; list.Count == 1; return true;
+    }
+
+    value = false;
+    return false;
+}</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>bool TryLoop(LoopArgs args, IList value)</code></pre>
+<p>Answers <code>&lt;%FOREACH name%&gt;</code> and <code>&lt;%REUSE_FOREACH existing name%&gt;</code>. The default answers &quot;not handled&quot;.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The name, the attributes, the context (it can be null) and the parent contexts of the tag.</dd>
+<dt><code>value</code></dt><dd>The rows. Null or an empty list writes the NORECORD part.</dd>
+</dl>
+<h4>Returns</h4><p><code>true</code> when this provider handled the name; <code>false</code> to let the next provider try.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">public override bool TryLoop(LoopArgs args, out IList? value)
+{
+    switch (args.Name)
+    {
+        case &quot;servers&quot;: value = Settings.Servers; return true;
+    }
+
+    value = null;
+    return false;
+}</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>bool TryToken(TokenArgs args, string value)</code></pre>
+<p>Answers <code>&lt;%=name%&gt;</code>. The default answers &quot;not handled&quot;.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The name, the attributes, the context (it can be null) and the parent contexts of the tag.</dd>
+<dt><code>value</code></dt><dd>The text to write. Null or empty writes nothing.</dd>
+</dl>
+<h4>Returns</h4><p><code>true</code> when this provider handled the name; <code>false</code> to let the next provider try.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">public override bool TryToken(TokenArgs args, out string? value)
+{
+    switch (args.Name)
+    {
+        case &quot;current_year&quot;: value = DateTime.Now.Year.ToString(); return true;
+    }
+
+    value = null;
+    return false;
+}</code></pre>
+</section>
+<section class="member">
+<pre class="sig"><code>bool TryWith(TokenArgs args, object value)</code></pre>
+<p>Answers <code>&lt;%WITH name%&gt;</code>. The default answers &quot;not handled&quot;.</p>
+<h4>Parameters</h4><dl>
+<dt><code>args</code></dt><dd>The name, the attributes, the context (it can be null) and the parent contexts of the tag.</dd>
+<dt><code>value</code></dt><dd>The context inside the block. Null skips the block.</dd>
+</dl>
+<h4>Returns</h4><p><code>true</code> when this provider handled the name; <code>false</code> to let the next provider try.</p>
+<h4>Example</h4>
+<pre><code class="lang-csharp">public override bool TryWith(TokenArgs args, out object? value)
+{
+    switch (args.Name)
+    {
+        case &quot;current_order&quot;: value = args.FindParent&lt;Order&gt;(); return true;
+    }
+
+    value = null;
+    return false;
+}</code></pre>
+</section>
+
+</main>
+<footer><div class="wrap">MIT License. Copyright (c) 2026 Toshal Infotech. This page was generated by <code>docs.cmd</code>; do not edit it by hand.</div></footer>
+</body>
+</html>

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+using Toshal.Template.Providers;
 using Toshal.Template.Tokens;
 using Xunit;
 
@@ -264,6 +265,87 @@ namespace Toshal.Template.Tests
             };
 
             Assert.Equal("t|c|l|w|p", Run("<%=a%>|<%IF a%>c<%ENDIF%>|<%FOREACH a%>l<%ENDFOR%>|<%WITH a%>w<%ENDWITH%>|<%PROCESS_TEMPLATE a%>", processor));
+        }
+
+        [Fact]
+        public void ProviderMethodsThatAreNotOverriddenAnswerNotHandled()
+        {
+            var typed = new EmptyTyped();
+            var global = new EmptyGlobal();
+            var token = (NamedToken)new Parser().Parse("<%=a%>")[0];
+            var args = new TokenArgs(token, "x", new List<object?>());
+            var condition = new ConditionArgs((ConditionToken)new Parser().Parse("<%IF a%><%ENDIF%>")[0], "x", new List<object?>());
+            var loop = new LoopArgs("a", "x", new List<object?>(), new TokenAttributeDictionary());
+
+            Assert.False(typed.TryToken("x", args, out _));
+            Assert.False(typed.TryCondition("x", condition, out _));
+            Assert.False(typed.TryLoop("x", loop, out _));
+            Assert.False(typed.TryWith("x", args, out _));
+            Assert.False(global.TryToken(args, out _));
+            Assert.False(global.TryCondition(condition, out _));
+            Assert.False(global.TryLoop(loop, out _));
+            Assert.False(global.TryWith(args, out _));
+        }
+
+        [Fact]
+        public void RegistryLookupsAllocateNothingAfterTheFirstLookupOfAType()
+        {
+            var registry = new ContextProviderRegistry().Register(new NameOfString());
+            var token = (NamedToken)new Parser().Parse("<%=name%>")[0];
+            var args = new TokenArgs(token, "x", new List<object?> { "x" });
+            registry.Token(args);
+
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            for (var i = 0; i < 1000; i++)
+            {
+                registry.Token(args);
+                registry.Condition(new ConditionArgs((ConditionToken)ConditionTokenInstance, "x", args.ParentContext));
+            }
+
+            long allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+            // Only the 1000 ConditionArgs made by this test allocate.
+            Assert.True(allocated <= 1000 * 64, $"Allocated {allocated} bytes.");
+        }
+
+        private static readonly IToken ConditionTokenInstance = new Parser().Parse("<%IF a%><%ENDIF%>")[0];
+
+        [Fact]
+        public void GlobalProvidersComeAfterTypedProvidersByDefault()
+        {
+            var registry = new ContextProviderRegistry().Register(new NameOfString()).RegisterGlobal(new NameGlobal());
+
+            Assert.Equal("typed", Run("<%=name%>", AttachTo(registry), "x"));
+            Assert.Equal("global", Run("<%=name%>", AttachTo(registry), null));
+        }
+
+        private static Processor AttachTo(ContextProviderRegistry registry)
+        {
+            var processor = new Processor();
+            registry.AttachTo(processor);
+            return processor;
+        }
+
+        private sealed class EmptyTyped : ContextProvider<string> { }
+
+        private sealed class EmptyGlobal : GlobalProvider { }
+
+        private sealed class NameOfString : ContextProvider<string>
+        {
+            public override bool TryToken(string context, TokenArgs args, out string? value)
+            {
+                value = "typed";
+                return args.Name == "name";
+            }
+        }
+
+        private sealed class NameGlobal : GlobalProvider
+        {
+            public override bool TryToken(TokenArgs args, out string? value)
+            {
+                value = "global";
+                return args.Name == "name";
+            }
         }
 
         private sealed class Provider : Signatures.ITokenValueProvider, Signatures.IConditionValueProvider, Signatures.ILoopValueProvider,
