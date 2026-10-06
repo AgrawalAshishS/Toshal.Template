@@ -1,0 +1,16 @@
+<Project>
+
+  <!-- The sources of the code generator: the parser of Toshal.Template, linked in, and the emitters next to this file.
+       Toshal.Template.CodeGen and Toshal.Template.Generator both compile them, so the analyzer is one assembly with nothing to load beside it. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Parser.cs" Link="Linked\Parser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Split.cs" Link="Linked\Split.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Tokens\*.cs" Link="Linked\Tokens\%(Filename).cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\Toshal.Template\Exceptions\*.cs" Link="Linked\Exceptions\%(Filename).cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Toshal.Template.CodeGen'">
+    <Compile Include="$(MSBuildThisFileDirectory)*.cs" Link="CodeGen\%(Filename).cs" />
+  </ItemGroup>
+
+</Project>

@@ -36,7 +36,11 @@ jobs:
         run: dotnet run --project tools/Toshal.Template.Tools -c Release --no-build -- docs check
 
       - name: Pack
-        run: dotnet pack src/Toshal.Template -c Release --no-build --nologo -o artifacts
+        run: |
+          dotnet pack src/Toshal.Template -c Release --no-build --nologo -o artifacts
+          dotnet pack src/Toshal.Template.Compiled -c Release --no-build --nologo -o artifacts
+          dotnet pack src/Toshal.Template.Generator -c Release --no-build --nologo -o artifacts
+          dotnet pack src/Toshal.Template.Cli -c Release --no-build --nologo -o artifacts
 
       - uses: actions/upload-artifact@v4
         if: always()

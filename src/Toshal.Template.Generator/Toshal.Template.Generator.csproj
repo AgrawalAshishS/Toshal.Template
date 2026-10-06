@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>1.2.0</VersionPrefix>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Toshal.Template.Generator</AssemblyName>
+    <RootNamespace>Toshal.Template.Generator</RootNamespace>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+
+    <PackageId>Toshal.Template.Generator</PackageId>
+    <Description>Turns .ctt templates into C# classes at build time: a Roslyn source generator for Toshal.Template. The template text becomes plain C# code, so no parser runs at run time. Every .ctt file of the project (or the ones you list) becomes a class, and a stub for your values is made once next to it.</Description>
+    <PackageTags>template;text-template;code-generation;source-generator;compiled-template</PackageTags>
+    <!-- The package is described by the .nuspec: the dll goes to analyzers/, and it depends on the run time package. -->
+    <NuspecFile>Toshal.Template.Generator.nuspec</NuspecFile>
+    <NuspecProperties>version=$(VersionPrefix);configuration=$(Configuration);description=$(Description)</NuspecProperties>
+  </PropertyGroup>
+
+  <Import Project="..\Toshal.Template.CodeGen\CodeGenSources.props" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.7.2" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="System.Memory" Version="4.5.5" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+</Project>

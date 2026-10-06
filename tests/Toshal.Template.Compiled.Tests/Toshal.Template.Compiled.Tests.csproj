@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Toshal.Template\Toshal.Template.csproj" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Compiled\Toshal.Template.Compiled.csproj" />
+    <!-- CodeGen holds its own copy of the parser types (same names as Toshal.Template), so it is used through an alias. -->
+    <ProjectReference Include="..\..\src\Toshal.Template.CodeGen\Toshal.Template.CodeGen.csproj" Aliases="codegen" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Generator\Toshal.Template.Generator.csproj" Aliases="generator" />
+    <ProjectReference Include="..\..\src\Toshal.Template.Cli\Toshal.Template.Cli.csproj" Aliases="cli" />
+    <!-- For ParserGoldenTests.Cases: the tricky templates of the parser are also run through both engines. -->
+    <ProjectReference Include="..\Toshal.Template.Tests\Toshal.Template.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.7.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

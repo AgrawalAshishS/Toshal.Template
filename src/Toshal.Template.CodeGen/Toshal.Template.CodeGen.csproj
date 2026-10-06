@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Turns .ctt templates into C# code. Used by Toshal.Template.Generator (which compiles these sources into its own assembly) and by the
+       toshal-template tool. The parser is the one of Toshal.Template: its source files are linked in, so both parse the same way. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Toshal.Template.CodeGen</AssemblyName>
+    <RootNamespace>Toshal.Template.CodeGen</RootNamespace>
+  </PropertyGroup>
+
+  <Import Project="CodeGenSources.props" />
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
+</Project>

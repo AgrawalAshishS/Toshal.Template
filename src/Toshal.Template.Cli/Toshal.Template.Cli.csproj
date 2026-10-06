@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>1.2.0</VersionPrefix>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>toshal-template</AssemblyName>
+    <RootNamespace>Toshal.Template.Cli</RootNamespace>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>toshal-template</ToolCommandName>
+    <PackageId>Toshal.Template.Cli</PackageId>
+    <Description>The toshal-template tool: turns .ctt templates (one file, or every file of a folder and its sub folders) into C# classes written next to them, for projects that want the generated code on disk instead of the Toshal.Template.Generator source generator.</Description>
+    <PackageTags>template;text-template;code-generation;compiled-template;dotnet-tool</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Toshal.Template.CodeGen\Toshal.Template.CodeGen.csproj" />
+  </ItemGroup>
+
+</Project>
