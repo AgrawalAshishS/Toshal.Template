@@ -76,6 +76,9 @@ A compiled template writes exactly the text the processor writes for the same te
 FOREACH parts, SEPARATOR, REMOVE_PREVIOUS, indents of sub templates and lines that hold only control tags. The tests run every template of the
 parser tests through both and compare the text.
 
+`REMOVE_PREVIOUS` and `REMOVE_PREVIOUS_NEW_LINE` are done at build time when the chars they remove are template text: the generated code
+just writes the shorter text. Only chars that come from data (a value, the rows of a FOREACH, a sub template) are removed at run time.
+
 Differences: a sub template is another compiled class, returned by `SubTemplate`, not a token list. A template with an error does not build:
 the generator reports `TTC001` at the line and column of the error, and the tool prints the same.
 
