@@ -36,7 +36,6 @@ namespace Toshal.Template
         /// </summary>
         /// <param name="args">The tokens and the top context. Must not be null.</param>
         /// <returns>A new <see cref="StringBuilder"/> with the text.</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Known issue: the template has a <c>&lt;%REMOVE_PREVIOUS n%&gt;</c> with a negative n. See docs/known-issues.md.</exception>
         /// <remarks>
         /// <para>Exceptions thrown by your providers are not caught; they reach the caller.</para>
         /// </remarks>

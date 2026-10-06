@@ -15,7 +15,6 @@
 <div class="table-wrap"><table>
 <tr><th>Issue</th><th>Today</th><th>Wanted</th><th>Test</th></tr>
 <tr><td>Attribute values of IF, ELSEIF and FOREACH tags are lower cased.</td><td><code>&lt;%IF Weight unit=&quot;KG&quot;%&gt;</code> gives the value <code>kg</code>. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case.</td><td>Keep the value as written, like the other tags. Waiting for a decision, because templates may rely on lower case values today.</td><td><code>IfAttributeValuesKeepTheirCase</code>, <code>ForEachAttributeValuesKeepTheirCase</code> (skipped)</td></tr>
-<tr><td>A negative count in <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> is accepted.</td><td>Parsing works, then <code>Processor.Process</code> throws <code>ArgumentOutOfRangeException</code>.</td><td>Proposal: <code>Parser.Parse</code> throws <code>ParserException</code>, like for a count that is not a whole number.</td><td><code>NegativeRemovePreviousIsAParserError</code> (skipped)</td></tr>
 </table></div>
 <h2>Open questions</h2>
 <p>These are not clearly bugs. The owner has to decide what the template language should do.</p>
@@ -37,6 +36,7 @@
 <tr><td><code>new TokenArgs(args, context)</code>, <code>new ConditionArgs(args, context)</code> and <code>new LoopArgs(args, context)</code> added to the parent context list of the original args.</td><td><code>Fixes/ArgsCopyTests</code></td></tr>
 <tr><td>Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from <code>ParentContext</code>.</td><td><code>Fixes/ParentContextStackTests</code></td></tr>
 <tr><td>Attribute values with spaces, and attributes separated by more than one space, threw <code>InvalidTokenAttributeException</code>.</td><td><code>Fixes/AttributeValueSpaceTests</code></td></tr>
+<tr><td>A negative count in <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> was accepted by the parser, and the processor then threw <code>ArgumentOutOfRangeException</code>. The parser now throws <code>ParserException</code>.</td><td><code>Fixes/NegativeRemovePreviousTests</code></td></tr>
 </table></div>
 
 </main>

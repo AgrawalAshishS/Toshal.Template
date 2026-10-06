@@ -8,7 +8,6 @@ or `tests/Toshal.Template.Tests/Fixes/`. A skipped test shows the wanted behavio
 | Issue | Today | Wanted | Test |
 |---|---|---|---|
 | Attribute values of IF, ELSEIF and FOREACH tags are lower cased. | `<%IF Weight unit="KG"%>` gives the value `kg`. Value tags, WITH, SET and PROCESS_TEMPLATE keep the case. | Keep the value as written, like the other tags. Waiting for a decision, because templates may rely on lower case values today. | `IfAttributeValuesKeepTheirCase`, `ForEachAttributeValuesKeepTheirCase` (skipped) |
-| A negative count in `<%REMOVE_PREVIOUS n%>` is accepted. | Parsing works, then `Processor.Process` throws `ArgumentOutOfRangeException`. | Proposal: `Parser.Parse` throws `ParserException`, like for a count that is not a whole number. | `NegativeRemovePreviousIsAParserError` (skipped) |
 
 ## Open questions
 
@@ -33,3 +32,4 @@ These are not clearly bugs. The owner has to decide what the template language s
 | `new TokenArgs(args, context)`, `new ConditionArgs(args, context)` and `new LoopArgs(args, context)` added to the parent context list of the original args. | `Fixes/ArgsCopyTests` |
 | Two loop items that are equal (for example the same string in an outer and an inner loop) removed the wrong entry from `ParentContext`. | `Fixes/ParentContextStackTests` |
 | Attribute values with spaces, and attributes separated by more than one space, threw `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests` |
+| A negative count in `<%REMOVE_PREVIOUS n%>` was accepted by the parser, and the processor then threw `ArgumentOutOfRangeException`. The parser now throws `ParserException`. | `Fixes/NegativeRemovePreviousTests` |

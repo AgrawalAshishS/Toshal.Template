@@ -12,8 +12,6 @@
 <h1>RemovePreviousCharsToken</h1>
 <p class="muted">class in <code>Toshal.Template.Tokens</code>, assembly <code>Toshal.Template</code></p>
 <p>A parsed <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> tag. The processor removes the last n characters written so far, or all of them when fewer were written. It is useful to drop a trailing separator, such as the last comma of a list.</p>
-<h4>Remarks</h4><p class="warning"><strong>Known issue:</strong> a negative n, such as <code>&lt;%REMOVE_PREVIOUS -1%&gt;</code>, is accepted by the parser and then makes the processor throw ArgumentOutOfRangeException. See docs/known-issues.md.</p>
-
 <h4>Example</h4>
 <pre><code class="lang-csharp">// &lt;%FOREACH tags%&gt;&lt;%CONTEXT_AS_STRING%&gt;, &lt;%ENDFOR%&gt;&lt;%REMOVE_PREVIOUS 2%&gt;   writes   a, b</code></pre>
 <h2>Constructors</h2>
@@ -24,7 +22,7 @@
 <dt><code>split</code></dt><dd>The tag.</dd>
 </dl>
 <h4>Exceptions</h4><dl>
-<dt><code>ParserException</code></dt><dd>The number is missing or is not a whole number.</dd>
+<dt><code>ParserException</code></dt><dd>The number is missing, is not a whole number, or is negative.</dd>
 </dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">var token = new RemovePreviousCharsToken(new Split { Content = &quot;&lt;%REMOVE_PREVIOUS 2%&gt;&quot; });   // token.CharCount == 2</code></pre>

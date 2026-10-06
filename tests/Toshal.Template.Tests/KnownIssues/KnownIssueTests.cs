@@ -38,20 +38,6 @@ namespace Toshal.Template.Tests.KnownIssues
             Assert.Equal("name", loop.Attributes["sort"]);
         }
 
-        // Proposal: reject a negative count when parsing, like a count that is not a whole number.
-        [Fact(Skip = Waiting)]
-        public void NegativeRemovePreviousIsAParserError()
-        {
-            Assert.Throws<ParserException>(() => new Parser().Parse("ab<%REMOVE_PREVIOUS -1%>"));
-        }
-
-        [Fact]
-        public void NegativeRemovePreviousThrowsWhenProcessedToday()
-        {
-            var tokens = new Parser().Parse("ab<%REMOVE_PREVIOUS -1%>");
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Processor().Process(new ProcessorArgs(tokens)));
-        }
-
         // Open question: should a list with one row use FIRSTROW, LASTROW, or both? Today it uses LASTROW.
         [Fact]
         public void OneRowUsesTheLastRowPartToday()

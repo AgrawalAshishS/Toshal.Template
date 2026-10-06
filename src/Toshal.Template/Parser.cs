@@ -48,7 +48,7 @@ namespace Toshal.Template
         /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
         /// <exception cref="ForEachMissingForReuseException">A REUSE_FOREACH names a FOREACH that is not in the template.</exception>
-        /// <exception cref="ParserException">An unknown tag, an end tag without its start, or a bad REMOVE_PREVIOUS count.
+        /// <exception cref="ParserException">An unknown tag, an end tag without its start, or a REMOVE_PREVIOUS count that is missing, not a whole number, or negative.
         /// All the exceptions above derive from it.</exception>
         /// <exception cref="ArgumentException">Known issue: REUSE_FOREACH names a FOREACH name that is used more than once, or a tag repeats an attribute.
         /// See docs/known-issues.md.</exception>

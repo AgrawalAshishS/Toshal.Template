@@ -30,9 +30,6 @@ string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }
 <dt><code>args</code></dt><dd>The tokens and the top context. Must not be null.</dd>
 </dl>
 <h4>Returns</h4><p>A new <code>StringBuilder</code> with the text.</p>
-<h4>Exceptions</h4><dl>
-<dt><code>ArgumentOutOfRangeException</code></dt><dd>Known issue: the template has a <code>&lt;%REMOVE_PREVIOUS n%&gt;</code> with a negative n. See docs/known-issues.md.</dd>
-</dl>
 <h4>Remarks</h4><p>Exceptions thrown by your providers are not caught; they reach the caller.</p>
 
 <h4>Example</h4>
