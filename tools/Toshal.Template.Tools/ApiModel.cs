@@ -124,9 +124,18 @@ internal sealed class ApiModel
 
     private static readonly Dictionary<Type, string> Keywords = new()
     {
-        [typeof(int)] = "int", [typeof(long)] = "long", [typeof(short)] = "short", [typeof(byte)] = "byte", [typeof(bool)] = "bool",
-        [typeof(string)] = "string", [typeof(object)] = "object", [typeof(void)] = "void", [typeof(decimal)] = "decimal",
-        [typeof(double)] = "double", [typeof(float)] = "float", [typeof(char)] = "char",
+        [typeof(int)] = "int",
+        [typeof(long)] = "long",
+        [typeof(short)] = "short",
+        [typeof(byte)] = "byte",
+        [typeof(bool)] = "bool",
+        [typeof(string)] = "string",
+        [typeof(object)] = "object",
+        [typeof(void)] = "void",
+        [typeof(decimal)] = "decimal",
+        [typeof(double)] = "double",
+        [typeof(float)] = "float",
+        [typeof(char)] = "char",
     };
 
     public static string Nice(Type t)

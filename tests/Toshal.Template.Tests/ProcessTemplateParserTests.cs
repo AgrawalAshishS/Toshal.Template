@@ -23,7 +23,7 @@ namespace Toshal.Template.Tests
             Assert.IsAssignableFrom<ProcessTemplateToken>(result[1]);
             Assert.Equal("This is ", ((ContentToken)result[0]).Content);
             Assert.Equal("sample", ((ProcessTemplateToken)result[1]).Name);
-            Assert.Equal("abc", ((ProcessTemplateToken)result[1]).GetAttribute("context","xyz"));
+            Assert.Equal("abc", ((ProcessTemplateToken)result[1]).GetAttribute("context", "xyz"));
         }
     }
 }

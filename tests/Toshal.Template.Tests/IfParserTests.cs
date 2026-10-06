@@ -403,6 +403,6 @@ namespace Toshal.Template.Tests
             Assert.False(((ConditionToken)result[0]).IsPositive);
         }
 
-        
+
     }
 }

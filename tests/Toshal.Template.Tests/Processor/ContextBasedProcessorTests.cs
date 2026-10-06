@@ -11,7 +11,7 @@ namespace Toshal.Template.Tests
 
     public partial class TemplateProcessorTests
     {
-        
+
         /*context based tests*/
 
         [Fact]

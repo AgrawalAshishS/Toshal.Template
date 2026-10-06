@@ -30,7 +30,7 @@ namespace Toshal.Template.Tokens
         {
             string tempString = TagText.Name(split.Content, "<%REMOVE_PREVIOUS ", space: false, minLength: 0).Trim();
             int charCount = 0;
-            if(int.TryParse(tempString, out charCount) == false)
+            if (int.TryParse(tempString, out charCount) == false)
             {
                 throw new ParserException(split, "Char count is missing or not integer");
             }

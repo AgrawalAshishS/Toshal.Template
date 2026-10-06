@@ -28,13 +28,14 @@ namespace Toshal.Template.Tests
             Assert.Equal("abc", ((ProcessTemplateToken)tokens[1]).GetAttribute("context", "xyz"));
 
             var processor = new Processor();
-            processor.ProcessTemplateValueProvider = (args) => {
+            processor.ProcessTemplateValueProvider = (args) =>
+            {
                 return parser.Parse(subTemplateText);
             };
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
 
             Assert.Equal("This is sample.", result.ToString());
         }
-        
+
     }
 }

@@ -49,7 +49,7 @@ namespace Toshal.Template.Tests
             {
                 parser.Parse(templateText);
             });
-            
+
         }
 
         [Fact]

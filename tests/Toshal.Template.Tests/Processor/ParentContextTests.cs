@@ -20,7 +20,8 @@ namespace Toshal.Template.Tests
             List<IToken> tokens = parser.Parse(templateText);
 
             var processor = new Processor();
-            processor.TokenValueProvider = (args) => {
+            processor.TokenValueProvider = (args) =>
+            {
                 Assert.Empty(args.ParentContext);
                 called = true;
                 return "abc";
@@ -40,7 +41,8 @@ namespace Toshal.Template.Tests
             List<IToken> tokens = parser.Parse(templateText);
 
             var processor = new Processor();
-            processor.TokenValueProvider = (args) => {
+            processor.TokenValueProvider = (args) =>
+            {
                 Assert.Single(args.ParentContext);
                 called = true;
                 return "abc";
@@ -69,7 +71,8 @@ namespace Toshal.Template.Tests
                 calledLoop = true;
                 return new List<int>() { 1, 2 };
             };
-            processor.TokenValueProvider = (args) => {
+            processor.TokenValueProvider = (args) =>
+            {
                 Assert.Equal(3, args.ParentContext.Count);
                 calledToken = true;
                 return "abc";
@@ -99,7 +102,8 @@ namespace Toshal.Template.Tests
                 calledWith = true;
                 return "xyz";
             };
-            processor.TokenValueProvider = (args) => {
+            processor.TokenValueProvider = (args) =>
+            {
                 Assert.Equal(2, args.ParentContext.Count);
                 calledToken = true;
                 return "abc";

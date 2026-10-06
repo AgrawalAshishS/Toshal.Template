@@ -84,6 +84,6 @@ namespace Toshal.Template.Tests
             StringBuilder result = processor.Process(new ProcessorArgs(tokens));
             Assert.Equal("First Value, Second Value", result.ToString());
         }
-        
+
     }
 }

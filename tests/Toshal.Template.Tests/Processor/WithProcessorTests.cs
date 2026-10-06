@@ -11,7 +11,7 @@ namespace Toshal.Template.Tests
 
     public partial class TemplateProcessorTests
     {
-        
+
         /*
 		 * with change in default context
 		 * with change in for context
