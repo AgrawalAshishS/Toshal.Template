@@ -59,10 +59,13 @@ object? value = myProvider(new TokenArgs(token, order, new List&lt;object?&gt; {
 <pre class="sig"><code>string GetAttribute(string key, string defaultValue)</code></pre>
 <p>Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.</p>
 <h4>Parameters</h4><dl>
-<dt><code>key</code></dt><dd>The attribute name. Must not be null.</dd>
+<dt><code>key</code></dt><dd>The attribute name.</dd>
 <dt><code>defaultValue</code></dt><dd>The value to return when the attribute is missing.</dd>
 </dl>
 <h4>Returns</h4><p>The attribute value as written in the tag, or <code>defaultValue</code>.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>key</code> is null.</dd>
+</dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">// &lt;%=Total format=&quot;0.00&quot;%&gt;
 string format = args.GetAttribute(&quot;Format&quot;, &quot;0&quot;);   // &quot;0.00&quot;</code></pre>

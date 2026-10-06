@@ -25,9 +25,9 @@ namespace Toshal.Template.Signatures
         /// <returns>The rows. Each row becomes the context of one ROW block. Null or an empty list runs the NORECORD block.</returns>
         /// <example>
         /// <code>
-        /// public IList LoopValueProvider(LoopArgs args) =&gt; ((Order)args.Context!).Lines;
+        /// public IList? LoopValueProvider(LoopArgs args) =&gt; ((Order)args.Context!).Lines;
         /// </code>
         /// </example>
-        IList LoopValueProvider(LoopArgs args);
+        IList? LoopValueProvider(LoopArgs args);
     }
 }

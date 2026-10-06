@@ -37,3 +37,4 @@ These are not clearly bugs. The owner has to decide what the template language s
 | Attribute values with spaces, and attributes separated by more than one space, threw `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests` |
 | A negative count in `<%REMOVE_PREVIOUS n%>` was accepted by the parser, and the processor then threw `ArgumentOutOfRangeException`. The parser now throws `ParserException`. | `Fixes/NegativeRemovePreviousTests` |
 | The same attribute twice in one tag, such as `<%=Name a="1" a="2"%>`, threw `ArgumentException`. It now throws `InvalidTokenAttributeException`. | `Fixes/AttributeValueSpaceTests.RepeatedAttributeIsInvalid` |
+| `Parser.Parse(null)`, `Processor.Process(null)`, `new ProcessorArgs(null)` and `GetValue(null, ...)` threw `NullReferenceException`. They now throw `ArgumentNullException`. Processing a REUSE_FOREACH token made by hand that is not linked throws `InvalidOperationException`. | `Fixes/NullArgumentTests` |

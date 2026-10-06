@@ -23,9 +23,9 @@ namespace Toshal.Template.Signatures
         /// <returns>The text to write. Null or an empty string writes nothing.</returns>
         /// <example>
         /// <code>
-        /// public string TokenValueProvider(TokenArgs args) =&gt; ((Customer)args.Context!).Name;
+        /// public string? TokenValueProvider(TokenArgs args) =&gt; ((Customer)args.Context!).Name;
         /// </code>
         /// </example>
-        string TokenValueProvider(TokenArgs args);
+        string? TokenValueProvider(TokenArgs args);
     }
 }

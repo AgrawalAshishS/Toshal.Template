@@ -68,9 +68,10 @@ namespace Toshal.Template.Tokens
         /// <summary>
         /// Gets an attribute value, or a default when the tag does not have that attribute. The name is not case sensitive.
         /// </summary>
-        /// <param name="attributeName">The attribute name. Must not be null.</param>
+        /// <param name="attributeName">The attribute name.</param>
         /// <param name="defaultValue">The value to return when the attribute is missing.</param>
         /// <returns>The attribute value as written in the tag, or <paramref name="defaultValue"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="attributeName"/> is null.</exception>
         /// <example>
         /// <code>
         /// string format = token.GetAttribute("format", "0");

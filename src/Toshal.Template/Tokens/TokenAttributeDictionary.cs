@@ -26,9 +26,10 @@ namespace Toshal.Template.Tokens
         /// <summary>
         /// Gets an attribute value, or a default when the attribute is missing. The name is not case sensitive.
         /// </summary>
-        /// <param name="attributeName">The attribute name. Must not be null.</param>
+        /// <param name="attributeName">The attribute name.</param>
         /// <param name="defaultValue">The value to return when the attribute is missing.</param>
         /// <returns>The attribute value, or <paramref name="defaultValue"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="attributeName"/> is null.</exception>
         /// <example>
         /// <code>
         /// string format = attributes.GetValue("FORMAT", "0");
@@ -36,10 +37,9 @@ namespace Toshal.Template.Tokens
         /// </example>
         public string GetValue(string attributeName, string defaultValue)
         {
-            attributeName = attributeName.ToLower();
-            var retVal = defaultValue;
-            if (this.TryGetValue(attributeName, out retVal)) return retVal;
-            return defaultValue;
+            ArgumentNullException.ThrowIfNull(attributeName);
+
+            return this.TryGetValue(attributeName.ToLower(), out var value) ? value : defaultValue;
         }
 
 

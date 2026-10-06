@@ -27,9 +27,13 @@ string text = processor.Process(new ProcessorArgs(tokens) { Context = customer }
 <pre class="sig"><code>StringBuilder Process(ProcessorArgs args)</code></pre>
 <p>Processes the tokens with the given top context and returns the text.</p>
 <h4>Parameters</h4><dl>
-<dt><code>args</code></dt><dd>The tokens and the top context. Must not be null.</dd>
+<dt><code>args</code></dt><dd>The tokens and the top context.</dd>
 </dl>
 <h4>Returns</h4><p>A new <code>StringBuilder</code> with the text.</p>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>args</code> is null.</dd>
+<dt><code>InvalidOperationException</code></dt><dd>The tokens hold a <a href="ReuseForEachToken.html"><code>ReuseForEachToken</code></a> made by hand that is not linked to a FOREACH. Tokens from <a href="Parser.html"><code>Parse</code></a> are always linked.</dd>
+</dl>
 <h4>Remarks</h4><p>Exceptions thrown by your providers are not caught; they reach the caller.</p>
 
 <h4>Example</h4>

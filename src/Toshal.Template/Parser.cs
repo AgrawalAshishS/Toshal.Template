@@ -42,8 +42,9 @@ namespace Toshal.Template
         /// Parses a template. Plain text becomes <see cref="ContentToken"/>, each tag becomes its token, and blocks such as IF and FOREACH
         /// hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.
         /// </summary>
-        /// <param name="templateText">The template. Must not be null. An empty string gives an empty list.</param>
+        /// <param name="templateText">The template. An empty string gives an empty list.</param>
         /// <returns>The top level tokens, in template order.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="templateText"/> is null.</exception>
         /// <exception cref="TokenMissingNameException">A tag that needs a name has none, for example <c>&lt;%=%&gt;</c>.</exception>
         /// <exception cref="TokenNotClosedException">A block has no end tag, for example IF without ENDIF.</exception>
         /// <exception cref="InvalidTokenAttributeException">The attributes of a tag are not written as <c>name="value"</c>.</exception>
@@ -60,6 +61,8 @@ namespace Toshal.Template
         /// </example>
         public List<IToken> Parse(string templateText)
         {
+            ArgumentNullException.ThrowIfNull(templateText);
+
             var retList = new List<IToken>();
 
             // A parser can be used for many templates. Each template only sees its own FOREACH blocks.
@@ -192,7 +195,7 @@ namespace Toshal.Template
         /// <summary>
         ///     The _splits.
         /// </summary>
-        private List<Split> _splits = null!;
+        private List<Split> _splits = new List<Split>();
 
         #endregion
 

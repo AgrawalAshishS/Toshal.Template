@@ -21,6 +21,7 @@ namespace Toshal.Template
         /// Creates the input for one run of the processor.
         /// </summary>
         /// <param name="tokenList">The tokens that <see cref="Parser.Parse(string)"/> returned. They are not changed, so the same list can be processed many times.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="tokenList"/> is null.</exception>
         /// <example>
         /// <code>
         /// List&lt;IToken&gt; tokens = new Parser().Parse("Hello &lt;%=Name%&gt;");
@@ -29,6 +30,8 @@ namespace Toshal.Template
         /// </example>
         public ProcessorArgs(List<IToken> tokenList)
         {
+            ArgumentNullException.ThrowIfNull(tokenList);
+
             this.TokenList = tokenList;
         }
 

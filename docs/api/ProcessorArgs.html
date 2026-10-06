@@ -22,6 +22,9 @@ string text = processor.Process(args).ToString();</code></pre>
 <h4>Parameters</h4><dl>
 <dt><code>tokenList</code></dt><dd>The tokens that <a href="Parser.html"><code>Parse</code></a> returned. They are not changed, so the same list can be processed many times.</dd>
 </dl>
+<h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>tokenList</code> is null.</dd>
+</dl>
 <h4>Example</h4>
 <pre><code class="lang-csharp">List&lt;IToken&gt; tokens = new Parser().Parse(&quot;Hello &lt;%=Name%&gt;&quot;);
 var args = new ProcessorArgs(tokens);</code></pre>

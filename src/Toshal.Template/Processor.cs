@@ -34,8 +34,11 @@ namespace Toshal.Template
         /// <summary>
         /// Processes the tokens with the given top context and returns the text.
         /// </summary>
-        /// <param name="args">The tokens and the top context. Must not be null.</param>
+        /// <param name="args">The tokens and the top context.</param>
         /// <returns>A new <see cref="StringBuilder"/> with the text.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="args"/> is null.</exception>
+        /// <exception cref="InvalidOperationException">The tokens hold a <see cref="ReuseForEachToken"/> made by hand that is not linked to a FOREACH.
+        /// Tokens from <see cref="Parser.Parse(string)"/> are always linked.</exception>
         /// <remarks>
         /// <para>Exceptions thrown by your providers are not caught; they reach the caller.</para>
         /// </remarks>
@@ -47,6 +50,8 @@ namespace Toshal.Template
         /// </example>
         public StringBuilder Process(ProcessorArgs args)
         {
+            ArgumentNullException.ThrowIfNull(args);
+
             var retVal = new StringBuilder();
             var parentContext = new List<object?>();
             if (args.Context != null) { parentContext.Add(args.Context); }
@@ -149,10 +154,11 @@ namespace Toshal.Template
         {
             var forEachToken = token as ForEachToken;
             if (forEachToken == null) return false;
-            if (this.LoopValueProvider == null) return true; //skip as there is no value provider
+            var loopValueProvider = this.LoopValueProvider;
+            if (loopValueProvider == null) return true; //skip as there is no value provider
 
             var args = new LoopArgs(forEachToken, context, parentContext);
-            return this.ProcessForEach(output, context, args, forEachToken, customTokens);
+            return this.ProcessForEach(output, context, args, forEachToken, loopValueProvider, customTokens);
         }
 
         private bool HandleNamedToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
@@ -184,10 +190,15 @@ namespace Toshal.Template
         {
             var reuseForEachToken = token as ReuseForEachToken;
             if (reuseForEachToken == null) return false;
-            if (this.LoopValueProvider == null) return true;
+            var loopValueProvider = this.LoopValueProvider;
+            if (loopValueProvider == null) return true;
 
-            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, reuseForEachToken.ExistingForEachToken!.Attributes);
-            return this.ProcessForEach(output, context, args, reuseForEachToken.ExistingForEachToken!, customTokens);
+            // Parser.Parse links every REUSE_FOREACH. Only a token made by hand can be unlinked.
+            var existing = reuseForEachToken.ExistingForEachToken
+                ?? throw new InvalidOperationException("REUSE_FOREACH " + reuseForEachToken.Name + " is not linked to a FOREACH. Create tokens with Parser.Parse.");
+
+            var args = new LoopArgs(reuseForEachToken.Name, context, parentContext, existing.Attributes);
+            return this.ProcessForEach(output, context, args, existing, loopValueProvider, customTokens);
         }
 
         private bool HandleWithToken(StringBuilder output, IToken token, object? context, List<object?> parentContext, Dictionary<string, string> customTokens)
@@ -349,11 +360,11 @@ namespace Toshal.Template
             }
         }
 
-        private bool ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Dictionary<string, string> customTokens)
+        private bool ProcessForEach(StringBuilder output, object? context, LoopArgs args, ForEachToken forEachToken, Func<LoopArgs, IList?> loopValueProvider, Dictionary<string, string> customTokens)
         {
             var rowLevelShared = new Dictionary<string, string>(customTokens);
 
-            var val = this.LoopValueProvider!(args);
+            var val = loopValueProvider(args);
             if (val == null || val.Count == 0)
             {
                 if (forEachToken.NoRecordTokens.Count > 0)

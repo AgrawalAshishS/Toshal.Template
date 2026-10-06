@@ -25,7 +25,7 @@
 </dl>
 <h4>Returns</h4><p>The tokens of the sub template, from <a href="Parser.html"><code>Parse</code></a>. Null writes nothing.</p>
 <h4>Example</h4>
-<pre><code class="lang-csharp">public List&lt;IToken&gt; ProcessTemplateValueProvider(ProcessTemplateArgs args) =&gt; cache[args.Name];</code></pre>
+<pre><code class="lang-csharp">public List&lt;IToken&gt;? ProcessTemplateValueProvider(ProcessTemplateArgs args) =&gt; cache.GetValueOrDefault(args.Name);</code></pre>
 </section>
 
 </main>

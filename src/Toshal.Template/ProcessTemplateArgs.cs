@@ -47,9 +47,10 @@ namespace Toshal.Template
         /// <summary>
         /// Gets an attribute value, or a default when the tag does not have that attribute. The key is not case sensitive.
         /// </summary>
-        /// <param name="key">The attribute name. Must not be null.</param>
+        /// <param name="key">The attribute name.</param>
         /// <param name="defaultValue">The value to return when the attribute is missing.</param>
         /// <returns>The attribute value as written in the tag, or <paramref name="defaultValue"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <example>
         /// <code>
         /// string lang = args.GetAttribute("lang", "en");

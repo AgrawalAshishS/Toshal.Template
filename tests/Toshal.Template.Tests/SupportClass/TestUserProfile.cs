@@ -1,7 +1,7 @@
-﻿namespace Toshal.Template.Tests.SupportClass
+namespace Toshal.Template.Tests.SupportClass
 {
 	public class TestUserProfile
 	{
-		public string Address { get; set; } = null!;
+		public required string Address { get; set; }
 	}
 }

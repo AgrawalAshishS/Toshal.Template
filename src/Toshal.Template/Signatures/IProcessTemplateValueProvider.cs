@@ -26,9 +26,9 @@ namespace Toshal.Template.Signatures
         /// <returns>The tokens of the sub template, from <see cref="Parser.Parse(string)"/>. Null writes nothing.</returns>
         /// <example>
         /// <code>
-        /// public List&lt;IToken&gt; ProcessTemplateValueProvider(ProcessTemplateArgs args) =&gt; cache[args.Name];
+        /// public List&lt;IToken&gt;? ProcessTemplateValueProvider(ProcessTemplateArgs args) =&gt; cache.GetValueOrDefault(args.Name);
         /// </code>
         /// </example>
-        List<IToken> ProcessTemplateValueProvider(ProcessTemplateArgs args);
+        List<IToken>? ProcessTemplateValueProvider(ProcessTemplateArgs args);
     }
 }

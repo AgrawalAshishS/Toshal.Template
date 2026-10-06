@@ -22,10 +22,11 @@
 <pre class="sig"><code>List&lt;IToken&gt; Parse(string templateText)</code></pre>
 <p>Parses a template. Plain text becomes <a href="ContentToken.html"><code>ContentToken</code></a>, each tag becomes its token, and blocks such as IF and FOREACH hold their inner tokens. A REUSE_FOREACH tag is linked to its FOREACH before the method returns.</p>
 <h4>Parameters</h4><dl>
-<dt><code>templateText</code></dt><dd>The template. Must not be null. An empty string gives an empty list.</dd>
+<dt><code>templateText</code></dt><dd>The template. An empty string gives an empty list.</dd>
 </dl>
 <h4>Returns</h4><p>The top level tokens, in template order.</p>
 <h4>Exceptions</h4><dl>
+<dt><code>ArgumentNullException</code></dt><dd><code>templateText</code> is null.</dd>
 <dt><code>TokenMissingNameException</code></dt><dd>A tag that needs a name has none, for example <code>&lt;%=%&gt;</code>.</dd>
 <dt><code>TokenNotClosedException</code></dt><dd>A block has no end tag, for example IF without ENDIF.</dd>
 <dt><code>InvalidTokenAttributeException</code></dt><dd>The attributes of a tag are not written as <code>name=&quot;value&quot;</code>.</dd>

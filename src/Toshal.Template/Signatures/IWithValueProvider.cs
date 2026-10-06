@@ -23,9 +23,9 @@ namespace Toshal.Template.Signatures
         /// <returns>The new context. Null skips the whole block.</returns>
         /// <example>
         /// <code>
-        /// public object WithValueProvider(TokenArgs args) =&gt; ((Order)args.Context!).Customer;
+        /// public object? WithValueProvider(TokenArgs args) =&gt; ((Order)args.Context!).Customer;
         /// </code>
         /// </example>
-        object WithValueProvider(TokenArgs args);
+        object? WithValueProvider(TokenArgs args);
     }
 }
